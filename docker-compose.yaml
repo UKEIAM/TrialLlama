@@ -11,6 +11,6 @@ services:
                 restart: "no"
                 ports:
                         - "51001:22"
-#                volumes:
-#                          - home/kraus/master-thesis:/master-thesis # symlink to host-machine volume
-#                          - /nextcloud/data:/data # symlink to mount /nextcloud/data to /data on container
+                volumes:
+                          - home/kraus/master-thesis:/master-thesis # symlink to host-machine volume
+                          - /nextcloud/data:/iam-data # symlink to mount /nextcloud/data to /data on container
