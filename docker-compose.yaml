@@ -10,7 +10,7 @@ services:
                 container_name: mtb_AI
                 restart: "no"
                 ports:
-                        - "51001:22"
+                        - "51002:22"
                 volumes:
                           - /home/kraus/master-thesis:/home/dev/masters-thesis # symlink to host-machine volume
                           - /nextcloud/data:/home/dev/data # symlink to mount /nextcloud/data to /data on container
