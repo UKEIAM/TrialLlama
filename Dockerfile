@@ -7,7 +7,6 @@ ARG USERNAME=dev
 # Additionally, allow the user to call python directly
 RUN apt-get update && apt-get install -y openssh-server python3-pip && rm -rf /var/lib/apt/lists/* \
     mkdir /var/run/sshd && mkdir -p /run/sshd \
-    mkdir /home/dev/mtb_LLM \
     echo 'root:root' | chpasswd && \
     useradd -m ${USERNAME} && passwd -d ${USERNAME} && \
     sed -i'' -e's/^#PermitRootLogin prohibit-password$/PermitRootLogin yes/' /etc/ssh/sshd_config \
@@ -15,8 +14,6 @@ RUN apt-get update && apt-get install -y openssh-server python3-pip && rm -rf /v
         && sed -i'' -e's/^#PermitEmptyPasswords no$/PermitEmptyPasswords yes/' /etc/ssh/sshd_config \
         && sed -i'' -e's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config && \
     echo 'export PATH="/usr/local/bin:$PATH"' >> /home/${USERNAME}/.bashrc \
-
-RUN chown -R dev:dev /home/dev/mtb_LLM
 
 RUN apt-get update && apt-get -y install make
 

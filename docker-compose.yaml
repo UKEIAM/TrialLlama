@@ -12,4 +12,5 @@ services:
                 ports:
                         - "51001:22"
                 volumes:
+                          - /home/kraus/masters-thesis:/home/dev/mtb_ai # symlink to host-machine volume
                           - /nextcloud/data:/home/dev/data/Clinical_Trials_Snapshot # symlink to mount /nextcloud/data to /data on container
