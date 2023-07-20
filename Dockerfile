@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y openssh-server python3-pip && rm -rf /v
     mkdir /var/run/sshd && mkdir -p /run/sshd \
     echo 'root:root' | chpasswd && \
     useradd -m ${USERNAME} && passwd -d ${USERNAME} && \
-    chown dev: dev \
     sed -i'' -e's/^#PermitRootLogin prohibit-password$/PermitRootLogin yes/' /etc/ssh/sshd_config \
         && sed -i'' -e's/^#PasswordAuthentication yes$/PasswordAuthentication yes/' /etc/ssh/sshd_config \
         && sed -i'' -e's/^#PermitEmptyPasswords no$/PermitEmptyPasswords yes/' /etc/ssh/sshd_config \
@@ -18,6 +17,7 @@ RUN apt-get update && apt-get install -y openssh-server python3-pip && rm -rf /v
 
 RUN apt-get update && apt-get -y install make
 
+RUN chown dev: dev
 # Install all the requirements in the requirements.txt
 COPY requirements.txt /tmp/pip-tmp/
 RUN pip install --upgrade pip \
