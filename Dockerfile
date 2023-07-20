@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y openssh-server && rm -rf /var/lib/apt/l
         && sed -i'' -e's/^#PasswordAuthentication yes$/PasswordAuthentication yes/' /etc/ssh/sshd_config \
         && sed -i'' -e's/^#PermitEmptyPasswords no$/PermitEmptyPasswords yes/' /etc/ssh/sshd_config \
         && sed -i'' -e's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config && \
-     echo 'export PATH="/opt/conda/bin:$PATH"' >> /home/${USERNAME}/.bashrc ; \
+    echo 'export PATH="/usr/local/bin:$PATH"' >> /home/${USERNAME}/.bashrc
 
 RUN apt-get update && apt-get -y install make
 
