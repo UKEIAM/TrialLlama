@@ -14,7 +14,9 @@ RUN apt-get update && apt-get install -y openssh-server python3-pip && rm -rf /v
         && sed -i'' -e's/^#PasswordAuthentication yes$/PasswordAuthentication yes/' /etc/ssh/sshd_config \
         && sed -i'' -e's/^#PermitEmptyPasswords no$/PermitEmptyPasswords yes/' /etc/ssh/sshd_config \
         && sed -i'' -e's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config && \
-    echo 'export PATH="/usr/local/bin:$PATH"' >> /home/${USERNAME}/.bashrc
+    echo 'export PATH="/usr/local/bin:$PATH"' >> /home/${USERNAME}/.bashrc \
+
+RUN chown -R dev:dev /home/dev/masters-thesis
 
 RUN apt-get update && apt-get -y install make
 
