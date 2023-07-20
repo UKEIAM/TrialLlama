@@ -7,10 +7,11 @@ readme = "README.md"
 packages = [{include = "masters_thesis"}]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 transformers = "^4.31.0"
 pandas = "^2.0.3"
 pytorch-lightning = "^2.0.5"
+gpustat = "^1.1"
 
 
 [build-system]
