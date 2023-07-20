@@ -19,7 +19,7 @@ RUN apt-get update && apt-get -y install make
 
 # Install all the requirements in the requirements.txt
 COPY requirements.txt /tmp/pip-tmp/
-RUN pip3 --disable-pip-version-check --no-cache-dir install black && pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt && rm -rf /tmp/pip-tmp
+RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt && rm -rf /tmp/pip-tmp
 
 # Expose SSH Server and install graphxplore module in editable mode
 EXPOSE 22
