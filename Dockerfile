@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y openssh-server python3-pip && rm -rf /v
 
 RUN apt-get update && apt-get -y install make
 
-RUN chown dev: dev
+RUN chown dev: /home/dev
 # Install all the requirements in the requirements.txt
 COPY requirements.txt /tmp/pip-tmp/
 RUN pip install --upgrade pip \
