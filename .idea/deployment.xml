@@ -3,6 +3,13 @@
   <component name="PublishConfigData" autoUpload="Always" serverName="dev@localhost:51001 agent" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
+      <paths name="dev@localhost:51001">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/code" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="dev@localhost:51001 agent">
         <serverdata>
           <mappings>

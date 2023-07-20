@@ -13,4 +13,4 @@ services:
                         - "51001:22"
                 volumes:
                           - home/kraus/master-thesis:/home/dev/masters-thesis # symlink to host-machine volume
-                          - /nextcloud/data:/iam-data # symlink to mount /nextcloud/data to /data on container
+                          - /nextcloud/data:/home/dev/data # symlink to mount /nextcloud/data to /data on container
