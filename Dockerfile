@@ -1,4 +1,5 @@
-FROM python:3.9-slim-bullseye
+ARG PYTORCH_VERSION="22.06-py3"
+FROM nvcr.io/nvidia/pytorch:${PYTORCH_VERSION}
 
 ARG USERNAME=dev
 
