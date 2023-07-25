@@ -7,14 +7,12 @@ services:
          python:
                 build:
                         dockerfile: Dockerfile
+                command:
+                  - --gpus
+                  - all
                 container_name: mtb_AI
                 restart: "no"
                 ports:
                         - "51001:22"
                 volumes:
                         - /nextcloud/data:/home/dev/data # symlink to mount /nextcloud/data to /data on container
-
-                devices:
-                        - driver: nvidia
-                          count: 1
-                          capabilities: [gpu]
