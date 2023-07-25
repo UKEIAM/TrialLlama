@@ -12,4 +12,9 @@ services:
                 ports:
                         - "51001:22"
                 volumes:
-                          - /nextcloud/data/Clinicial_Trials_Snapshot:/home/dev/data # symlink to mount /nextcloud/data to /data on container
+                          - /nextcloud/data:/home/dev/data # symlink to mount /nextcloud/data to /data on container
+                devices:
+                          - /dev/nvidia0  # Assuming you have only one GPU, adjust accordingly if you have more.
+                environment:
+                          - NVIDIA_VISIBLE_DEVICES=all
+                          - NVIDIA_DRIVER_CAPABILITIES=compute,utility
