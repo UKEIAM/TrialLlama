@@ -1,5 +1,5 @@
 ARG PYTORCH_VERSION="23.06-py3"
-FROM nvcr.io/nvidia/cuda:12.2.0-devel-ubuntu20.04
+FROM nvcr.io/nvidia/pytorch:${PYTORCH_VERSION}
 
 ARG USERNAME=dev
 

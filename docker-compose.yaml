@@ -10,8 +10,6 @@ services:
                 command:
                   - --gpus
                   - all
-                  - nvidia/cuda:11.4.0-base-ubuntu20.04
-                  - nvidia-smi
                 container_name: mtb_AI
                 restart: "no"
                 ports:
