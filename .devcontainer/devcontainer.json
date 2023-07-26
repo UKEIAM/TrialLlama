@@ -1,0 +1,46 @@
+{
+	"name": "Python 3",
+	"build": {
+		"dockerfile": "../Dockerfile",
+		"context": "..",
+		"args": {
+			// Select your PyTorch version from https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes
+			"PYTORCH_VERSION": "23.06-py3",
+			"INSTALL_VSCODE": "1"
+		}
+	},
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			"settings": {
+				"python.defaultInterpreterPath": "/opt/conda/bin/python",
+				"python.linting.enabled": true,
+				"python.linting.pylintEnabled": true,
+				"python.linting.flake8Enabled": true,
+				"python.formatting.provider": "black",
+				"editor.formatOnSave": true,
+				"python.formatting.blackPath": "/opt/conda/bin/black",
+				"python.linting.flake8Path": "/opt/conda/bin/flake8",
+				"python.linting.pylintPath": "/opt/conda/bin/pylint"
+			},
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance"
+			]
+		}
+	},
+	"features": {
+		"git": "os-provided"
+	},
+	// We must instruct Docker to use the GPUs
+	"runArgs": [
+		"--gpus",
+		"all"
+	],
+	// The seems to be some ownership issue
+	"postCreateCommand": "git config --global --add safe.directory /workspaces/mtb_ai_kevin_kraus",
+	"mounts": [
+       "source=/nextcloud/data/Clinical_Trials_Snapshot,target=/workspaces/data/,type=bind,consistency=cached"
+    ]
+}
