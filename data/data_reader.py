@@ -18,13 +18,13 @@ base_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 home_directory = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 data_directory = os.path.join(home_directory, 'data')
 
-config_file = os.path.join(base_directory, 'src/configs/config.yaml')
+config_file = os.path.join(base_directory, 'configs/config.yaml')
 with open(config_file, 'r') as file:
     config = yaml.safe_load(file)
 
 
 def read_qrel_txt(path: str):
-  qrels = pd.read_csv('../data/2021/', sep=' ', header=None, names=['Topic', 'N/A', 'Clinical Trial ID', 'Label'])
+  qrels = pd.read_csv(os.path.join(home_directory, 'data/2021/'), sep=' ', header=None, names=['Topic', 'N/A', 'Clinical Trial ID', 'Label'])
 
   if debug:
     print(qrels.head(10))
@@ -62,6 +62,6 @@ def search_target_directory(filename):
 if __name__ == '__main__':
     # Replace these paths with your actual paths
     qrel_path = os.path.join(data_directory, config['year_of_data'], 'GoldStandard/trec.nist.gov_data_trials_qrels2021.txt')
-    target_directory = os.path.join(base_directory, 'src/data/required_cts')
+    target_directory = os.path.join(base_directory, 'data/required_cts')
     qrels = read_qrel_txt()
     copy_files_from_json(qrels, target_directory)
