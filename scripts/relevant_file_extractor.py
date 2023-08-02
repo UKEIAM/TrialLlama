@@ -34,7 +34,7 @@ def read_qrel_txt(qrel_path: str):
         qrel_path,
         sep=' ',
         header=None,
-        names=['Topic', 'N/A', 'Clinical Trial ID', 'Label'],
+        names=['topic', 'N/A', 'clinical trial id', 'label'],
     )
 
     return qrels
@@ -46,7 +46,7 @@ def copy_required_files_to_folder(qrels: pd.DataFrame, target_dir: str) -> None:
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
     
-    for filename in tqdm(qrels['Clinical Trial ID']):
+    for filename in tqdm(qrels['clinical trial id']):
         source_dir = search_target_directory(filename)
         full_filename = filename + '.xml'
         source_file = os.path.join(source_dir, full_filename)
