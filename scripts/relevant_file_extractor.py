@@ -6,6 +6,8 @@ import argparse
 import shutil
 import yaml
 
+from tqdm import tqdm
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--debug", action="store_true", help="Enable debug mode")
@@ -43,8 +45,8 @@ def read_qrel_txt(qrel_path: str):
 def copy_required_files_to_folder(qrels: pd.DataFrame, target_dir: str) -> None:
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
-
-    for filename in qrels["Clinical Trial ID"]:
+    
+    for filename in tqdm(qrels["Clinical Trial ID"]):
         source_dir = search_target_directory(filename)
         full_filename = filename + ".xml"
         source_file = os.path.join(source_dir, full_filename)
