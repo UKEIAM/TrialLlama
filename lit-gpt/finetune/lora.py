@@ -64,9 +64,9 @@ hparams = {
 
 
 def setup(
-    data_dir: Path = Path("data/alpaca"),
-    checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
-    out_dir: Path = Path("out/lora/alpaca"),
+    data_dir: Path = Path("../data/clinical_trials"),
+    checkpoint_dir: Path = Path("checkpoints/meta-llama/Llama-2-7b-chat-hf"),
+    out_dir: Path = Path("../out/lora/meta-llama"),
     precision: Optional[str] = None,
     tpu: bool = False,
 ):
