@@ -74,7 +74,6 @@ def search_target_directory(filename):
 
 
 if __name__ == "__main__":
-    # Replace these paths with your actual paths
     qrel_path = os.path.join(
         data_directory,
         config["year_of_data"],
