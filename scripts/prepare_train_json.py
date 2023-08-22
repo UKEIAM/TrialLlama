@@ -31,8 +31,7 @@ def create_JSON(qrles):
 
     for index, row in tqdm(qrles.iterrows()):
         topic_nr = row["topic"]
-        # TODO: Write prettier method
-        topic = topics_df.where(topics_df["number"] == str(topic_nr))["topic"][0]
+        topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"][0]
         ct = row["clinical trial id"] + ".xml"
         label = row["label"]
         ct_path = os.path.join(target_data_directory, ct)
