@@ -26,7 +26,7 @@ from lit_gpt.speed_monitor import (
     measure_flops,
     estimate_flops,
 )
-from scripts.prepare_alpaca import generate_prompt
+from scripts.prepare_llama import generate_prompt
 
 
 eval_interval = 100
