@@ -29,7 +29,7 @@ def create_JSON(qrles):
     )
     topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
-    for index, row in tqdm(qrles[:15].iterrows()):
+    for index, row in tqdm(qrles.iterrows()):
         topic_nr = row["topic"]
         # TODO: Write prettier method
         topic = topics_df.where(topics_df["number"] == str(topic_nr))["topic"][0]
@@ -62,7 +62,7 @@ def create_JSON(qrles):
                     "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided.",
                     "inputs": [
                         {"patient_description": f"{topic}"},
-                        {"clinical_trial": "PLACEHOLDER"},  # clinical_trial_json
+                        {"clinical_trial": clinical_trial_json},
                     ],
                     "output": f"{label}",
                 }
@@ -70,11 +70,8 @@ def create_JSON(qrles):
         else:
             continue
 
-    # Transform list type to JSON type
-    train_json = json.dumps(train_set)
-
-    with open(os.path.join(base_directory, "data", "train_json_full.json"), "w") as f:
-        json.dump(train_json, f)
+    with open(os.path.join(base_directory, "data", "train_json_full.json"), "w") as fp:
+        json.dump(train_set, fp)
 
 
 def read_qrel_txt(qrel_path: str):
@@ -122,7 +119,7 @@ def parse_XML_to_json(xml_file, cols):
     rows = []
     json_data = xml_to_dict(xroot)
 
-    # TODO JSON is somehow broken. Either due to the nested other json, or due to wrong saving
+    # TODO Remove \n and \r's in the Text
     return json_data
 
 
