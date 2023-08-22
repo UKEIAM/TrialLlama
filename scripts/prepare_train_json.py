@@ -20,7 +20,7 @@ with open(config_file, "r") as file:
 source_data_directory = os.path.join(data_directory, config["year_of_data"])
 target_data_directory = os.path.join(data_directory, "required_cts")
 
-train_set = []
+train_dict = []
 
 
 def create_JSON(qrles):
@@ -29,9 +29,12 @@ def create_JSON(qrles):
     )
     topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
-    for index, row in tqdm(qrles.iterrows()):
+    for index, row in tqdm(qrles[:100].iterrows()):
         topic_nr = row["topic"]
-        topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"][0]
+        try:
+            topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[0]
+        except KeyError as e:
+            continue
         ct = row["clinical trial id"] + ".xml"
         label = row["label"]
         ct_path = os.path.join(target_data_directory, ct)
@@ -39,7 +42,7 @@ def create_JSON(qrles):
         if os.path.exists(ct_path):
             """Currently it's simply a JSON file"""
             # clinical_trial_df = parse_XML_to_df(ct_path, ['brief_title', 'officiel_title', 'brief_summary', 'start_date' 'overall_status', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers'])
-            clinical_trial_json = parse_XML_to_json(
+            clinical_trial_dict = parse_XML_to_json(
                 ct_path,
                 [
                     "brief_title",
@@ -55,23 +58,43 @@ def create_JSON(qrles):
                     "healthy_volunteers",
                 ],
             )
-            train_set.append(
+            train_dict.append(
                 {
                     "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
                     "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided.",
                     "inputs": [
                         {"patient_description": f"{topic}"},
-                        {"clinical_trial": clinical_trial_json},
+                        {"clinical_trial": clinical_trial_dict},
                     ],
                     "output": f"{label}",
                 }
             )
         else:
             continue
+        
+    cleaned_dict = clean_textblock_data_recursively(train_dict)
 
-    with open(os.path.join(base_directory, "data", "train_json_full.json"), "w") as fp:
-        json.dump(train_set, fp)
+    with open(os.path.join(base_directory, "data", "train_json_full_36000.json"), "w") as fp:
+        json.dump(train_dict, fp)
 
+def clean_textblock_data_recursively(train_dict):
+    if isinstance(train_dict, dict):
+        cleaned_dict = {}
+        for key, value in train_dict.items():
+            cleaned_value = clean_textblock_data_recursively(value)
+            cleaned_dict[key] = cleaned_value
+        return cleaned_dict
+    elif isinstance(train_dict, list):
+        cleaned_list = []
+        for item in train_dict:
+            cleaned_item = clean_textblock_data_recursively(item)
+            cleaned_list.append(cleaned_item)
+        return cleaned_list
+    elif isinstance(train_dict, str):
+        return train_dict.replace('\n', '').replace('\r', '').replace(' ', '')
+    else:
+        return train_dict
+    
 
 def read_qrel_txt(qrel_path: str):
     qrels = pd.read_csv(
@@ -116,10 +139,9 @@ def parse_XML_to_json(xml_file, cols):
     xtree = ET.parse(xml_file)
     xroot = xtree.getroot()
     rows = []
-    json_data = xml_to_dict(xroot)
+    dict_data = xml_to_dict(xroot)
 
-    # TODO Remove \n and \r's in the Text
-    return json_data
+    return dict_data
 
 
 def xml_to_dict(element):
@@ -150,6 +172,3 @@ if __name__ == "__main__":
     train_json = create_JSON(qrels)
 
     print("FINISH")
-
-    with open(os.path.join(base_directory, "data", "train_json_full.json"), "r") as f:
-        ts = json.load(f)
