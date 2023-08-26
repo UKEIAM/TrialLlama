@@ -12,6 +12,8 @@ from lightning.fabric.strategies import XLAStrategy, FSDPStrategy
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
+base_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
 from generate.base import generate
 from lit_gpt.lora import mark_only_lora_as_trainable, lora_filter, GPT, Config, Block
 from lit_gpt.tokenizer import Tokenizer
@@ -64,9 +66,9 @@ hparams = {
 
 
 def setup(
-    data_dir: Path = Path("../data/clinical_trials"),
-    checkpoint_dir: Path = Path("checkpoints/meta-llama/Llama-2-7b-chat-hf"),
-    out_dir: Path = Path("../out/lora/meta-llama"),
+    data_dir: Path = Path(os.path.join(base_directory, "data", "experiment_1_full_ct")),
+    checkpoint_dir: Path = Path(os.path.join(base_directory, "lit-gpt/checkpoints/meta-llama/Llama-2-7b-chat-hf")),
+    out_dir: Path = Path(os.path.join(base_directory,"out/lora/experiment_1_full_ct")),
     precision: Optional[str] = None,
     tpu: bool = False,
 ):

@@ -63,9 +63,9 @@ hparams = {
 
 
 def setup(
-    data_dir: Path = Path("data/alpaca"),
-    checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
-    out_dir: Path = Path("out/adapter_v2/alpaca"),
+    data_dir: Path = Path("data"),
+    checkpoint_dir: Path = Path("lit-gpt/checkpoints/meta-llama/Llama-2-7b-chat-hf"),
+    out_dir: Path = Path("out/adapter_v2/experiment_1_full_ct"),
     precision: Optional[str] = None,
     tpu: bool = False,
 ):
