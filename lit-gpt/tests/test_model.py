@@ -13,10 +13,9 @@ wd = Path(__file__).parent.parent.absolute()
 @pytest.mark.parametrize("n_embd", (16, 32))
 @pytest.mark.parametrize("parallel_residual", (False, True))
 @pytest.mark.parametrize("kv_cache", (False, True))
-def test_against_hf_model(
-    rotary_pct, batch_size, n_embd, parallel_residual, kv_cache
-) -> None:
-    from transformers import GPTNeoXForCausalLM, GPTNeoXConfig
+def test_against_hf_model(rotary_pct, batch_size, n_embd, parallel_residual, kv_cache) -> None:
+    from transformers import GPTNeoXConfig, GPTNeoXForCausalLM
+
     import lit_gpt
     from scripts.convert_hf_checkpoint import copy_weights_gpt_neox
 
@@ -60,12 +59,7 @@ def test_against_hf_model(
     ours_model = lit_gpt.GPT(ours_config)
     ours_model.load_state_dict(state_dict)
 
-    token_sample = torch.randint(
-        0,
-        ours_config.padded_vocab_size,
-        size=(batch_size, block_size),
-        dtype=torch.int64,
-    )
+    token_sample = torch.randint(0, ours_config.padded_vocab_size, size=(batch_size, block_size), dtype=torch.int64)
 
     theirs_embed = theirs_model.gpt_neox.embed_in(token_sample)
     ours_embed = ours_model.transformer.wte(token_sample)
@@ -79,12 +73,7 @@ def test_against_hf_model(
             theirs_embed, use_cache=True, position_ids=position_ids
         )
         head_size = n_embd // n_head
-        k_cache_shape = (
-            batch_size,
-            n_head,
-            block_size,
-            rope[0].size(-1) + head_size - int(rotary_pct * head_size),
-        )
+        k_cache_shape = (batch_size, n_head, block_size, rope[0].size(-1) + head_size - int(rotary_pct * head_size))
         v_cache_shape = (batch_size, n_head, block_size, head_size)
         ours_kv_cache = torch.zeros(k_cache_shape), torch.zeros(v_cache_shape)
         (ours_block_out, ours_kv_cache) = ours_model.transformer.h[0](
@@ -93,12 +82,8 @@ def test_against_hf_model(
         for ours_cache, theirs_cache in zip(ours_kv_cache, theirs_kv_cache):
             torch.testing.assert_close(ours_cache, theirs_cache)
     else:
-        (theirs_block_out,) = theirs_model.gpt_neox.layers[0](
-            theirs_embed, position_ids=position_ids
-        )
-        ours_block_out, _ = ours_model.transformer.h[0](
-            ours_embed, rope, block_size, mask
-        )
+        (theirs_block_out,) = theirs_model.gpt_neox.layers[0](theirs_embed, position_ids=position_ids)
+        ours_block_out, _ = ours_model.transformer.h[0](ours_embed, rope, block_size, mask)
     torch.testing.assert_close(ours_block_out, theirs_block_out)
 
     theirs = theirs_model(token_sample)["logits"]
@@ -113,21 +98,13 @@ def test_against_original_falcon_40b():
     if not file_path.is_file():
         urlretrieve(url=url, filename=file_path)
 
-    from tests.original_falcon_40b import RWConfig, RWForCausalLM
-    from lit_gpt import Config, GPT
+    from lit_gpt import GPT, Config
     from scripts.convert_hf_checkpoint import copy_weights_falcon
+    from tests.original_falcon_40b import RWConfig, RWForCausalLM
 
-    ours_config = Config.from_name(
-        "falcon-40b", n_layer=2, n_head=8, n_query_groups=4, n_embd=32
-    )
+    ours_config = Config.from_name("falcon-40b", n_layer=2, n_head=8, n_query_groups=4, n_embd=32)
     theirs_config = RWConfig(
-        hidden_size=32,
-        n_head=8,
-        n_head_kv=4,
-        n_layer=2,
-        parallel_attn=True,
-        vocab_size=65024,
-        bias=False,
+        hidden_size=32, n_head=8, n_head_kv=4, n_layer=2, parallel_attn=True, vocab_size=65024, bias=False
     )
 
     theirs_model = RWForCausalLM(theirs_config)
@@ -146,18 +123,14 @@ def test_against_original_falcon_40b():
 
 @torch.inference_mode()
 def test_against_original_open_llama_3b():
-    from lit_gpt import Config, GPT
-    from scripts.convert_hf_checkpoint import copy_weights_hf_llama
-    from transformers.models.llama.modeling_llama import (
-        LlamaForCausalLM,
-        apply_rotary_pos_emb,
-    )
     from transformers.models.llama.configuration_llama import LlamaConfig
-    from lit_gpt.model import apply_rope
+    from transformers.models.llama.modeling_llama import LlamaForCausalLM, apply_rotary_pos_emb
 
-    ours_config = Config.from_name(
-        "open_llama_3b", n_layer=2, n_head=8, n_embd=32, intermediate_size=86
-    )
+    from lit_gpt import GPT, Config
+    from lit_gpt.model import apply_rope
+    from scripts.convert_hf_checkpoint import copy_weights_hf_llama
+
+    ours_config = Config.from_name("open_llama_3b", n_layer=2, n_head=8, n_embd=32, intermediate_size=86)
     T = 5
     theirs_config = LlamaConfig(
         hidden_size=ours_config.n_embd,
@@ -184,9 +157,7 @@ def test_against_original_open_llama_3b():
     torch.testing.assert_close(ours_sin, theirs_sin.squeeze())
     q = torch.randn(1, ours_config.n_head, T, ours_config.head_size)
     ours_q_roped = apply_rope(q, ours_cos, ours_sin)
-    theirs_q_roped, _ = apply_rotary_pos_emb(
-        q, q, theirs_cos, theirs_sin, torch.arange(T).unsqueeze(0)
-    )
+    theirs_q_roped, _ = apply_rotary_pos_emb(q, q, theirs_cos, theirs_sin, torch.arange(T).unsqueeze(0))
     torch.testing.assert_close(ours_q_roped, theirs_q_roped)
 
     # test end to end
@@ -200,10 +171,11 @@ def test_against_original_open_llama_3b():
 @torch.inference_mode()
 @pytest.mark.parametrize("size", ("7b", "70b"))
 def test_against_hf_llama2(size):
-    from lit_gpt import Config, GPT
-    from scripts.convert_hf_checkpoint import copy_weights_hf_llama
-    from transformers.models.llama.modeling_llama import LlamaForCausalLM
     from transformers.models.llama.configuration_llama import LlamaConfig
+    from transformers.models.llama.modeling_llama import LlamaForCausalLM
+
+    from lit_gpt import GPT, Config
+    from scripts.convert_hf_checkpoint import copy_weights_hf_llama
 
     if size == "7b":
         ours_kwargs = {"name": "Llama-2-7b-hf"}
@@ -212,9 +184,7 @@ def test_against_hf_llama2(size):
         ours_kwargs = {"name": "Llama-2-70b-chat-hf", "n_query_groups": 2}
         theirs_kwargs = {"num_key_value_heads": 2}
 
-    ours_config = Config.from_name(
-        n_layer=2, n_head=8, n_embd=32, intermediate_size=86, **ours_kwargs
-    )
+    ours_config = Config.from_name(n_layer=2, n_head=8, n_embd=32, intermediate_size=86, **ours_kwargs)
     T = 5
     theirs_config = LlamaConfig(
         hidden_size=ours_config.n_embd,
@@ -242,10 +212,7 @@ def test_against_hf_llama2(size):
     torch.testing.assert_close(ours_y, theirs_y)
 
 
-@pytest.mark.skipif(
-    sys.platform in ("win32", "darwin"),
-    reason="torch.compile not supported on this platform",
-)
+@pytest.mark.skipif(sys.platform in ("win32", "darwin"), reason="torch.compile not supported on this platform")
 @torch.inference_mode()
 def test_model_compile():
     import lit_gpt
@@ -256,9 +223,7 @@ def test_model_compile():
 
     model = torch.compile(model)
 
-    sample = torch.randint(
-        model.config.vocab_size, size=(2, model.config.block_size), dtype=torch.int64
-    )
+    sample = torch.randint(model.config.vocab_size, size=(2, model.config.block_size), dtype=torch.int64)
     for _ in range(3):
         _ = model(sample)
 

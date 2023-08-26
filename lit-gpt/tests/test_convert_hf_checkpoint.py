@@ -15,8 +15,4 @@ def test_convert_hf_checkpoint(tmp_path):
         convert_hf_checkpoint(checkpoint_dir=tmp_path, model_name="pythia-70m")
     load.assert_called_with(bin_file)
 
-    assert {p.name for p in tmp_path.glob("*")} == {
-        "foo.bin",
-        "lit_config.json",
-        "lit_model.pth",
-    }
+    assert {p.name for p in tmp_path.glob("*")} == {"foo.bin", "lit_config.json", "lit_model.pth"}

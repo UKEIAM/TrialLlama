@@ -8,9 +8,7 @@ wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
 
-def download_from_hub(
-    repo_id: Optional[str] = None, token: Optional[str] = os.getenv("HF_TOKEN")
-) -> None:
+def download_from_hub(repo_id: Optional[str] = None, token: Optional[str] = os.getenv("HF_TOKEN")) -> None:
     if repo_id is None:
         from lit_gpt.config import configs
 
@@ -33,7 +31,7 @@ def download_from_hub(
         local_dir=f"checkpoints/{repo_id}",
         local_dir_use_symlinks=False,
         resume_download=True,
-        allow_patterns=["*.bin*", "tokenizer*"],
+        allow_patterns=["*.bin*", "tokenizer*", "generation_config.json"],
         token=token,
     )
 

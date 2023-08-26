@@ -1,8 +1,8 @@
 """Implementation derived from https://github.com/tloen/alpaca-lora"""
 import json
 import sys
-import os
 from pathlib import Path
+from typing import Optional
 
 import requests
 import torch
@@ -13,18 +13,17 @@ from tqdm import tqdm
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-base_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-
 from lit_gpt.tokenizer import Tokenizer
 
-DATA_FILE_URL = ""
-DATA_FILE_NAME = "preprocessed_data_testing.json"
-
-DESTINATION_PATH = Path(os.path.join(base_directory, 'data'))
-CHECKPOINT_DIR = Path(os.path.join(base_directory, "lit-gpt/checkpoints/meta-llama/Llama-2-7b-chat-hf"))
-TEST_SPLIT_FRACTION = 0.03865  # to get exactly 2000 test samples
+DATA_FILE_URL = (
+    "https://huggingface.co/datasets/databricks/databricks-dolly-15k/resolve/main/databricks-dolly-15k.jsonl"
+)
+DATA_FILE_NAME = "dolly_data_cleaned.json"
+DESTINATION_PATH = Path("data/dolly")
+CHECKPOINT_DIR = Path("checkpoints/stabilityai/stablelm-base-alpha-3b")
+TEST_SPLIT_FRACTION = 0.1
 IGNORE_INDEX = -1
-MASK_INPUTS = False  # as in alpaca-lora
+MASK_INPUTS = False
 SEED = 42
 
 
@@ -37,31 +36,37 @@ def prepare(
     data_file_name: str = DATA_FILE_NAME,
     data_file_url: str = DATA_FILE_URL,
     ignore_index: int = IGNORE_INDEX,
+    max_seq_length: Optional[int] = None,
 ) -> None:
-    """Prepare the Clinical Trials dataset for instruction tuning.
+    """Prepare the Alpaca dataset for instruction tuning.
 
     The output is a training and test dataset saved as `train.pt` and `test.pt`,
     which stores the preprocessed and tokenized prompts and labels.
     """
-    with open(checkpoint_dir / "lit_config.json", "r") as file:
-        config = json.load(file)
-        max_seq_length = config["block_size"]
+
+    if max_seq_length is None:
+        with open(checkpoint_dir / "lit_config.json", "r", encoding="utf-8") as file:
+            config = json.load(file)
+            max_seq_length = config["block_size"]
 
     destination_path.mkdir(parents=True, exist_ok=True)
     data_file_path = destination_path / data_file_name
     print("Loading data file...")
     download_if_missing(data_file_path, data_file_url)
+
     with open(data_file_path, "r", encoding="utf-8") as file:
-        data = json.load(file)
+        data = file.readlines()
+        data = [json.loads(line) for line in data]
+    for item in data:
+        item["input"] = item.pop("context")
+        item["output"] = item.pop("response")
 
     print("Loading tokenizer...")
     tokenizer = Tokenizer(checkpoint_dir)
 
     # Partition the dataset into train and test
     train_set, test_set = random_split(
-        data,
-        [1.0 - test_split_fraction, test_split_fraction],
-        generator=torch.Generator().manual_seed(seed),
+        data, [1.0 - test_split_fraction, test_split_fraction], generator=torch.Generator().manual_seed(seed)
     )
     train_set, test_set = list(train_set), list(test_set)
 
@@ -129,9 +134,7 @@ def prepare_sample(
     full_prompt = generate_prompt(example)
     full_prompt_and_response = full_prompt + example["output"]
     encoded_full_prompt = tokenizer.encode(full_prompt, max_length=max_length)
-    encoded_full_prompt_and_response = tokenizer.encode(
-        full_prompt_and_response, eos=True, max_length=max_length
-    )
+    encoded_full_prompt_and_response = tokenizer.encode(full_prompt_and_response, eos=True, max_length=max_length)
 
     # The labels are the full prompt with response, but with the prompt masked out
     labels = encoded_full_prompt_and_response.clone()
@@ -151,14 +154,11 @@ def generate_prompt(example):
     'response' field."""
 
     if example["input"]:
-        try:
-            return (
-                "Below is an instruction that describes a task, paired with an input that provides further context. "
-                "Write a response that appropriately completes the request.\n\n"
-                f"### Instruction:\n{example['instruction']}\n\n### Input Patient Description:\n{example['input'][0]}\n### Input Trial Description:\n{example['input'][1]}\n\n### Response:"
-            )
-        except IndexError as e:
-            print(f'{e}: Index out of range')
+        return (
+            "Below is an instruction that describes a task, paired with an input that provides further context. "
+            "Write a response that appropriately completes the request.\n\n"
+            f"### Instruction:\n{example['instruction']}\n\n### Input:\n{example['input']}\n\n### Response:"
+        )
     return (
         "Below is an instruction that describes a task. "
         "Write a response that appropriately completes the request.\n\n"
@@ -168,5 +168,5 @@ def generate_prompt(example):
 
 if __name__ == "__main__":
     from jsonargparse import CLI
-    
+
     CLI(prepare)
