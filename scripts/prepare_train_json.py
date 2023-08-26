@@ -62,7 +62,7 @@ def create_JSON(qrles):
                 {
                     "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
                     "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided.",
-                    "inputs": [
+                    "input": [
                         {"patient_description": f"{topic}"},
                         {"clinical_trial": clinical_trial_dict},
                     ],
