@@ -20,7 +20,7 @@ from lit_gpt.tokenizer import Tokenizer
 DATA_FILE_URL = ""
 DATA_FILE_NAME = "preprocessed_data_testing.json"
 
-DESTINATION_PATH = Path(os.path.join(base_directory, 'data'))
+DESTINATION_PATH = Path(os.path.join(base_directory, "data"))
 CHECKPOINT_DIR = Path(os.path.join(base_directory, "lit-gpt/checkpoints/meta-llama/Llama-2-7b-chat-hf"))
 TEST_SPLIT_FRACTION = 0.03865  # to get exactly 2000 test samples
 IGNORE_INDEX = -1
