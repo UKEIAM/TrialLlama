@@ -29,7 +29,7 @@ def create_JSON(qrles):
     )
     topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
-    for index, row in tqdm(qrles[:100].iterrows()):
+    for index, row in tqdm(qrles.iterrows()):
         topic_nr = row["topic"]
         try:
             topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[0]
@@ -75,27 +75,32 @@ def create_JSON(qrles):
     cleaned_dict = clean_textblock_data_recursively(train_dict)
 
     with open(os.path.join(base_directory, "data", "train_json_full_36000.json"), "w") as fp:
-        json.dump(train_dict, fp)
+        json.dump(cleaned_dict, fp)
 
-def clean_textblock_data_recursively(train_dict):
-    if isinstance(train_dict, dict):
+def clean_textblock(text):
+    cleaned_text = re.sub(r'\s+', ' ', text.strip())
+    return cleaned_text
+
+def clean_textblock_data_recursively(json_obj):
+    """Recursive function to find nested 'textblock' elements and clean the string from unnessecary chars and whitespaces"""
+    if isinstance(json_obj, dict):
         cleaned_dict = {}
-        for key, value in train_dict.items():
-            cleaned_value = clean_textblock_data_recursively(value)
-            cleaned_dict[key] = cleaned_value
+        for key, value in json_obj.items():
+            if isinstance(value, dict) or isinstance(value, list):
+                cleaned_dict[key] = clean_textblock_data_recursively(value)
+            elif (key == "textblock" or key == "patient_description"):
+                cleaned_dict[key] = clean_textblock(value)
+            else:
+                cleaned_dict[key] = value
         return cleaned_dict
-    elif isinstance(train_dict, list):
+    elif isinstance(json_obj, list):
         cleaned_list = []
-        for item in train_dict:
-            cleaned_item = clean_textblock_data_recursively(item)
-            cleaned_list.append(cleaned_item)
+        for item in json_obj:
+            cleaned_list.append(clean_textblock_data_recursively(item))
         return cleaned_list
-    elif isinstance(train_dict, str):
-        return train_dict.replace('\n', '').replace('\r', '').replace(' ', '')
     else:
-        return train_dict
+        return json_obj
     
-
 def read_qrel_txt(qrel_path: str):
     qrels = pd.read_csv(
         qrel_path,

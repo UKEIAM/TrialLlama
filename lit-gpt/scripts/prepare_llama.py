@@ -150,7 +150,7 @@ def generate_prompt(example):
         return (
             "Below is an instruction that describes a task, paired with an input that provides further context. "
             "Write a response that appropriately completes the request.\n\n"
-            f"### Instruction:\n{example['instruction']}\n\n### Input Patient Description:\n{example['inputs']['patient_description']}\n### Input Trial Description:\n{example['inputs']['clinical_trial']}\n\n### Response:"
+            f"### Instruction:\n{example['instruction']}\n\n### Input Patient Description:\n{example['input'][0]}\n### Input Trial Description:\n{example['input'][1]}\n\n### Response:"
         )
     return (
         "Below is an instruction that describes a task. "
