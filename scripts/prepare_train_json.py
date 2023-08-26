@@ -29,7 +29,7 @@ def create_JSON(qrles):
     )
     topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
-    for index, row in tqdm(qrles[:200].iterrows()):
+    for index, row in tqdm(qrles.iterrows()):
         topic_nr = row["topic"]
         try:
             topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[0]
@@ -74,7 +74,7 @@ def create_JSON(qrles):
         
     cleaned_dict = clean_textblock_data_recursively(train_dict)
 
-    with open(os.path.join(base_directory, "data", "preprocessed_data_testing.json"), "w") as fp:
+    with open(os.path.join(base_directory, "data", "preprocessed_data_full.json"), "w") as fp:
         json.dump(cleaned_dict, fp)
 
 def clean_textblock(text):
