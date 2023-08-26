@@ -12,6 +12,8 @@ from lightning.fabric.strategies import FSDPStrategy, XLAStrategy
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
+base_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
 from generate.base import generate
 from lit_gpt.lora import GPT, Block, Config, lora_filter, mark_only_lora_as_trainable
 from lit_gpt.speed_monitor import SpeedMonitorFabric as SpeedMonitor
@@ -59,9 +61,9 @@ hparams = {k: v for k, v in locals().items() if isinstance(v, (int, float, str))
 
 
 def setup(
-    data_dir: Path = Path("data/alpaca"),
-    checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-base-alpha-3b"),
-    out_dir: Path = Path("out/lora/alpaca"),
+    data_dir: Path = Path(os.path.join(base_directory, "data", "experiment_1_full_ct")),
+    checkpoint_dir: Path = Path(os.path.join(base_directory, "lit-gpt/checkpoints/meta-llama/Llama-2-7b-chat-hf")),
+    out_dir: Path =  Path(os.path.join(base_directory, "out/lora/experiment_1_full_ct")),
     precision: Optional[str] = None,
     tpu: bool = False,
     quantize: Optional[Literal["bnb.nf4", "bnb.nf4-dq", "bnb.fp4", "bnb.fp4-dq"]] = None,
