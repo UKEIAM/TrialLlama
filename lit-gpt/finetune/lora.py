@@ -40,8 +40,8 @@ override_max_seq_length = None
 
 # Hyperparameters
 learning_rate = 3e-4
-batch_size = 128
-micro_batch_size = 4
+batch_size = 64
+micro_batch_size = 2
 gradient_accumulation_iters = batch_size // micro_batch_size
 assert gradient_accumulation_iters > 0
 max_iters = 50000  # train dataset size
@@ -268,7 +268,7 @@ def validate(
     val_loss = losses.mean()
 
     # produce an example:
-    instruction = "Recommend a movie for me to watch during the weekend and explain the reason."
+    instruction = "Please tell me if the following patient is eligable for any clinical trial you have ever heard of: Patient male 35 years old with an anaplastic carcinoma, non-smoking."
     fabric.print(instruction)
     sample = {"instruction": instruction, "input": ""}
     prompt = generate_prompt(sample)

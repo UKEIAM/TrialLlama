@@ -20,7 +20,7 @@ with open(config_file, "r") as file:
 source_data_directory = os.path.join(data_directory, config["year_of_data"])
 target_data_directory = os.path.join(data_directory, "required_cts")
 
-train_dict = []
+train_list = []
 
 
 def create_JSON(qrles):
@@ -29,7 +29,7 @@ def create_JSON(qrles):
     )
     topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
-    for index, row in tqdm(qrles.iterrows()):
+    for index, row in tqdm(qrles[:50].iterrows()):
         topic_nr = row["topic"]
         try:
             topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[0]
@@ -58,24 +58,30 @@ def create_JSON(qrles):
                     "healthy_volunteers",
                 ],
             )
-            train_dict.append(
+            ct_textblock = extract_textblocks_from_clinical_trials(clinical_trial_dict)
+            cleaned_ct_textblocks = []
+            for textblock in ct_textblock:
+                cleaned_textblock = clean_textblock(textblock)
+                cleaned_ct_textblocks.append(cleaned_textblock)
+            train_list.append(
                 {
                     "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
                     "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided.",
                     "input": [
                         {"patient_description": f"{topic}"},
-                        {"clinical_trial": clinical_trial_dict},
+                        {"clinical_trial": cleaned_ct_textblocks}, # If full CT should be put as value, just change 'cleaned_ct_textblocks' to 'clinical_trials_dict'
                     ],
                     "output": f"{label}",
                 }
             )
         else:
             continue
-        
-    cleaned_dict = clean_textblock_data_recursively(train_dict)
 
-    with open(os.path.join(base_directory, "data", "preprocessed_data_full.json"), "w") as fp:
-        json.dump(cleaned_dict, fp)
+    '''The below function is returning the full CT parsed into a JSON format + cleaned'''
+    # cleaned_list = clean_textblock_data_recursively(train_list)
+
+    with open(os.path.join(base_directory, "data", "preprocessed_data_test_reduced.json"), "w") as fp:
+        json.dump(train_list, fp)
 
 def clean_textblock(text):
     cleaned_text = re.sub(r'\s+', ' ', text.strip())
@@ -88,7 +94,7 @@ def clean_textblock_data_recursively(json_obj):
         for key, value in json_obj.items():
             if isinstance(value, dict) or isinstance(value, list):
                 cleaned_dict[key] = clean_textblock_data_recursively(value)
-            elif (key == "textblock" or key == "patient_description"):
+            elif key in ["patient_description", "textblock"]:
                 cleaned_dict[key] = clean_textblock(value)
             else:
                 cleaned_dict[key] = value
@@ -100,6 +106,16 @@ def clean_textblock_data_recursively(json_obj):
         return cleaned_list
     else:
         return json_obj
+
+def extract_textblocks_from_clinical_trials(clinical_trial):
+    """Extracts 'textblock' elements from the 'clinical_trials' section"""
+    textblocks = []
+    for key, value in clinical_trial.items():
+        if key == "textblock":
+            textblocks.append(value)
+        elif isinstance(value, dict):
+            textblocks.extend(extract_textblocks_from_clinical_trials(value))
+    return textblocks
     
 def read_qrel_txt(qrel_path: str):
     qrels = pd.read_csv(
