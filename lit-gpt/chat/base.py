@@ -4,7 +4,7 @@ import sys
 import time
 import warnings
 from pathlib import Path
-from typing import Optional, Tuple, List, Literal, Iterator
+from typing import Iterator, List, Literal, Optional, Tuple
 
 import lightning as L
 import torch
@@ -13,8 +13,8 @@ import torch
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-from lit_gpt import GPT, Tokenizer, Config
-from lit_gpt.utils import lazy_load, check_valid_checkpoint_dir, quantization
+from lit_gpt import GPT, Config, Tokenizer
+from lit_gpt.utils import check_valid_checkpoint_dir, get_default_supported_precision, lazy_load, quantization
 
 
 @torch.no_grad()
@@ -47,9 +47,7 @@ def generate(
 
     # buffer holds the tokens that haven't been yield yet
     buffer_length = max((len(tokens) for tokens in stop_tokens), default=1)
-    buffer = torch.full(
-        (buffer_length,), -999, device=device
-    )  # fill with non-existing token
+    buffer = torch.full((buffer_length,), -999, device=device)  # fill with non-existing token
 
     if idx.device.type == "xla":
         import torch_xla.core.xla_model as xm
@@ -97,9 +95,7 @@ def generate(
             yield_i += 1
 
 
-def decode(
-    fabric: L.Fabric, tokenizer: Tokenizer, token_stream: Iterator[torch.Tensor]
-) -> int:
+def decode(fabric: L.Fabric, tokenizer: Tokenizer, token_stream: Iterator[torch.Tensor]) -> int:
     tokens_generated = 0
     if tokenizer.backend == "huggingface":
         for token in token_stream:
@@ -125,13 +121,9 @@ def main(
     *,
     top_k: int = 200,
     temperature: float = 0.8,
-    checkpoint_dir: Path = Path("checkpoints/meta-llama/Llama-2-7b-chat-hf"),
-    quantize: Optional[
-        Literal[
-            "bnb.nf4", "bnb.nf4-dq", "bnb.fp4", "bnb.fp4-dq", "bnb.int8", "gptq.int4"
-        ]
-    ] = None,
-    precision: str = "bf16-true",
+    checkpoint_dir: Path = Path("checkpoints/stabilityai/stablelm-tuned-alpha-3b"),
+    quantize: Optional[Literal["bnb.nf4", "bnb.nf4-dq", "bnb.fp4", "bnb.fp4-dq", "bnb.int8", "gptq.int4"]] = None,
+    precision: Optional[str] = None,
 ) -> None:
     """Starts a conversation with a tuned GPT model.
 
@@ -147,6 +139,8 @@ def main(
             for more details, see https://github.com/Lightning-AI/lit-gpt/blob/main/tutorials/quantize.md
         precision: Indicates the Fabric precision setting to use.
     """
+    precision = precision or get_default_supported_precision(training=False)
+
     check_valid_checkpoint_dir(checkpoint_dir)
 
     with open(checkpoint_dir / "lit_config.json") as fp:
@@ -161,16 +155,11 @@ def main(
     else:
         model_file = "lit_model.pth"
     checkpoint_path = checkpoint_dir / model_file
-    fabric.print(
-        f"Loading model {str(checkpoint_path)!r} with {config.__dict__}",
-        file=sys.stderr,
-    )
+    fabric.print(f"Loading model {str(checkpoint_path)!r} with {config.__dict__}", file=sys.stderr)
     with fabric.init_module(empty_init=True), quantization(quantize):
         model = GPT(config)
     with lazy_load(checkpoint_path) as checkpoint:
-        model.load_state_dict(
-            checkpoint.get("model", checkpoint), strict=quantize is None
-        )
+        model.load_state_dict(checkpoint.get("model", checkpoint), strict=quantize is None)
 
     model.eval()
     model = fabric.setup_module(model)
@@ -204,8 +193,7 @@ def main(
             t = time.perf_counter() - t0
             model.reset_cache()
             fabric.print(
-                f"\nTime for inference: {t:.02f} sec total, {tokens_generated / t:.02f} tokens/sec",
-                file=sys.stderr,
+                f"\nTime for inference: {t:.02f} sec total, {tokens_generated / t:.02f} tokens/sec", file=sys.stderr
             )
         except KeyboardInterrupt:
             # support stopping generation
@@ -213,9 +201,7 @@ def main(
         fabric.print()
 
 
-def prompt_config(
-    checkpoint_dir: Path, tokenizer: Tokenizer
-) -> Tuple[str, Tuple[List[int], ...]]:
+def prompt_config(checkpoint_dir: Path, tokenizer: Tokenizer) -> Tuple[str, Tuple[List[int], ...]]:
     checkpoint_name = str(checkpoint_dir)
     if re.search(r"stabilityai.*tuned-alpha", checkpoint_name):
         system_prompt = (
@@ -299,6 +285,22 @@ def prompt_config(
             "{prompt}\n\n"
             "### Assistant:\n"
         )
+        stop_tokens = ([tokenizer.eos_id],)
+        return system_prompt, stop_tokens
+
+    if re.search("Platypus", checkpoint_name):
+        system_prompt = "### Instruction:\n\n{prompt}\n\n### Response:\n"
+        # this checkpoint doesn't emit the eos token very consistently
+        stop_tokens = ([tokenizer.eos_id],)
+        return system_prompt, stop_tokens
+
+    if re.search("NousResearch", checkpoint_name):
+        system_prompt = "### Instruction:\n{prompt}\n\n### Response:\n"
+        stop_tokens = ([tokenizer.eos_id],)
+        return system_prompt, stop_tokens
+
+    if re.search("stablecode-instruct", checkpoint_name):
+        system_prompt = "###Instruction\n{prompt}###Response\n"
         stop_tokens = ([tokenizer.eos_id],)
         return system_prompt, stop_tokens
 

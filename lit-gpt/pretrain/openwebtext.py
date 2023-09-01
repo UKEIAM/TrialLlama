@@ -7,8 +7,8 @@ from typing import Optional, Union
 import lightning as L
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, IterableDataset
 from lightning.fabric.strategies import FSDPStrategy, XLAStrategy
+from torch.utils.data import DataLoader, IterableDataset
 
 # support running without installing as a package
 wd = Path(__file__).parent.parent.resolve()
@@ -16,12 +16,9 @@ sys.path.append(str(wd))
 
 from lit_gpt import Config
 from lit_gpt.model import GPT, Block
-from lit_gpt.speed_monitor import (
-    SpeedMonitorFabric as SpeedMonitor,
-    measure_flops,
-    estimate_flops,
-)
-from lit_gpt.utils import step_csv_logger, chunked_cross_entropy
+from lit_gpt.speed_monitor import SpeedMonitorFabric as SpeedMonitor
+from lit_gpt.speed_monitor import estimate_flops, measure_flops
+from lit_gpt.utils import chunked_cross_entropy, get_default_supported_precision, num_parameters, step_csv_logger
 
 model_name = "pythia-70m"
 name = "openwebtext"
@@ -48,22 +45,15 @@ warmup_iters = 2000
 lr_decay_iters = max_iters
 min_lr = 6e-5
 
-hparams = {
-    k: v
-    for k, v in locals().items()
-    if isinstance(v, (int, float, str)) and not k.startswith("_")
-}
+hparams = {k: v for k, v in locals().items() if isinstance(v, (int, float, str)) and not k.startswith("_")}
 logger = step_csv_logger("out", name, flush_logs_every_n_steps=log_interval)
 
 
 def setup(
-    devices: int = 1,
-    precision: Optional[str] = None,
-    tpu: bool = False,
-    resume: Union[bool, Path] = False,
+    devices: int = 1, precision: Optional[str] = None, tpu: bool = False, resume: Union[bool, Path] = False
 ) -> None:
-    if precision is None:
-        precision = "32-true" if tpu else "bf16-mixed"
+    precision = precision or get_default_supported_precision(training=True, tpu=tpu)
+
     if devices > 1:
         if tpu:
             # For multi-host TPU training, the device count for Fabric is limited to the count on a single host.
@@ -80,59 +70,41 @@ def setup(
     else:
         strategy = "auto"
 
-    fabric = L.Fabric(
-        devices=devices, strategy=strategy, precision=precision, loggers=logger
-    )
+    fabric = L.Fabric(devices=devices, strategy=strategy, precision=precision, loggers=logger)
+    fabric.print(hparams)
     fabric.launch(main, resume=resume)
 
 
 def main(fabric, resume) -> None:
-    fabric.print(hparams)
     speed_monitor = SpeedMonitor(fabric, window_size=50, time_unit="seconds")
 
     if fabric.global_rank == 0:
         out_dir.mkdir(parents=True, exist_ok=True)
 
-    fabric.seed_everything(
-        1337, workers=True
-    )  # same seed for every process to init model (FSDP)
+    fabric.seed_everything(1337, workers=True)  # same seed for every process to init model (FSDP)
 
     config = Config.from_name(model_name)
     fabric.print(f"Loading model with {config.__dict__}")
-    t0 = time.time()
-    with fabric.init_module(empty_init=False):
+    t0 = time.perf_counter()
+    with fabric.init_module(empty_init=True):
         model = GPT(config)
         model.apply(model._init_weights)
-    fabric.print(f"Time to instantiate model: {time.time() - t0:.02f} seconds.")
 
-    num_total_params = sum(p.numel() for p in model.parameters())
-    fabric.print(f"Total parameters {num_total_params}")
+    fabric.print(f"Time to instantiate model: {time.perf_counter() - t0:.02f} seconds.")
+    fabric.print(f"Total parameters {num_parameters(model):,}")
 
+    model = fabric.setup(model)
     optimizer = torch.optim.AdamW(
-        model.parameters(),
-        lr=learning_rate,
-        weight_decay=weight_decay,
-        betas=(beta1, beta2),
-        foreach=False,
+        model.parameters(), lr=learning_rate, weight_decay=weight_decay, betas=(beta1, beta2), foreach=False
     )
-    model, optimizer = fabric.setup(model, optimizer)
+    optimizer = fabric.setup_optimizers(optimizer)
 
     train_data, val_data = load_datasets(data_dir, block_size=model.config.block_size)
-    train_dataloader = DataLoader(
-        train_data, batch_size=micro_batch_size, num_workers=2
-    )
+    train_dataloader = DataLoader(train_data, batch_size=micro_batch_size, num_workers=2)
     val_dataloader = DataLoader(val_data, batch_size=micro_batch_size, num_workers=2)
-    train_dataloader, val_dataloader = fabric.setup_dataloaders(
-        train_dataloader, val_dataloader
-    )
+    train_dataloader, val_dataloader = fabric.setup_dataloaders(train_dataloader, val_dataloader)
 
-    state = {
-        "model": model,
-        "optimizer": optimizer,
-        "hparams": hparams,
-        "iter_num": 0,
-        "step_count": 0,
-    }
+    state = {"model": model, "optimizer": optimizer, "hparams": hparams, "iter_num": 0, "step_count": 0}
 
     if resume is True:
         resume = sorted(out_dir.glob("*.pth"))[-1]
@@ -140,9 +112,11 @@ def main(fabric, resume) -> None:
         fabric.print(f"Resuming training from {resume}")
         fabric.load(resume, state)
 
-    train_time = time.time()
+    train_time = time.perf_counter()
     train(fabric, state, train_dataloader, val_dataloader, speed_monitor)
-    fabric.print(f"Training time: {(time.time()-train_time):.2f}s")
+    fabric.print(f"Training time: {(time.perf_counter()-train_time):.2f}s")
+    if fabric.device.type == "cuda":
+        fabric.print(f"Memory used: {torch.cuda.max_memory_allocated() / 1e9:.02f} GB")
 
 
 def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
@@ -153,20 +127,18 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
 
     with torch.device("meta"):
         meta_model = GPT(model.config)
-        # estimated is too much of an optimistic estimate, left just for reference
+        # "estimated" is not as precise as "measured". Estimated is optimistic but widely used in the wild.
+        # When comparing MFU or FLOP numbers with other projects that use estimated FLOPs,
+        # consider passing `SpeedMonitor(flops_per_batch=estimated_flops)` instead
         estimated_flops = estimate_flops(meta_model) * micro_batch_size
-        fabric.print(
-            f"Estimated TFLOPs: {estimated_flops * fabric.world_size / 1e12:.2f}"
-        )
+        fabric.print(f"Estimated TFLOPs: {estimated_flops * fabric.world_size / 1e12:.2f}")
         x = torch.randint(0, 1, (micro_batch_size, model.config.block_size))
         measured_flops = measure_flops(meta_model, x)
-        fabric.print(
-            f"Measured TFLOPs: {measured_flops * fabric.world_size / 1e12:.2f}"
-        )
+        fabric.print(f"Measured TFLOPs: {measured_flops * fabric.world_size / 1e12:.2f}")
         del meta_model, x
 
     total_lengths = 0
-    total_t0 = time.time()
+    total_t0 = time.perf_counter()
 
     if fabric.device.type == "xla":
         import torch_xla.core.xla_model as xm
@@ -181,7 +153,7 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
         for param_group in optimizer.param_groups:
             param_group["lr"] = lr
 
-        iter_t0 = time.time()
+        iter_t0 = time.perf_counter()
 
         input_ids, targets = next(train_iter)
 
@@ -199,7 +171,7 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
         elif fabric.device.type == "xla":
             xm.mark_step()
 
-        t1 = time.time()
+        t1 = time.perf_counter()
         total_lengths += input_ids.size(1)
         speed_monitor.on_train_batch_end(
             (state["iter_num"] + 1) * micro_batch_size,
@@ -216,13 +188,11 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
             )
 
         if not is_accumulating and state["step_count"] % eval_interval == 0:
-            t0 = time.time()
-            val_loss = validate(fabric, model, val_data)
-            t1 = time.time() - t0
+            t0 = time.perf_counter()
+            val_loss = validate(fabric, model, val_dataloader)
+            t1 = time.perf_counter() - t0
             speed_monitor.eval_end(t1)
-            fabric.print(
-                f"step {state['iter_num']}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms"
-            )
+            fabric.print(f"step {state['iter_num']}: val loss {val_loss:.4f}, val time: {t1 * 1000:.2f}ms")
             fabric.barrier()
         if not is_accumulating and state["step_count"] % save_interval == 0:
             checkpoint_path = out_dir / f"iter-{state['iter_num']:06d}-ckpt.pth"
@@ -231,9 +201,7 @@ def train(fabric, state, train_dataloader, val_dataloader, speed_monitor):
 
 
 @torch.no_grad()
-def validate(
-    fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoader
-) -> torch.Tensor:
+def validate(fabric: L.Fabric, model: torch.nn.Module, val_dataloader: DataLoader) -> torch.Tensor:
     fabric.print("Validating ...")
     model.eval()
     val_iter = iter(val_dataloader)
@@ -267,9 +235,7 @@ class Dataset(IterableDataset):
         while True:
             i = torch.randint(len(data) - self.block_size, (1,)).item()
             x = torch.from_numpy((data[i : i + self.block_size]).astype(np.int64))
-            y = torch.from_numpy(
-                (data[i + 1 : i + 1 + self.block_size]).astype(np.int64)
-            )
+            y = torch.from_numpy((data[i + 1 : i + 1 + self.block_size]).astype(np.int64))
             yield x, y
 
 

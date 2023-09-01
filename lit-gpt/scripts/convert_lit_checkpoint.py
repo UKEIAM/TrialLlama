@@ -3,7 +3,7 @@ import gc
 import sys
 from functools import partial
 from pathlib import Path
-from typing import Optional, Literal, Dict, Union
+from typing import Dict, Literal, Optional, Tuple, Union
 
 import torch
 
@@ -12,8 +12,8 @@ wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
 from lit_gpt import Config
-from lit_gpt.utils import lazy_load, incremental_save, NotYetLoadedTensor
-from scripts.convert_hf_checkpoint import load_param, layer_template
+from lit_gpt.utils import NotYetLoadedTensor, incremental_save, lazy_load
+from scripts.convert_hf_checkpoint import layer_template, load_param
 
 
 def copy_weights_falcon(
@@ -58,7 +58,7 @@ def copy_weights_falcon(
             to_name = weight_map[from_name].format(number)
         else:
             to_name = weight_map[name]
-        param = load_param(param)
+        param = load_param(param, name, None)
         if saver is not None:
             param = saver.store_early(param)
         state_dict[to_name] = param
@@ -94,7 +94,7 @@ def copy_weights_gpt_neox(
             to_name = weight_map[from_name].format(number)
         else:
             to_name = weight_map[name]
-        param = load_param(param)
+        param = load_param(param, name, None)
         if saver is not None:
             param = saver.store_early(param)
         state_dict[to_name] = param
@@ -124,34 +124,34 @@ def copy_weights_llama(
             q = "model.layers.{}.self_attn.q_proj.weight".format(number)
             k = "model.layers.{}.self_attn.k_proj.weight".format(number)
             v = "model.layers.{}.self_attn.v_proj.weight".format(number)
-            qkv = load_param(param)
-            qp, kp, vp = tensor_split(qkv, config, "llama")
-            for to_name, to_param in zip((q, k, v), (qp, kp, vp)):
+            qkv = load_param(param, name, None)
+            qp, kp, vp = tensor_split(qkv, config)
+            for to_name, param in zip((q, k, v), (qp, kp, vp)):
                 if saver is not None:
-                    param = saver.store_early(to_param)
-                state_dict[to_name] = to_param
+                    param = saver.store_early(param)
+                state_dict[to_name] = param
         elif "transformer.h" in name:
             from_name, number = layer_template(name, 2)
             to_name = weight_map[from_name]
             if to_name is None:
                 continue
             to_name = to_name.format(number)
-            param = load_param(param)
+            param = load_param(param, name, None)
             if saver is not None:
                 param = saver.store_early(param)
             state_dict[to_name] = param
 
         else:
             to_name = weight_map[name]
-            param = load_param(param)
+            param = load_param(param, name, None)
             if saver is not None:
                 param = saver.store_early(param)
             state_dict[to_name] = param
 
 
 def tensor_split(
-    param: Union[torch.Tensor, NotYetLoadedTensor], config: Config, model_name: str
-) -> torch.Tensor:
+    param: Union[torch.Tensor, NotYetLoadedTensor], config: Config
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     def kstart(start, blen, klen) -> int:
         """returns start index of keys in batch"""
         return start + (blen - (klen * 2))
@@ -175,9 +175,7 @@ def tensor_split(
     # the starting index of each new batch
     starts = range(0, nobs, blen)
     # the indices to splice on
-    splices = [
-        (s, kstart(s, blen, klen), vstart(s, blen, vlen), vend(s, blen)) for s in starts
-    ]
+    splices = [(s, kstart(s, blen, klen), vstart(s, blen, vlen), vend(s, blen)) for s in starts]
 
     qc = ()
     kc = ()
@@ -196,28 +194,31 @@ def tensor_split(
     return q, k, v
 
 
-def maybe_unwrap_state_dict(
-    lit_weights: Dict[str, torch.Tensor]
-) -> Dict[str, torch.Tensor]:
+def maybe_unwrap_state_dict(lit_weights: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
     return lit_weights.get("model", lit_weights)
 
 
+def check_conversion_supported(lit_weights: Dict[str, torch.Tensor]) -> None:
+    weight_names = {wk.split(".")[-1] for wk in lit_weights}
+    # LoRA or QLoRA
+    if any("lora" in wn for wn in weight_names):
+        raise ValueError("Model weights must be merged using `lora.merge_lora_weights()` before conversion.")
+    # adapter v2. adapter_bias will only be in adapter_v2
+    elif "adapter_bias" in weight_names:
+        raise NotImplementedError("Converting models finetuned with adapter_v2 not yet supported.")
+    # adapter. gating_factor is in adapter and adapter_v2
+    elif "gating_factor" in weight_names:
+        raise NotImplementedError("Converting models finetuned with adapter not yet supported.")
+
+
 @torch.inference_mode()
-def convert_lit_checkpoint(
-    *,
-    checkpoint_name: str,
-    checkpoint_dir: Path = Path("checkpoints/tiiuae/falcon-7b"),
-    model_name: Optional[str] = None,
-) -> None:
-    if model_name is None:
-        model_name = checkpoint_dir.name
+def convert_lit_checkpoint(*, checkpoint_name: str, out_dir: Path, model_name: str) -> None:
     config = Config.from_name(model_name)
 
     if "falcon" in model_name:
         copy_fn = partial(copy_weights_falcon, "40b" if config.n_embd == 8192 else "7b")
     elif config._mlp_class == "LLaMAMLP":
-        qkv_weights = {}
-        copy_fn = partial(copy_weights_llama, config, qkv_weights)
+        copy_fn = partial(copy_weights_llama, config)
     else:
         copy_fn = copy_weights_gpt_neox
 
@@ -226,13 +227,14 @@ def convert_lit_checkpoint(
 
     # checkpoint_name cannot be hardcoded because there exists different outputs such as
     # ("lit_model_finetuned.pth", "lit_model_lora_finetuned.pth", "lit_model_adapter_finetuned.pth"")
-    pth_file = checkpoint_dir / checkpoint_name
+    pth_file = out_dir / checkpoint_name
     bin_file = pth_file.with_suffix(".bin")
 
     with incremental_save(bin_file) as saver:
         with contextlib.ExitStack() as stack:
             lit_weights = stack.enter_context(lazy_load(pth_file))
             lit_weights = maybe_unwrap_state_dict(lit_weights)
+            check_conversion_supported(lit_weights)
             copy_fn(sd, lit_weights, saver=saver)
             gc.collect()
         saver.save(sd)

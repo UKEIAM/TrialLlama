@@ -16,14 +16,10 @@ def maybe_get_file(url, file_path):
 
 def test_prepare_sample(tmp_path):
     vocabulary_path = tmp_path / "tokenizer.json"
-    maybe_get_file(
-        "https://huggingface.co/stabilityai/stablelm-base-alpha-3b/raw/main/tokenizer.json",
-        vocabulary_path,
-    )
+    maybe_get_file("https://huggingface.co/stabilityai/stablelm-base-alpha-3b/raw/main/tokenizer.json", vocabulary_path)
     tokenizer_path = tmp_path / "tokenizer_config.json"
     maybe_get_file(
-        "https://huggingface.co/stabilityai/stablelm-base-alpha-3b/raw/main/tokenizer_config.json",
-        tokenizer_path,
+        "https://huggingface.co/stabilityai/stablelm-base-alpha-3b/raw/main/tokenizer_config.json", tokenizer_path
     )
     with open(tmp_path / "lit_config.json", "w") as f:
         json.dump({"block_size": 2048}, f)
@@ -44,14 +40,9 @@ def test_prepare_sample(tmp_path):
         with open(source_path / filename, "w") as f:
             f.write(jsonl_sample)
 
-    prepare_redpajama.prepare(
-        source_path=source_path, checkpoint_dir=tmp_path, destination_path=dest_path
-    )
+    prepare_redpajama.prepare(source_path=source_path, checkpoint_dir=tmp_path, destination_path=dest_path)
 
-    bin_files = [
-        el.replace(".jsonl", "_0000000000.bin")
-        for el in prepare_redpajama.filenames_sample
-    ]
+    bin_files = [el.replace(".jsonl", "_0000000000.bin") for el in prepare_redpajama.filenames_sample]
 
     assert set(os.listdir(dest_path)) == set(bin_files)
 
@@ -65,9 +56,7 @@ def test_prepare_sample(tmp_path):
 
     for filename in bin_files:
         filenames = [os.path.join(dest_path, filename)]
-        dataset = PackedDataset(
-            filenames=filenames, n_chunks=1, block_size=block_size, shuffle=False
-        )
+        dataset = PackedDataset(filenames=filenames, n_chunks=1, block_size=block_size, shuffle=False)
         dataset_iter = iter(dataset)
         assert tokenizer.decode(next(dataset_iter)) == "some text"
         assert tokenizer.decode(next(dataset_iter)) == "some text"
@@ -75,14 +64,10 @@ def test_prepare_sample(tmp_path):
 
 def test_prepare_full(tmp_path):
     vocabulary_path = tmp_path / "tokenizer.json"
-    maybe_get_file(
-        "https://huggingface.co/stabilityai/stablelm-base-alpha-3b/raw/main/tokenizer.json",
-        vocabulary_path,
-    )
+    maybe_get_file("https://huggingface.co/stabilityai/stablelm-base-alpha-3b/raw/main/tokenizer.json", vocabulary_path)
     tokenizer_path = tmp_path / "tokenizer_config.json"
     maybe_get_file(
-        "https://huggingface.co/stabilityai/stablelm-base-alpha-3b/raw/main/tokenizer_config.json",
-        tokenizer_path,
+        "https://huggingface.co/stabilityai/stablelm-base-alpha-3b/raw/main/tokenizer_config.json", tokenizer_path
     )
     with open(tmp_path / "lit_config.json", "w") as f:
         json.dump({"block_size": 2048}, f)
@@ -115,10 +100,7 @@ def test_prepare_full(tmp_path):
 
     with mock.patch.object(prepare_redpajama, "filename_sets", filename_sets):
         prepare_redpajama.prepare(
-            source_path=source_path,
-            checkpoint_dir=tmp_path,
-            destination_path=dest_path,
-            sample=False,
+            source_path=source_path, checkpoint_dir=tmp_path, destination_path=dest_path, sample=False
         )
 
         all_names = prepare_redpajama.filename_sets.keys()
@@ -137,9 +119,7 @@ def test_prepare_full(tmp_path):
     filenames = [os.path.join(dest_path, el) for el in bin_files]
 
     for filename in filenames:
-        dataset = PackedDataset(
-            filenames=[filename], n_chunks=1, block_size=block_size, shuffle=False
-        )
+        dataset = PackedDataset(filenames=[filename], n_chunks=1, block_size=block_size, shuffle=False)
         dataset_iter = iter(dataset)
         assert tokenizer.decode(next(dataset_iter)) == "some text"
         assert tokenizer.decode(next(dataset_iter)) == "some text"

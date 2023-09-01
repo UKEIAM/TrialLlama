@@ -1,11 +1,11 @@
 import json
 import subprocess
 import sys
-from contextlib import redirect_stdout, redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from unittest import mock
-from unittest.mock import Mock, call, ANY
+from unittest.mock import ANY, Mock, call
 
 import pytest
 import torch
@@ -14,7 +14,6 @@ import torch
 @pytest.mark.parametrize("max_seq_length", (10, 20 + 5))
 def test_generate(max_seq_length):
     import generate.base as generate
-
     from lit_gpt import GPT, Config
 
     T = 5
@@ -33,9 +32,7 @@ def test_generate(max_seq_length):
         return out
 
     with mock.patch("torch.multinomial", multinomial):
-        out = generate.generate(
-            model, input_idx, T + max_new_tokens, max_seq_length=max_seq_length, top_k=4
-        )
+        out = generate.generate(model, input_idx, T + max_new_tokens, max_seq_length=max_seq_length, top_k=4)
 
     assert out.size(0) == T + max_new_tokens
     multinomial_results = torch.hstack(multinomial_results)
@@ -48,14 +45,7 @@ def test_main(fake_checkpoint_dir, monkeypatch):
     import generate.base as generate
 
     config_path = fake_checkpoint_dir / "lit_config.json"
-    config = {
-        "block_size": 128,
-        "vocab_size": 50,
-        "n_layer": 2,
-        "n_head": 4,
-        "n_embd": 8,
-        "rotary_percentage": 1,
-    }
+    config = {"block_size": 128, "vocab_size": 50, "n_layer": 2, "n_head": 4, "n_embd": 8, "rotary_percentage": 1}
     config_path.write_text(json.dumps(config))
 
     module_mock = Mock()
@@ -76,22 +66,11 @@ def test_main(fake_checkpoint_dir, monkeypatch):
     num_samples = 2
     out, err = StringIO(), StringIO()
     with redirect_stdout(out), redirect_stderr(err):
-        generate.main(
-            temperature=2.0,
-            top_k=2,
-            num_samples=num_samples,
-            checkpoint_dir=fake_checkpoint_dir,
-        )
+        generate.main(temperature=2.0, top_k=2, num_samples=num_samples, checkpoint_dir=fake_checkpoint_dir)
 
     assert len(tokenizer_mock.return_value.decode.mock_calls) == num_samples
-    assert torch.allclose(
-        tokenizer_mock.return_value.decode.call_args[0][0], generate_mock.return_value
-    )
-    assert (
-        generate_mock.mock_calls
-        == [call(ANY, ANY, 53, max_seq_length=53, temperature=2.0, top_k=2)]
-        * num_samples
-    )
+    assert torch.allclose(tokenizer_mock.return_value.decode.call_args[0][0], generate_mock.return_value)
+    assert generate_mock.mock_calls == [call(ANY, ANY, 53, max_seq_length=53, temperature=2.0, top_k=2)] * num_samples
     # only the generated result is printed to stdout
     assert out.getvalue() == "foo bar baz\n" * num_samples
 

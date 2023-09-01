@@ -55,9 +55,7 @@ def prepare(
 
     # Partition the dataset into train and test
     train_set, test_set = random_split(
-        data,
-        [1.0 - test_split_fraction, test_split_fraction],
-        generator=torch.Generator().manual_seed(seed),
+        data, [1.0 - test_split_fraction, test_split_fraction], generator=torch.Generator().manual_seed(seed)
     )
     train_set, test_set = list(train_set), list(test_set)
 
@@ -125,9 +123,7 @@ def prepare_sample(
     full_prompt = generate_prompt(example)
     full_prompt_and_response = full_prompt + example["output"]
     encoded_full_prompt = tokenizer.encode(full_prompt, max_length=max_length)
-    encoded_full_prompt_and_response = tokenizer.encode(
-        full_prompt_and_response, eos=True, max_length=max_length
-    )
+    encoded_full_prompt_and_response = tokenizer.encode(full_prompt_and_response, eos=True, max_length=max_length)
 
     # The labels are the full prompt with response, but with the prompt masked out
     labels = encoded_full_prompt_and_response.clone()

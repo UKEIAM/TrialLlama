@@ -6,15 +6,12 @@ from lightning_utilities.core.imports import RequirementCache
 
 # configuration for bitsandbytes before import
 os.environ["BITSANDBYTES_NOWELCOME"] = "1"
-warnings.filterwarnings(
-    "ignore", message=r".*bitsandbytes was compiled without GPU support.*"
-)
+warnings.filterwarnings("ignore", message=r".*bitsandbytes was compiled without GPU support.*")
 _BITSANDBYTES_AVAILABLE = RequirementCache("bitsandbytes>=0.40.0")
 
 if _BITSANDBYTES_AVAILABLE:
     warnings.filterwarnings(
-        "ignore",
-        message=r"MatMul8bitLt: inputs will be cast from .* to float16 during quantization",
+        "ignore", message=r"MatMul8bitLt: inputs will be cast from .* to float16 during quantization"
     )
     import bitsandbytes as bnb
 
@@ -40,9 +37,7 @@ if _BITSANDBYTES_AVAILABLE:
 
         def _load_from_state_dict(self, local_state_dict, *args, **kwargs):
             # There is only one key that ends with `*.weight`, the other one is the bias
-            weight_key = next(
-                (name for name in local_state_dict if name.endswith("weight")), None
-            )
+            weight_key = next((name for name in local_state_dict if name.endswith("weight")), None)
             if weight_key is None:
                 return
 
@@ -75,10 +70,7 @@ if _BITSANDBYTES_AVAILABLE:
                 # (inefficient). see condition:
                 # https://github.com/TimDettmers/bitsandbytes/blob/817bdf6/bitsandbytes/nn/modules.py#L177
                 self.weight.data = self.weight.data.to("cpu")
-                warnings.filterwarnings(
-                    "ignore",
-                    message=r".*Fabric.setup\(\)` has parameters on different devices.*",
-                )
+                warnings.filterwarnings("ignore", message=r".*Fabric.setup\(\)` has parameters on different devices.*")
                 # we could manually move `self.weight.to(device)` here but that breaks checkpoint loading
                 # bnb expects that the layers are moved to the device after loading
 

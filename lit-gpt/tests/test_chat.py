@@ -33,13 +33,7 @@ def test_generate(generated, stop_tokens, expected):
         return torch.tensor([out])
 
     chat.torch.multinomial = multinomial
-    actual = chat.generate(
-        model,
-        input_idx,
-        max_returned_tokens,
-        max_returned_tokens,
-        stop_tokens=stop_tokens,
-    )
+    actual = chat.generate(model, input_idx, max_returned_tokens, max_returned_tokens, stop_tokens=stop_tokens)
     actual = list(actual)
     chat.torch.multinomial = original_multinomial
 

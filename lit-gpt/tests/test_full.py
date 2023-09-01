@@ -23,9 +23,7 @@ def test_full_script(tmp_path, fake_checkpoint_dir, monkeypatch):
 
     from lit_gpt.config import name_to_config
 
-    model_config = dict(
-        block_size=128, n_layer=2, n_embd=8, n_head=4, padded_vocab_size=8
-    )
+    model_config = dict(block_size=128, n_layer=2, n_embd=8, n_head=4, padded_vocab_size=8)
     monkeypatch.setitem(name_to_config, "tmp", model_config)
 
     load_mock = Mock()
@@ -41,12 +39,7 @@ def test_full_script(tmp_path, fake_checkpoint_dir, monkeypatch):
 
     stdout = StringIO()
     with redirect_stdout(stdout):
-        module.setup(
-            data_dir=tmp_path,
-            checkpoint_dir=fake_checkpoint_dir,
-            out_dir=tmp_path,
-            precision="32-true",
-        )
+        module.setup(data_dir=tmp_path, checkpoint_dir=fake_checkpoint_dir, out_dir=tmp_path, precision="32-true")
 
     assert {p.name for p in tmp_path.glob("*.pth")} == {
         "iter-000001-ckpt.pth",

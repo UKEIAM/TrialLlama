@@ -1,6 +1,7 @@
 """Implementation derived from https://github.com/tloen/alpaca-lora"""
 import json
 import sys
+import os
 from pathlib import Path
 
 import requests
@@ -12,12 +13,15 @@ from tqdm import tqdm
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
+base_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
 from lit_gpt.tokenizer import Tokenizer
 
-DATA_FILE_URL = "https://raw.githubusercontent.com/tloen/alpaca-lora/main/alpaca_data_cleaned_archive.json"
-DATA_FILE_NAME = "clinical_trials_data_cleaned.json"
-DESTINATION_PATH = Path("../data/clinical_trials")
-CHECKPOINT_DIR = Path("checkpoints/meta-llama/Llama-2-7b-chat-hf")
+DATA_FILE_URL = ""
+DATA_FILE_NAME = "preprocessed_data_testing.json"
+
+DESTINATION_PATH = Path(os.path.join(base_directory, "data"))
+CHECKPOINT_DIR = Path(os.path.join(base_directory, "lit-gpt/checkpoints/meta-llama/Llama-2-7b-chat-hf"))
 TEST_SPLIT_FRACTION = 0.03865  # to get exactly 2000 test samples
 IGNORE_INDEX = -1
 MASK_INPUTS = False  # as in alpaca-lora
@@ -147,11 +151,14 @@ def generate_prompt(example):
     'response' field."""
 
     if example["input"]:
-        return (
-            "Below is an instruction that describes a task, paired with an input that provides further context. "
-            "Write a response that appropriately completes the request.\n\n"
-            f"### Instruction:\n{example['instruction']}\n\n### Input Patient Description:\n{example['inputs']['patient_description']}\n### Input Trial Description:\n{example['inputs']['clinical_trial']}\n\n### Response:"
-        )
+        try:
+            return (
+                "Below is an instruction that describes a task, paired with an input that provides further context. "
+                "Write a response that appropriately completes the request.\n\n"
+                f"### Instruction:\n{example['instruction']}\n\n### Input Patient Description:\n{example['input'][0]}\n### Input Trial Description:\n{example['input'][1]}\n\n### Response:"
+            )
+        except IndexError as e:
+            print(f'{e}: Index out of range')
     return (
         "Below is an instruction that describes a task. "
         "Write a response that appropriately completes the request.\n\n"
