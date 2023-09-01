@@ -71,11 +71,14 @@ def create_JSON(qrles):
             )
         else:
             continue
-        
+
     cleaned_dict = clean_textblock_data_recursively(train_dict)
 
-    with open(os.path.join(base_directory, "data", "train_json_full_36000.json"), "w") as fp:
+    with open(
+        os.path.join(base_directory, "data", "train_json_full_36000.json"), "w"
+    ) as fp:
         json.dump(train_dict, fp)
+
 
 def clean_textblock_data_recursively(train_dict):
     if isinstance(train_dict, dict):
@@ -91,10 +94,11 @@ def clean_textblock_data_recursively(train_dict):
             cleaned_list.append(cleaned_item)
         return cleaned_list
     elif isinstance(train_dict, str):
-        return train_dict.replace('\n', '').replace('\r', '').replace(' ', '')
+        return train_dict.replace("\n", "").replace("\r", "").replace(" ", "")
+    # re.sub('', <thing to replace>, key)
     else:
         return train_dict
-    
+
 
 def read_qrel_txt(qrel_path: str):
     qrels = pd.read_csv(
