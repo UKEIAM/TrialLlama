@@ -24,7 +24,10 @@ target_data_directory = os.path.join(data_directory, "required_cts")
 train_list = []
 
 
-def create_JSON(out_file_name: Optional[str] = "clinical_trials.json", samples: Optional[str] = 'all'):
+def create_JSON(
+        out_file_name: Optional[str] = "clinical_trials.json", 
+        samples: Optional[str] = 'all'
+        ):
     topics_df = parse_XML_to_df(
         os.path.join(source_data_directory, "topics2021.xml"), ["number", "topic"]
     )
