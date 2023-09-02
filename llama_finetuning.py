@@ -25,7 +25,7 @@ from transformers.models.llama.modeling_llama import LlamaDecoderLayer
 import policies
 from configs.training import train_config
 from configs.fsdp import fsdp_config
-from policies.anyprecision_policies import AnyPrecisionAdamW
+from policies.anyprecision_optimizer import AnyPrecisionAdamW
 
 from utils.fsdp_utils import fsdp_auto_wrap_policy
 from utils.config_utils import (
