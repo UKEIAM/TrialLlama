@@ -12,7 +12,8 @@ from typing import Optional
 
 
 DATASET_PREPROC = {
-    "clinical_trials_dataset": partial(InstructionDataset, max_words=224),
+    "clinical_trials_dataset": partial(InstructionDataset, max_words=2000),
+    "alpaca_dataset": partial(InstructionDataset, max_words=224),
 }
 
 

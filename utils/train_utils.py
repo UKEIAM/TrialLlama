@@ -176,7 +176,7 @@ def train(
                 model, train_config, eval_dataloader, local_rank, tokenizer
             )
             checkpoint_start_time = time.perf_counter()
-            if train_config.save_model and eval_epoch_loss < best_val_loss:
+            if train_config.save_model:
                 if train_config.enable_fsdp:
                     dist.barrier()
                 if train_config.use_peft:

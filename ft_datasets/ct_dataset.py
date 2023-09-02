@@ -15,8 +15,8 @@ from typing import List
 PROMPT_DICT = {
     "prompt_input": (
         "Below is an instruction that describes a task, paired with an input that provides further context. "
-        "Write a response that appropriately completes the request.\n\n"
-        "### Instruction:\n{instruction}\n\n### Input Patient Description:\n{input[0]}\n### Input Trial    Description:\n{input[1]}\n\n### Response:"
+         "Write a response that appropriately completes the request.\n\n"
+        "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response:"
     ),
     "prompt_no_input": (
         "Below is an instruction that describes a task. "

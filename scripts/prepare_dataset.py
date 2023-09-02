@@ -77,13 +77,8 @@ def create_JSON(
             train_list.append(
                 {
                     "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-                    "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided.",
-                    "input": [
-                        {"patient_description": f"{topic}"},
-                        {
-                            "clinical_trial": cleaned_ct_textblocks
-                        },  # If full CT should be put as value, just change 'cleaned_ct_textblocks' to 'clinical_trials_dict'
-                    ],
+                    "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided. If the patient profile fits the trial return '2' as answer, which means patient is eligible. If it does not match to the patient profile, return '1' as answer, which means patient is not-eligible. If the trial is not relevant for the patient, return '0' as answer.",
+                    "input": f"Patient Description: {topic}\n Clinical Trial Description: {cleaned_ct_textblocks}",
                     "output": f"{label}",
                 }
             )

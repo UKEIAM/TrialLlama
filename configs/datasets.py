@@ -8,5 +8,12 @@ from dataclasses import dataclass
 class clinical_trials_dataset:
     dataset: str = "clinical_trials_dataset"
     train_split: str = "train"
-    test_split: str = "validation"
-    data_path: str = "data/ct_testing_reduced.json"
+    test_split: str = "val"
+    data_path: str = "data/ct_testing_500.json"
+
+@dataclass
+class alpaca_dataset:
+    dataset: str = "alpaca_dataset"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/alpaca_data.json"
