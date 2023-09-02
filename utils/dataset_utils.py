@@ -5,14 +5,15 @@ import torch
 
 from functools import partial
 
-from ft_datasets.ct_dataset import (
+from ft_datasets.instruct_dataset import (
     InstructionDataset,
 )
 from typing import Optional
 
 
 DATASET_PREPROC = {
-    "clinical_trials_dataset": partial(InstructionDataset, max_words=2000),
+    "clinical_trials_dataset": partial(InstructionDataset, max_words=1900), # Adjust max_words based on the input and GPU capacities
+    "ct_test": partial(InstructionDataset, max_words=1900),
     "alpaca_dataset": partial(InstructionDataset, max_words=224),
 }
 

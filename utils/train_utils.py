@@ -3,14 +3,16 @@
 
 import os
 import sys
-from typing import List
 import yaml
 import time
+import math
 
 import fire
 import torch
 import transformers
+
 from tqdm import tqdm
+from typing import List
 
 """
 Unused imports:
@@ -22,7 +24,7 @@ from peft import (
     LoraConfig,
     get_peft_model,
     get_peft_model_state_dict,
-    prepare_model_for_int8_training,
+    prepare_model_for_kbit_training,
     set_peft_model_state_dict,
 )
 from transformers import LlamaForCausalLM, LlamaTokenizer
@@ -132,6 +134,9 @@ def train(
                         optimizer.step()
                         optimizer.zero_grad()
                         pbar.update(step // gradient_accumulation_steps)
+                
+                if math.isnan(loss.detach().float().item()):
+                   print(loss.detach().float())
 
                 pbar.set_description(
                     f"Training Epoch: {epoch}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})"
@@ -176,7 +181,7 @@ def train(
                 model, train_config, eval_dataloader, local_rank, tokenizer
             )
             checkpoint_start_time = time.perf_counter()
-            if train_config.save_model:
+            if train_config.save_model and eval_epoch_loss < best_val_loss:
                 if train_config.enable_fsdp:
                     dist.barrier()
                 if train_config.use_peft:
@@ -186,6 +191,7 @@ def train(
                     else:
                         print(f"we are about to save the PEFT modules")
                     model.save_pretrained(train_config.output_dir)
+                    print(f"Model saved to: {train_config.output_dir}")
                     if train_config.enable_fsdp:
                         if rank == 0:
                             print(
@@ -254,11 +260,11 @@ def train(
         if train_config.enable_fsdp:
             if rank == 0:
                 print(
-                    f"Epoch {epoch+1}: train_perplexity={train_perplexity:.4f}, train_epoch_loss={train_epoch_loss:.4f}, epcoh time {epoch_end_time}s"
+                    f"Epoch {epoch+1}: train_perplexity={train_perplexity:.4f}, train_epoch_loss={train_epoch_loss:.4f}, epoch time {epoch_end_time}s"
                 )
         else:
             print(
-                f"Epoch {epoch+1}: train_perplexity={train_perplexity:.4f}, train_epoch_loss={train_epoch_loss:.4f}, epcoh time {epoch_end_time}s"
+                f"Epoch {epoch+1}: train_perplexity={train_perplexity:.4f}, train_epoch_loss={train_epoch_loss:.4f}, epoch time {epoch_end_time}s"
             )
     avg_epoch_time = sum(epoch_times) / len(epoch_times)
     avg_checkpoint_time = sum(checkpoint_times) / len(checkpoint_times)
@@ -315,6 +321,8 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
                 outputs = model(**batch)
                 loss = outputs.loss
                 eval_loss += loss.detach().float()
+                if math.isnan(eval_loss.item()):
+                   print(eval_loss)
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
             eval_preds.extend(

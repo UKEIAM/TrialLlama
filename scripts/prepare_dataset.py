@@ -11,15 +11,16 @@ from typing import Optional
 
 
 base_directory = os.path.dirname(os.path.dirname((__file__)))
+data_directory = os.path.join(base_directory, "data")
 home_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-data_directory = os.path.join(home_directory, "data")
+raw_ct_data_directory = os.path.join(home_directory, "data")
 
 config_file = os.path.join(base_directory, "configs/config.yaml")
 with open(config_file, "r") as file:
     config = yaml.safe_load(file)
 
-source_data_directory = os.path.join(data_directory, config["year_of_data"])
-target_data_directory = os.path.join(data_directory, "required_cts")
+source_data_directory = os.path.join(raw_ct_data_directory, config["year_of_data"])
+target_data_directory = os.path.join(raw_ct_data_directory, "required_cts")
 
 train_list = []
 
@@ -34,7 +35,7 @@ def create_JSON(
     topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
     qrel_path = os.path.join(
-        data_directory,
+        raw_ct_data_directory,
         config["year_of_data"],
         config["qrels_path"],
     )
@@ -46,6 +47,7 @@ def create_JSON(
         topic_nr = row["topic"]
         try:
             topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[0]
+            cleaned_topic = clean_textblock(topic)
         except KeyError as e:
             continue
         ct = row["clinical trial id"] + ".xml"
@@ -53,47 +55,53 @@ def create_JSON(
         ct_path = os.path.join(target_data_directory, ct)
 
         if os.path.exists(ct_path):
-            clinical_trial_dict = parse_XML_to_json(
-                ct_path,
-                [
-                    "brief_title",
-                    "officiel_title",
-                    "brief_summary",
-                    "start_date" "overall_status",
-                    "study_pop",
-                    "sampling_method",
-                    "criteria",
-                    "gender",
-                    "minimum_age",
-                    "maximum_age",
-                    "healthy_volunteers",
-                ],
-            )
+            clinical_trial_dict = parse_XML_to_json(ct_path)
             ct_textblock = extract_textblocks_from_clinical_trials(clinical_trial_dict)
             cleaned_ct_textblocks = []
             for textblock in ct_textblock:
                 cleaned_textblock = clean_textblock(textblock)
                 cleaned_ct_textblocks.append(cleaned_textblock)
-            train_list.append(
-                {
+            # TODO: Delete, just for debugging reasons
+            if label == "0":
+                output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
+            elif label == "1":
+                 output_text = f"The patient at hand is not eligible for the clinical presented clinical trial. Status code {label}"
+            else:
+                 output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
+
+            item = {
                     "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
                     "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided. If the patient profile fits the trial return '2' as answer, which means patient is eligible. If it does not match to the patient profile, return '1' as answer, which means patient is not-eligible. If the trial is not relevant for the patient, return '0' as answer.",
-                    "input": f"Patient Description: {topic}\n Clinical Trial Description: {cleaned_ct_textblocks}",
-                    "output": f"{label}",
+                    "input": f"PATIENT DESCRIPTION: {cleaned_topic}\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
+                    "output": str(label),
                 }
-            )
+            
+            full_text_size = item['instruction'] + item['input']
+            if len(full_text_size.split()) > 1900: # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
+                print(f"{ct} nr of words: {len(full_text_size.split())} Skipping...")
+                continue
+            else:
+                train_list.append(item)
         else:
             continue
 
     """The below function is returning the full CT parsed into a JSON format + cleaned"""
     # cleaned_list = clean_textblock_data_recursively(train_list)
+    out_directory = os.path.join(data_directory, out_file_name)
+    print(f"Saving dataset to {out_directory}...")
 
-    with open(os.path.join(data_directory, out_file_name), "w") as fp:
-        json.dump(train_list, fp)
+    with open(out_directory, "w") as fp:
+        json.dump(train_list, fp, indent=4)
+
+    print("Saved dataset")
 
 
 def clean_textblock(text):
-    cleaned_text = re.sub(r"\s+", " ", text.strip())
+    # pattern = r'[^\x00-\x7F]'
+    # cleaned_text = re.sub(pattern, "", text)
+    cleaned_text = text.replace(r'\\"', r"'")
+    #cleaned_text = re.sub(r'[@#$*_{}\[\]"\'\|\\~`]', ' ', cleaned_text)
+    cleaned_text = re.sub(r"\s+", " ", cleaned_text.strip())
     return cleaned_text
 
 
@@ -168,10 +176,9 @@ def parse_XML_to_df(xml_file, df_cols):
     return out_df
 
 
-def parse_XML_to_json(xml_file, cols):
+def parse_XML_to_json(xml_file):
     xtree = ET.parse(xml_file)
     xroot = xtree.getroot()
-    rows = []
     dict_data = xml_to_dict(xroot)
 
     return dict_data

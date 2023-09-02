@@ -1,3 +1,4 @@
+mode: ""
 year_of_data: "2021"
 year_of_topics: "2021"
 qrels_path: "GoldStandard/trec.nist.gov_data_trials_qrels2021.txt"

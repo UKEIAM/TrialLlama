@@ -24,13 +24,13 @@ class train_config:
     dataset = "clinical_trials_dataset"
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = False
-    output_dir: str = "out/poc_model"
+    output_dir: str = "out"
     freeze_layers: bool = False
     num_freeze_layers: int = 1
     quantization: bool = False
     one_gpu: bool = False
     save_model: bool = True
-    dist_checkpoint_root_folder: str = "out/poc_model"  # will be used if using FSDP
+    dist_checkpoint_root_folder: str = "out"  # will be used if using FSDP
     dist_checkpoint_folder: str = "fine-tuned"  # will be used if using FSDP
     save_optimizer: bool = False  # will be used if using FSDP
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers, make use Flash Attention and Xformer memory-efficient kernels
