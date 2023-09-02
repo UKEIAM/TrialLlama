@@ -7,6 +7,7 @@ import pandas as pd
 import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
+from typing import Optional
 
 
 base_directory = os.path.dirname(os.path.dirname((__file__)))
@@ -23,13 +24,22 @@ target_data_directory = os.path.join(data_directory, "required_cts")
 train_list = []
 
 
-def create_JSON(qrles):
+def create_JSON(out_file_name: Optional[str] = "clinical_trials.json", samples: Optional[str] = 'all'):
     topics_df = parse_XML_to_df(
         os.path.join(source_data_directory, "topics2021.xml"), ["number", "topic"]
     )
     topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
-    for index, row in tqdm(qrles[:50].iterrows()):
+    qrel_path = os.path.join(
+        data_directory,
+        config["year_of_data"],
+        config["qrels_path"],
+    )
+    qrels = read_qrel_txt(qrel_path)
+    if samples != 'all':
+        qrels = qrels[:int(samples)]
+
+    for index, row in tqdm(qrels.iterrows()):
         topic_nr = row["topic"]
         try:
             topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[0]
@@ -40,8 +50,6 @@ def create_JSON(qrles):
         ct_path = os.path.join(target_data_directory, ct)
 
         if os.path.exists(ct_path):
-            """Currently it's simply a JSON file"""
-            # clinical_trial_df = parse_XML_to_df(ct_path, ['brief_title', 'officiel_title', 'brief_summary', 'start_date' 'overall_status', 'study_pop', 'sampling_method', 'criteria', 'gender', 'minimum_age', 'maximum_age', 'healthy_volunteers'])
             clinical_trial_dict = parse_XML_to_json(
                 ct_path,
                 [
@@ -82,9 +90,7 @@ def create_JSON(qrles):
     """The below function is returning the full CT parsed into a JSON format + cleaned"""
     # cleaned_list = clean_textblock_data_recursively(train_list)
 
-    with open(
-        os.path.join(base_directory, "data", "preprocessed_data_test_reduced.json"), "w"
-    ) as fp:
+    with open(os.path.join(data_directory, out_file_name), "w") as fp:
         json.dump(train_list, fp)
 
 
@@ -192,12 +198,6 @@ def read_patient_topic():
 
 
 if __name__ == "__main__":
-    qrel_path = os.path.join(
-        data_directory,
-        config["year_of_data"],
-        config["qrels_path"],
-    )
-    qrels = read_qrel_txt(qrel_path)
-    train_json = create_JSON(qrels)
-
-    print("FINISH")
+    from jsonargparse import CLI
+    
+    CLI(create_JSON)
