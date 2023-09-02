@@ -11,12 +11,14 @@ class clinical_trials_dataset:
     test_split: str = "val"
     data_path: str = "data/clinical_trials.json"
 
+
 @dataclass
 class ct_test:
     dataset: str = "clinical_trials_dataset"
     train_split: str = "train"
     test_split: str = "val"
     data_path: str = "data/ct_testing.json"
+
 
 @dataclass
 class alpaca_dataset:

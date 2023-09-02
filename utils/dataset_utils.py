@@ -12,7 +12,9 @@ from typing import Optional
 
 
 DATASET_PREPROC = {
-    "clinical_trials_dataset": partial(InstructionDataset, max_words=1900), # Adjust max_words based on the input and GPU capacities
+    "clinical_trials_dataset": partial(
+        InstructionDataset, max_words=1900
+    ),  # Adjust max_words based on the input and GPU capacities
     "ct_test": partial(InstructionDataset, max_words=1900),
     "alpaca_dataset": partial(InstructionDataset, max_words=224),
 }

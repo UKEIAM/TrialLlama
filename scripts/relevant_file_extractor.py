@@ -23,10 +23,8 @@ data_directory = os.path.join(home_directory, "data")
 config_file = os.path.join(base_directory, "configs/eval_config.yaml")
 with open(config_file, "r") as file:
     config = yaml.safe_load(file)
-    
+
 source_data_directory = os.path.join(data_directory, config["year_of_data"])
-
-
 
 
 def read_qrel_txt(qrel_path: str):
@@ -40,12 +38,13 @@ def read_qrel_txt(qrel_path: str):
     return qrels
 
 
-
 """Function takes a DataFrame as input and searches for all listed Clinical Trial IDs within the data, since most of the trials are not required for the fine-tune dataset"""
+
+
 def copy_required_files_to_folder(qrels: pd.DataFrame, target_dir: str) -> None:
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
-    
+
     for filename in tqdm(qrels["clinical trial id"]):
         source_dir = search_target_directory(filename)
         full_filename = filename + ".xml"
@@ -62,7 +61,11 @@ def copy_required_files_to_folder(qrels: pd.DataFrame, target_dir: str) -> None:
 
 
 def search_target_directory(filename):
-    directories = [dir for dir in os.listdir(os.path.join(source_data_directory)) if os.path.isdir(os.path.join(source_data_directory, dir))]
+    directories = [
+        dir
+        for dir in os.listdir(os.path.join(source_data_directory))
+        if os.path.isdir(os.path.join(source_data_directory, dir))
+    ]
     for directory in directories:
         sub_dirs = os.listdir(os.path.join(source_data_directory, directory))
         for sub_dir in sub_dirs:
@@ -79,6 +82,8 @@ if __name__ == "__main__":
         config["year_of_data"],
         config["qrels_path"],
     )
-    target_data_directory = os.path.join(data_directory, f"{config['mode']}required_cts")
+    target_data_directory = os.path.join(
+        data_directory, f"{config['mode']}required_cts"
+    )
     qrels = read_qrel_txt(qrel_path)
     copy_required_files_to_folder(qrels, target_data_directory)

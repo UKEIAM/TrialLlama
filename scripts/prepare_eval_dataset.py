@@ -26,9 +26,9 @@ train_list = []
 
 
 def create_JSON(
-        out_file_name: Optional[str] = "clinical_trials.json", 
-        samples: Optional[str] = 'all'
-        ):
+    out_file_name: Optional[str] = "clinical_trials.json",
+    samples: Optional[str] = "all",
+):
     topics_df = parse_XML_to_df(
         os.path.join(source_data_directory, "topics2021.xml"), ["number", "topic"]
     )
@@ -40,8 +40,8 @@ def create_JSON(
         config["qrels_path"],
     )
     qrels = read_qrel_txt(qrel_path)
-    if samples != 'all':
-        qrels = qrels[:int(samples)]
+    if samples != "all":
+        qrels = qrels[: int(samples)]
 
     for index, row in tqdm(qrels.iterrows()):
         topic_nr = row["topic"]
@@ -87,7 +87,7 @@ def clean_textblock(text):
     # pattern = r'[^\x00-\x7F]'
     # cleaned_text = re.sub(pattern, "", text)
     cleaned_text = text.replace(r'\\"', r"'")
-    cleaned_text = re.sub(r'[@#$*_{}\[\]"\'\|\\~`]', ' ', cleaned_text)
+    cleaned_text = re.sub(r'[@#$*_{}\[\]"\'\|\\~`]', " ", cleaned_text)
     cleaned_text = re.sub(r"\s+", " ", cleaned_text.strip())
     return cleaned_text
 
@@ -191,5 +191,5 @@ def read_patient_topic():
 
 if __name__ == "__main__":
     from jsonargparse import CLI
-    
+
     CLI(create_JSON)

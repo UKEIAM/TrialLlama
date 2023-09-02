@@ -6,8 +6,8 @@ from huggingface_hub import snapshot_download
 def download_from_hub(
     repo_id: Optional[str] = None, token: Optional[str] = os.getenv("HF_TOKEN")
 ) -> None:
-    
-    os.makedirs('../checkpoints', exist_ok=True)
+
+    os.makedirs("../checkpoints", exist_ok=True)
 
     snapshot_download(
         repo_id,

@@ -134,9 +134,9 @@ def train(
                         optimizer.step()
                         optimizer.zero_grad()
                         pbar.update(step // gradient_accumulation_steps)
-                
+
                 if math.isnan(loss.detach().float().item()):
-                   print(loss.detach().float())
+                    print(loss.detach().float())
 
                 pbar.set_description(
                     f"Training Epoch: {epoch}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})"
@@ -322,7 +322,7 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
                 loss = outputs.loss
                 eval_loss += loss.detach().float()
                 if math.isnan(eval_loss.item()):
-                   print(eval_loss)
+                    print(eval_loss)
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
             eval_preds.extend(
