@@ -23,10 +23,11 @@ source_data_directory = os.path.join(raw_ct_data_directory, config["year_of_eval
 target_data_directory = os.path.join(raw_ct_data_directory, "required_eval_cts")
 
 train_list = []
+items_to_remove_from_gold_standard_file = []
 
 
 def create_JSON(
-        out_file_name: Optional[str] = "clinical_trials.json", 
+        out_file_name: Optional[str] = "clinical_trials_eval.json", 
         samples: Optional[str] = 'all'
         ):
     topics_df = parse_XML_to_df(
@@ -61,14 +62,22 @@ def create_JSON(
             for textblock in ct_textblock:
                 cleaned_textblock = clean_textblock(textblock)
                 cleaned_ct_textblocks.append(cleaned_textblock)
-            train_list.append(
-                {
+            
+            item = {
                     "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
                     "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided. If the patient profile fits the trial return '2' as answer, which means patient is eligible. If it does not match to the patient profile, return '1' as answer, which means patient is not-eligible. If the trial is not relevant for the patient, return '0' as answer.",
                     "input": f"PATIENT DESCRIPTION: {cleaned_topic}\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
                     "output": f"{label}",
                 }
-            )
+            
+            train_list.append(item)
+            full_text_size = item['instruction'] + item['input']
+            if len(full_text_size.split()) > 1900: # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
+                print(f"{ct} nr of words: {len(full_text_size.split())} Skipping...")
+                items_to_remove_from_gold_standard_file.append(row["clinical trial id"])
+                continue
+            else:
+                train_list.append(item)
         else:
             continue
 
@@ -81,6 +90,13 @@ def create_JSON(
         json.dump(train_list, fp)
 
     print("Saved dataset")
+
+    clean_gold_label_file()
+
+
+def clean_gold_label_file():
+    # TODO: Load gold labels file as dataframe and remove every row which contains one of the clinical trial id's from the list of too long items
+    pass
 
 
 def clean_textblock(text):
