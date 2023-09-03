@@ -26,9 +26,9 @@ train_list = []
 
 
 def create_JSON(
-        out_file_name: Optional[str] = "clinical_trials.json", 
-        samples: Optional[str] = 'all'
-        ):
+    out_file_name: Optional[str] = "clinical_trials.json",
+    samples: Optional[str] = "all",
+):
     topics_df = parse_XML_to_df(
         os.path.join(source_data_directory, "topics2021.xml"), ["number", "topic"]
     )
@@ -40,8 +40,8 @@ def create_JSON(
         config["qrels_path"],
     )
     qrels = read_qrel_txt(qrel_path)
-    if samples != 'all':
-        qrels = qrels[:int(samples)]
+    if samples != "all":
+        qrels = qrels[: int(samples)]
 
     for index, row in tqdm(qrels.iterrows()):
         topic_nr = row["topic"]
@@ -65,19 +65,21 @@ def create_JSON(
             if label == "0":
                 output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
             elif label == "1":
-                 output_text = f"The patient at hand is not eligible for the clinical presented clinical trial. Status code {label}"
+                output_text = f"The patient at hand is not eligible for the clinical presented clinical trial. Status code {label}"
             else:
-                 output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
+                output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
 
             item = {
-                    "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-                    "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided. If the patient profile fits the trial return '2' as answer, which means patient is eligible. If it does not match to the patient profile, return '1' as answer, which means patient is not-eligible. If the trial is not relevant for the patient, return '0' as answer.",
-                    "input": f"PATIENT DESCRIPTION: {cleaned_topic}\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
-                    "output": str(label),
-                }
-            
-            full_text_size = item['instruction'] + item['input']
-            if len(full_text_size.split()) > 1900: # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
+                "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
+                "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided. If the patient profile fits the trial return '2' as answer, which means patient is eligible. If it does not match to the patient profile, return '1' as answer, which means patient is not-eligible. If the trial is not relevant for the patient, return '0' as answer.",
+                "input": f"PATIENT DESCRIPTION: {cleaned_topic}\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
+                "output": str(label),
+            }
+
+            full_text_size = item["instruction"] + item["input"]
+            if (
+                len(full_text_size.split()) > 1900
+            ):  # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
                 print(f"{ct} nr of words: {len(full_text_size.split())} Skipping...")
                 continue
             else:
@@ -100,7 +102,7 @@ def clean_textblock(text):
     # pattern = r'[^\x00-\x7F]'
     # cleaned_text = re.sub(pattern, "", text)
     cleaned_text = text.replace(r'\\"', r"'")
-    #cleaned_text = re.sub(r'[@#$*_{}\[\]"\'\|\\~`]', ' ', cleaned_text)
+    # cleaned_text = re.sub(r'[@#$*_{}\[\]"\'\|\\~`]', ' ', cleaned_text)
     cleaned_text = re.sub(r"\s+", " ", cleaned_text.strip())
     return cleaned_text
 
@@ -204,5 +206,5 @@ def read_patient_topic():
 
 if __name__ == "__main__":
     from jsonargparse import CLI
-    
+
     CLI(create_JSON)

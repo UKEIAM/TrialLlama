@@ -7,25 +7,21 @@ from peft import PeftModel
 from transformers import LlamaForCausalLM, LlamaTokenizer
 
 
-def main(base_model: str,
-         peft_model: str,
-         output_dir: str):
-        
+def main(base_model: str, peft_model: str, output_dir: str):
+
     model = LlamaForCausalLM.from_pretrained(
         base_model,
         load_in_8bit=False,
         torch_dtype=torch.float16,
         device_map="auto",
-        offload_folder="tmp", 
+        offload_folder="tmp",
     )
-    
-    tokenizer = LlamaTokenizer.from_pretrained(
-        base_model
-    )
-        
+
+    tokenizer = LlamaTokenizer.from_pretrained(base_model)
+
     model = PeftModel.from_pretrained(
-        model, 
-        peft_model, 
+        model,
+        peft_model,
         torch_dtype=torch.float16,
         device_map="auto",
         offload_folder="tmp",
