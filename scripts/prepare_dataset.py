@@ -15,21 +15,22 @@ data_directory = os.path.join(base_directory, "data")
 home_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 raw_ct_data_directory = os.path.join(home_directory, "data")
 
-config_file = os.path.join(base_directory, "configs/config.yaml")
-with open(config_file, "r") as file:
-    config = yaml.safe_load(file)
-
-source_data_directory = os.path.join(raw_ct_data_directory, config["year_of_data"])
-target_data_directory = os.path.join(raw_ct_data_directory, "required_cts")
-
 train_list = []
 
 
 def create_JSON(
+    config_name: Optional[str] = "config",
     out_file_name: Optional[str] = "clinical_trials.json",
     samples: Optional[str] = "all",
     only_criteria: Optional[bool] = False,
 ):
+    config_file = os.path.join(base_directory, f"configs/{config_name}.yaml")
+    with open(config_file, "r") as file:
+        config = yaml.safe_load(file)
+
+    source_data_directory = os.path.join(raw_ct_data_directory, config["year_of_data"])
+    target_data_directory = os.path.join(raw_ct_data_directory, "required_cts")
+
     topics_df = parse_XML_to_df(
         os.path.join(source_data_directory, "topics2021.xml"), ["number", "topic"]
     )
@@ -44,6 +45,7 @@ def create_JSON(
     if samples != "all":
         qrels = qrels[: int(samples)]
 
+    counter = 0
     for index, row in tqdm(qrels.iterrows()):
         topic_nr = row["topic"]
         try:
@@ -64,7 +66,7 @@ def create_JSON(
             for textblock in ct_textblock:
                 cleaned_textblock = clean_textblock(textblock)
                 cleaned_ct_textblocks.append(cleaned_textblock)
-            # TODO: Delete, just for debugging reasons
+            # TODO: Delete, just for testing reasons
             if label == "0":
                 output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
             elif label == "1":
@@ -87,6 +89,7 @@ def create_JSON(
                 continue
             else:
                 train_list.append(item)
+                counter += 1
         else:
             continue
 
@@ -98,7 +101,7 @@ def create_JSON(
     with open(out_directory, "w") as fp:
         json.dump(train_list, fp, indent=4)
 
-    print("Saved dataset")
+    print(f"Saved dataset with {counter} examples")
 
 
 def clean_textblock(text):
