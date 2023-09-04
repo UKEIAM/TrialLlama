@@ -11,4 +11,3 @@ Run `python inference/hf-text-generation-inference/merge_lora_weights.py --base_
 
 ## Credits
 This repository is an adaptaion of the llama-recipies repository by facebookresearch: https://github.com/facebookresearch/llama-recipes
-
