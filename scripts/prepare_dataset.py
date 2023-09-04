@@ -1,3 +1,5 @@
+"""This script will only work with TREC 2021/22 data, since they changed the input format in 2023"""
+
 import os
 import re
 import json
@@ -29,7 +31,7 @@ def create_JSON(
         config = yaml.safe_load(file)
 
     source_data_directory = os.path.join(raw_ct_data_directory, config["year_of_data"])
-    target_data_directory = os.path.join(raw_ct_data_directory, "required_cts")
+    required_data_directory = os.path.join(raw_ct_data_directory, f"{config['mode']}required_cts")
 
     topics_df = parse_XML_to_df(
         os.path.join(source_data_directory, "topics2021.xml"), ["number", "topic"]
@@ -55,7 +57,7 @@ def create_JSON(
             continue
         ct = row["clinical trial id"] + ".xml"
         label = row["label"]
-        ct_path = os.path.join(target_data_directory, ct)
+        ct_path = os.path.join(required_data_directory, ct)
 
         if os.path.exists(ct_path):
             clinical_trial_dict = parse_XML_to_json(ct_path)
