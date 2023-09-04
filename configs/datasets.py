@@ -13,7 +13,7 @@ class clinical_trials_dataset:
 
 
 @dataclass
-class ct_test:
+class ct_testing:
     dataset: str = "clinical_trials_dataset"
     train_split: str = "train"
     test_split: str = "val"

@@ -28,6 +28,7 @@ train_list = []
 def create_JSON(
     out_file_name: Optional[str] = "clinical_trials.json",
     samples: Optional[str] = "all",
+    only_criteria: Optional[bool] = False,
 ):
     topics_df = parse_XML_to_df(
         os.path.join(source_data_directory, "topics2021.xml"), ["number", "topic"]
@@ -56,6 +57,8 @@ def create_JSON(
 
         if os.path.exists(ct_path):
             clinical_trial_dict = parse_XML_to_json(ct_path)
+            if only_criteria:
+                clinical_trial_dict = extract_criteria_from_clinical_trials(clinical_trial_dict)
             ct_textblock = extract_textblocks_from_clinical_trials(clinical_trial_dict)
             cleaned_ct_textblocks = []
             for textblock in ct_textblock:
@@ -107,7 +110,7 @@ def clean_textblock(text):
     return cleaned_text
 
 
-def clean_textblock_data_recursively(json_obj):
+def clean_textblock_data_recursively(json_obj:  list | dict) -> dict:
     """Recursive function to find nested 'textblock' elements and clean the string from unnessecary chars and whitespaces"""
     if isinstance(json_obj, dict):
         cleaned_dict = {}
@@ -128,9 +131,14 @@ def clean_textblock_data_recursively(json_obj):
         return json_obj
 
 
-def extract_textblocks_from_clinical_trials(clinical_trial):
+def extract_textblocks_from_clinical_trials(clinical_trial: list | dict) -> list: 
     """Extracts 'textblock' elements from the 'clinical_trials' section"""
     textblocks = []
+    if isinstance(clinical_trial, list):
+        result_dict = {}
+        for d in clinical_trial:
+            result_dict.update(d)
+        clinical_trial = result_dict
     for key, value in clinical_trial.items():
         if key == "textblock":
             textblocks.append(value)
@@ -138,8 +146,17 @@ def extract_textblocks_from_clinical_trials(clinical_trial):
             textblocks.extend(extract_textblocks_from_clinical_trials(value))
     return textblocks
 
+def extract_criteria_from_clinical_trials(clinical_trial: dict) -> list:
+    criteria = []
+    for key, value in clinical_trial.items():
+        if key == "criteria":
+            criteria.append(value)
+        elif isinstance(value, dict):
+            criteria.extend(extract_criteria_from_clinical_trials(value))
+    return criteria
 
-def read_qrel_txt(qrel_path: str):
+
+def read_qrel_txt(qrel_path: str) -> pd.DataFrame:
     qrels = pd.read_csv(
         qrel_path,
         sep=" ",
@@ -150,7 +167,7 @@ def read_qrel_txt(qrel_path: str):
     return qrels
 
 
-def parse_XML_to_df(xml_file, df_cols):
+def parse_XML_to_df(xml_file, df_cols) -> pd.DataFrame:
     """Parse the input XML file and store the result in a pandas
     DataFrame with the given columns.
 
@@ -178,7 +195,7 @@ def parse_XML_to_df(xml_file, df_cols):
     return out_df
 
 
-def parse_XML_to_json(xml_file):
+def parse_XML_to_json(xml_file: str) -> dict:
     xtree = ET.parse(xml_file)
     xroot = xtree.getroot()
     dict_data = xml_to_dict(xroot)
@@ -195,13 +212,6 @@ def xml_to_dict(element):
             data[child.tag] = child.text
     return data
 
-
-def read_clinical_trial():
-    pass
-
-
-def read_patient_topic():
-    pass
 
 
 if __name__ == "__main__":
