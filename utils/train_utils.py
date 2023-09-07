@@ -326,8 +326,8 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
             tokens = tokenizer.batch_decode(preds.detach().cpu().numpy(), skip_special_tokens=True)
-            if len(tokens[0]) > train_config.max_words:
-                tokens = preds[:, :train_config.max_words]
+            # if len(tokens[0]) > train_config.max_words:
+            #     tokens = preds[:, :train_config.max_words]
             eval_preds.extend(
                 tokens)
 

@@ -12,6 +12,7 @@ from peft import (
 import configs.datasets as datasets
 from configs.peft import lora_config, llama_adapter_config, prefix_config
 from configs.training import train_config
+from configs.testing import test_config
 from .dataset_utils import DATASET_PREPROC
 
 
@@ -33,6 +34,8 @@ def update_config(config, **kwargs):
                         # In case of specialized config we can warm user
                         print(f"Warning: {config_name} does not accept parameter: {k}")
             elif isinstance(config, train_config):
+                print(f"Warning: unknown parameter {k}")
+            elif isinstance(config, test_config):
                 print(f"Warning: unknown parameter {k}")
 
 

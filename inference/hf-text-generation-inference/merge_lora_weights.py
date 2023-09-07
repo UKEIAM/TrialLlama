@@ -19,6 +19,10 @@ def main(base_model: str, peft_model: str, output_dir: str):
 
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
 
+    """
+    Fine-tuning with lora outputs adapter weights, which need to be merged with the original model. 
+    This can be achieved with loading the base-model and then using it as input for the `PeftModel.from_pretrained()` function.
+    """
     model = PeftModel.from_pretrained(
         model,
         peft_model,

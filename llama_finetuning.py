@@ -7,7 +7,7 @@ import fire
 import torch
 import torch.distributed as dist
 import torch.optim as optim
-from peft import get_peft_model, prepare_model_for_kbit_training
+from peft import PeftModel, get_peft_model, prepare_model_for_kbit_training
 from pkg_resources import packaging
 from torch.distributed.fsdp import (
     FullyShardedDataParallel as FSDP,
@@ -44,6 +44,7 @@ from utils.train_utils import (
     print_model_size,
     get_policies,
 )
+
 
 
 def main(**kwargs):
@@ -257,6 +258,30 @@ def main(**kwargs):
     )
     if not train_config.enable_fsdp or rank == 0:
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
+    
+    if train_config.use_peft:
+        # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
+        model = LlamaForCausalLM.from_pretrained(
+            train_config.model_name,
+            load_in_8bit=False,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            offload_folder="tmp",
+        )
+
+        tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
+
+        model = PeftModel.from_pretrained(
+            model,
+            train_config.output_dir,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            offload_folder="tmp",
+        )
+
+        model = model.merge_and_unload()
+        model.save_pretrained(train_config.output_dir)
+        tokenizer.save_pretrained(train_config.output_dir)
 
 
 if __name__ == "__main__":
