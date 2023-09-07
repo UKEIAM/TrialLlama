@@ -31,7 +31,9 @@ def create_JSON(
         config = yaml.safe_load(file)
 
     source_data_directory = os.path.join(raw_ct_data_directory, config["year_of_data"])
-    required_data_directory = os.path.join(raw_ct_data_directory, f"{config['mode']}required_cts")
+    required_data_directory = os.path.join(
+        raw_ct_data_directory, f"{config['mode']}required_cts"
+    )
 
     topics_df = parse_XML_to_df(
         os.path.join(source_data_directory, "topics2021.xml"), ["number", "topic"]
@@ -62,7 +64,9 @@ def create_JSON(
         if os.path.exists(ct_path):
             clinical_trial_dict = parse_XML_to_json(ct_path)
             if only_criteria:
-                clinical_trial_dict = extract_criteria_from_clinical_trials(clinical_trial_dict)
+                clinical_trial_dict = extract_criteria_from_clinical_trials(
+                    clinical_trial_dict
+                )
             ct_textblock = extract_textblocks_from_clinical_trials(clinical_trial_dict)
             cleaned_ct_textblocks = []
             for textblock in ct_textblock:
@@ -115,7 +119,7 @@ def clean_textblock(text):
     return cleaned_text
 
 
-def clean_textblock_data_recursively(json_obj:  list | dict) -> dict:
+def clean_textblock_data_recursively(json_obj: list | dict) -> dict:
     """Recursive function to find nested 'textblock' elements and clean the string from unnessecary chars and whitespaces"""
     if isinstance(json_obj, dict):
         cleaned_dict = {}
@@ -136,7 +140,7 @@ def clean_textblock_data_recursively(json_obj:  list | dict) -> dict:
         return json_obj
 
 
-def extract_textblocks_from_clinical_trials(clinical_trial: list | dict) -> list: 
+def extract_textblocks_from_clinical_trials(clinical_trial: list | dict) -> list:
     """Extracts 'textblock' elements from the 'clinical_trials' section"""
     textblocks = []
     if isinstance(clinical_trial, list):
@@ -150,6 +154,7 @@ def extract_textblocks_from_clinical_trials(clinical_trial: list | dict) -> list
         elif isinstance(value, dict):
             textblocks.extend(extract_textblocks_from_clinical_trials(value))
     return textblocks
+
 
 def extract_criteria_from_clinical_trials(clinical_trial: dict) -> list:
     criteria = []
@@ -216,7 +221,6 @@ def xml_to_dict(element):
         else:
             data[child.tag] = child.text
     return data
-
 
 
 if __name__ == "__main__":
