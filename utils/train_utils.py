@@ -325,11 +325,12 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
                     print(eval_loss)
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
-            tokens = tokenizer.batch_decode(preds.detach().cpu().numpy(), skip_special_tokens=True)
+            tokens = tokenizer.batch_decode(
+                preds.detach().cpu().numpy(), skip_special_tokens=True
+            )
             # if len(tokens[0]) > train_config.max_words:
             #     tokens = preds[:, :train_config.max_words]
-            eval_preds.extend(
-                tokens)
+            eval_preds.extend(tokens)
 
     # If there's more than one CUDA device, reduce evaluation loss across all devices
     if torch.cuda.device_count() > 1 and train_config.enable_fsdp:
@@ -339,7 +340,7 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
     eval_epoch_loss = eval_loss / len(eval_dataloader)
     if train_config.enable_fsdp:
         eval_epoch_loss = eval_epoch_loss / world_size
-    
+
     eval_ppl = torch.exp(eval_epoch_loss)
 
     # Print evaluation metrics

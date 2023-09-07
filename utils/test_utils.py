@@ -8,12 +8,18 @@ from pathlib import Path
 from .memory_utils import MemoryTrace
 
 
-
-
-
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-def test(model, test_set_json, train_config, test_dataloader, local_rank, tokenizer, input_json):
+
+def test(
+    model,
+    test_set_json,
+    train_config,
+    test_dataloader,
+    local_rank,
+    tokenizer,
+    input_json,
+):
     """
     Run the model on a given test dataset. Returns a class 0, 1 or 2, which is saved to a
     .txt mapping the patient topic and the clinical trial ID.
@@ -44,5 +50,3 @@ def test(model, test_set_json, train_config, test_dataloader, local_rank, tokeni
                 outputs = model(**batch)
 
                 predictions = outputs.logits.argmax(dim=-1)
-
-                

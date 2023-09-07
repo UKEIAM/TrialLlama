@@ -35,9 +35,7 @@ from utils.train_utils import (
     clear_gpu_cache,
 )
 
-from utils.test_utils import(
-    test
-)
+from utils.test_utils import test
 
 
 def main(**kwargs):
@@ -55,9 +53,9 @@ def main(**kwargs):
     dataset_config = generate_dataset_config(test_config, kwargs)
 
     dataset_test = get_preprocessed_dataset(
-      tokenizer,
-      dataset_config,
-      split="train", # Not to be confused: Simply used existing infrastructer, to load full dataset provided
+        tokenizer,
+        dataset_config,
+        split="train",  # Not to be confused: Simply used existing infrastructer, to load full dataset provided
     )
 
     test_dataloader = torch.utils.data.DataLoader(
@@ -65,7 +63,7 @@ def main(**kwargs):
         batch_size=test_config.batch_size,
         num_workers=test_config.num_workers_dataloader,
         pin_memory=True,
-        sampler= None,
+        sampler=None,
         drop_last=True,
         collate_fn=default_data_collator,
     )
@@ -80,8 +78,7 @@ def main(**kwargs):
         torch_dtype=torch.float16,
         device_map="auto",
         offload_folder="tmp",
-        )
-  
+    )
 
     test(
         model,

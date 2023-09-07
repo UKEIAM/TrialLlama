@@ -11,6 +11,7 @@ class clinical_trials_dataset:
     test_split: str = "val"
     data_path: str = "data/clinical_trials.json"
 
+
 @dataclass
 class ct_testing:
     dataset: str = "clinical_trials_dataset"
@@ -18,11 +19,13 @@ class ct_testing:
     test_split: str = "val"
     data_path: str = "data/ct_testing.json"
 
+
 @dataclass
 class clinical_trials_testing:
     dataset: str = "clinical_trials_dataset"
-    train_split: str = "train" # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
     data_path: str = "data/ct_eval_testing.json"
+
 
 @dataclass
 class alpaca_dataset:

@@ -15,9 +15,7 @@ DATASET_PREPROC = {
     "clinical_trials_dataset": partial(
         InstructionDataset, max_words=1900
     ),  # Adjust max_words based on the input and GPU capacities
-    "clinical_trials_testing": partial(
-        InstructionDataset, max_words=1900
-    ),
+    "clinical_trials_testing": partial(InstructionDataset, max_words=1900),
     "ct_testing": partial(InstructionDataset, max_words=1900),
     "alpaca_dataset": partial(InstructionDataset, max_words=224),
 }

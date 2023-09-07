@@ -46,7 +46,6 @@ from utils.train_utils import (
 )
 
 
-
 def main(**kwargs):
     # Update the configuration for the training and sharding process
     update_config((train_config, fsdp_config), **kwargs)
@@ -258,7 +257,7 @@ def main(**kwargs):
     )
     if not train_config.enable_fsdp or rank == 0:
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
-    
+
     if train_config.use_peft:
         # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
         model = LlamaForCausalLM.from_pretrained(
