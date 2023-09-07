@@ -83,10 +83,9 @@ def main(**kwargs):
     test(
         model,
         test_set_json,
+        test_config,
         test_dataloader,
         tokenizer,
-        test_config.gradient_accumulation_steps,
-        test_config,
     )
 
 

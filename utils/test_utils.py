@@ -1,9 +1,10 @@
 import sys
 import os
+import re
 
 import torch
-import tqdm
 
+from tqdm import tqdm
 from pathlib import Path
 from .memory_utils import MemoryTrace
 
@@ -14,11 +15,9 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 def test(
     model,
     test_set_json,
-    train_config,
+    test_config,
     test_dataloader,
-    local_rank,
-    tokenizer,
-    input_json,
+    tokenizer
 ):
     """
     Run the model on a given test dataset. Returns a class 0, 1 or 2, which is saved to a
@@ -28,25 +27,25 @@ def test(
     returns a .txt file.
     """
 
-    # TODO: Get json 'input' key and separate topic and CT ID with ^([^_]+)_([^_]+)_([^_]+)\.xml$
+    pattern = r'^(\d+)_(\d+)_(\w+)\.(\w+)$'
 
-    if train_config.enable_fsdp:
-        world_size = int(os.environ["WORLD_SIZE"])
     model.eval()
-    eval_preds = []
-    eval_loss = 0.0  # Initialize evaluation loss
     with MemoryTrace() as memtrace:
         for step, batch in enumerate(
             tqdm(test_dataloader, colour="green", desc="evaluating Epoch")
         ):
             for key in batch.keys():
-                if train_config.enable_fsdp:
-                    batch[key] = batch[key].to(local_rank)
-                else:
-                    batch[key] = batch[key].to("cuda:0")
-            # Ensure no gradients are computed for this scope to save memory
+                batch[key] = batch[key].to("cuda:0")
             with torch.no_grad():
-                # Forward pass and compute loss
                 outputs = model(**batch)
+                preds = torch.argmax(outputs.logits, -1)
 
-                predictions = outputs.logits.argmax(dim=-1)
+                match = re.match(pattern, test_set_json[step]['id'])
+                if match:
+                    internal_id = match.group(1)
+                    topic_id = match.group(2)
+                    ct_id = match.group(3)
+
+                # tokens = tokenizer.batch_decode(
+                #     preds.detach().cpu().numpy(), skip_special_tokens=True
+                # )
