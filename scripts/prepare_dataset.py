@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
 from typing import Optional
+from configs.config import train_config, eval_config
 
 
 base_directory = os.path.dirname(os.path.dirname((__file__)))
@@ -26,13 +27,15 @@ def create_JSON(
     samples: Optional[str] = "all",
     only_criteria: Optional[bool] = False,
 ):
-    config_file = os.path.join(base_directory, f"configs/{config_name}.yaml")
-    with open(config_file, "r") as file:
-        config = yaml.safe_load(file)
 
-    source_data_directory = os.path.join(raw_ct_data_directory, config["year_of_data"])
+    if config_name is "config":
+        config = train_config
+    else:
+        config = eval_config
+
+    source_data_directory = os.path.join(raw_ct_data_directory, config.year_of_data)
     required_data_directory = os.path.join(
-        raw_ct_data_directory, f"{config['mode']}required_cts"
+        raw_ct_data_directory, f"{config.mode}required_cts"
     )
 
     topics_df = parse_XML_to_df(
@@ -42,8 +45,8 @@ def create_JSON(
 
     qrel_path = os.path.join(
         raw_ct_data_directory,
-        config["year_of_data"],
-        config["qrels_path"],
+        config.year_of_data,
+        config.qrels_path,
     )
     qrels = read_qrel_txt(qrel_path)
     if samples != "all":
