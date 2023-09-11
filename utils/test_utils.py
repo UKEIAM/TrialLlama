@@ -12,13 +12,7 @@ from .memory_utils import MemoryTrace
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 
-def test(
-    model,
-    test_set_json,
-    test_config,
-    test_dataloader,
-    tokenizer
-):
+def test(model, test_set_json, test_config, test_dataloader, tokenizer):
     """
     Run the model on a given test dataset. Returns a class 0, 1 or 2, which is saved to a
     .txt mapping the patient topic and the clinical trial ID.
@@ -27,7 +21,7 @@ def test(
     returns a .txt file.
     """
 
-    pattern = r'^(\d+)_(\d+)_(\w+)\.(\w+)$'
+    pattern = r"^(\d+)_(\d+)_(\w+)\.(\w+)$"
 
     model.eval()
     with MemoryTrace() as memtrace:
@@ -40,7 +34,7 @@ def test(
                 outputs = model(**batch)
                 preds = torch.argmax(outputs.logits, -1)
 
-                match = re.match(pattern, test_set_json[step]['id'])
+                match = re.match(pattern, test_set_json[step]["id"])
                 if match:
                     internal_id = match.group(1)
                     topic_id = match.group(2)
