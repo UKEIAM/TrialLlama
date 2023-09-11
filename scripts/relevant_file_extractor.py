@@ -7,7 +7,6 @@ import shutil
 import yaml
 
 from tqdm import tqdm
-from configs.config import train_config, eval_config
 
 
 parser = argparse.ArgumentParser()
@@ -40,21 +39,25 @@ def read_qrel_txt(qrel_path: str):
 
 def main(config_name: str = "config") -> None:
 
-    if config_name is "config":
-        config = train_config
+    if config_name == "train":
+        config_file = os.path.join(base_directory, "configs/train_data.yaml")
+        with open(config_file, "r") as file:
+            config = yaml.safe_load(file)
     else:
-        config = eval_config
+        config_file = os.path.join(base_directory, "configs/test_data.yaml")
+        with open(config_file, "r") as file:
+            config = yaml.safe_load(file)
 
-    source_data_dir = os.path.join(data_directory, config.year_of_data)
+    source_data_dir = os.path.join(data_directory, config["year_of_data"])
 
     qrel_path = os.path.join(
         data_directory,
-        config.year_of_data,
-        config.qrels_path,
+        config["year_of_data"],
+        config["qrels_path"],
     )
 
     target_dir = os.path.join(
-        data_directory, f"{config.mode}required_cts"
+        data_directory, f"{config['mode']}required_cts"
     )
 
     qrels = read_qrel_txt(qrel_path)
@@ -63,7 +66,7 @@ def main(config_name: str = "config") -> None:
         os.makedirs(target_dir)
 
     for filename in tqdm(qrels["clinical trial id"]):
-        source_dir = search_target_directory(filename, source_data_dir, config.year_of_data)
+        source_dir = search_target_directory(filename, source_data_dir, config["year_of_data"])
         full_filename = filename + ".xml"
         source_file = os.path.join(source_dir, full_filename)
         target_file = os.path.join(target_dir)

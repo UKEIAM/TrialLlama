@@ -3,15 +3,18 @@
 import os
 import re
 import json
+import sys
 import yaml
 
 import pandas as pd
 import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
+from pathlib import Path
 from typing import Optional
-from configs.config import train_config, eval_config
+# from configs.config import train_config, eval_config
 
+# sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 base_directory = os.path.dirname(os.path.dirname((__file__)))
 data_directory = os.path.join(base_directory, "data")
@@ -22,20 +25,24 @@ train_list = []
 
 
 def create_JSON(
-    config_name: Optional[str] = "config",
+    config_name: Optional[str] = "train",
     out_file_name: Optional[str] = "clinical_trials.json",
     samples: Optional[str] = "all",
     only_criteria: Optional[bool] = False,
 ):
 
-    if config_name is "config":
-        config = train_config
+    if config_name == "train":
+        config_file = os.path.join(base_directory, "configs/train_data.yaml")
+        with open(config_file, "r") as file:
+            config = yaml.safe_load(file)
     else:
-        config = eval_config
+        config_file = os.path.join(base_directory, "configs/test_data.yaml")
+        with open(config_file, "r") as file:
+            config = yaml.safe_load(file)
 
-    source_data_directory = os.path.join(raw_ct_data_directory, config.year_of_data)
+    source_data_directory = os.path.join(raw_ct_data_directory, config["year_of_data"])
     required_data_directory = os.path.join(
-        raw_ct_data_directory, f"{config.mode}required_cts"
+        raw_ct_data_directory, f"{config['mode']}required_cts"
     )
 
     topics_df = parse_XML_to_df(
@@ -45,8 +52,8 @@ def create_JSON(
 
     qrel_path = os.path.join(
         raw_ct_data_directory,
-        config.year_of_data,
-        config.qrels_path,
+        config["year_of_data"],
+        config["qrels_path"],
     )
     qrels = read_qrel_txt(qrel_path)
     if samples != "all":

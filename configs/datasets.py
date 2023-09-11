@@ -13,13 +13,20 @@ class clinical_trials_dataset:
 
 
 @dataclass
-class ct_testing:
+class ct_debug:
     dataset: str = "clinical_trials_dataset"
     train_split: str = "train"
     test_split: str = "val"
     data_path: str = "data/ct_testing.json"
 
+@dataclass
+class ct_debug_fast:
+    dataset: str = "clinical_trials_dataset"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_debug_fast.json"
 
+# Test data, never seen by the model
 @dataclass
 class clinical_trials_testing:
     dataset: str = "clinical_trials_dataset"
