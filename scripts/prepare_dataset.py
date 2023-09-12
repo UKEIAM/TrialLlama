@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 from tqdm import tqdm
 from pathlib import Path
 from typing import Optional
+
 # from configs.config import train_config, eval_config
 
 # sys.path.append(str(Path(__file__).resolve().parent.parent))

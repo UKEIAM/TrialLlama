@@ -21,8 +21,6 @@ home_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 data_directory = os.path.join(home_directory, "data")
 
 
-
-
 def read_qrel_txt(qrel_path: str):
     qrels = pd.read_csv(
         qrel_path,
@@ -56,9 +54,7 @@ def main(config_name: str = "config") -> None:
         config["qrels_path"],
     )
 
-    target_dir = os.path.join(
-        data_directory, f"{config['mode']}required_cts"
-    )
+    target_dir = os.path.join(data_directory, f"{config['mode']}required_cts")
 
     qrels = read_qrel_txt(qrel_path)
 
@@ -66,7 +62,9 @@ def main(config_name: str = "config") -> None:
         os.makedirs(target_dir)
 
     for filename in tqdm(qrels["clinical trial id"]):
-        source_dir = search_target_directory(filename, source_data_dir, config["year_of_data"])
+        source_dir = search_target_directory(
+            filename, source_data_dir, config["year_of_data"]
+        )
         full_filename = filename + ".xml"
         source_file = os.path.join(source_dir, full_filename)
         target_file = os.path.join(target_dir)
@@ -91,12 +89,10 @@ def search_target_directory(filename, source_data_dir, year_of_data):
         for sub_dir in sub_dirs:
             pattern = re.escape(sub_dir[:7])
             if bool(re.search(pattern, filename[:7])):
-                return os.path.join(
-                    data_directory, year_of_data, directory, sub_dir
-                )
+                return os.path.join(data_directory, year_of_data, directory, sub_dir)
 
 
 if __name__ == "__main__":
     from fire import Fire
-  
+
     Fire(main)
