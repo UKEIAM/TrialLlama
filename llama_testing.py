@@ -80,13 +80,21 @@ def main(**kwargs):
         offload_folder="tmp",
     )
 
-    test(
+    trec_out, df_out = test(
         model,
         test_set_json,
         test_config,
         test_dataloader,
         tokenizer,
     )
+    
+
+    # Save out_file to run with TREC Eval script
+    out_path = os.path.join("out", "eval", f"{test_config.out_file_name}_trec.txt")
+    out_path_2 = os.path.join("out", "eval", f"{test_config.out_file_name}_qrels.txt")
+    trec_out.to_csv(out_path, sep="\t", index=False, header=False)
+    df_out.to_csv(out_path_2, sep="\t", index=False, header=False)
+    print(f"Evaluation file for trec_eval script successfully saved under {out_path}")
 
 
 if __name__ == "__main__":

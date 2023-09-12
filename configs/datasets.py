@@ -13,19 +13,19 @@ class clinical_trials_dataset:
 
 
 @dataclass
-class ct_debug:
+class ct_300:
     dataset: str = "clinical_trials_dataset"
     train_split: str = "train"
     test_split: str = "val"
-    data_path: str = "data/ct_debug.json"
+    data_path: str = "data/ct_300.json"
 
 
 @dataclass
-class ct_debug_fast:
+class ct_10:
     dataset: str = "clinical_trials_dataset"
     train_split: str = "train"
     test_split: str = "val"
-    data_path: str = "data/ct_debug_fast.json"
+    data_path: str = "data/ct_10.json"
 
 
 # Test data, never seen by the model
@@ -33,14 +33,21 @@ class ct_debug_fast:
 class clinical_trials_testing:
     dataset: str = "clinical_trials_dataset"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
-    data_path: str = "data/ct_testing.json"
+    data_path: str = "data/clinical_trials_testing.json"
 
 # Test data, never seen by the model
 @dataclass
-class ct_testing_fast:
+class ct_testing_300:
     dataset: str = "clinical_trials_dataset"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
-    data_path: str = "data/ct_testing_fast.json"
+    data_path: str = "data/ct_testing_300.json"
+
+# Test data, never seen by the model
+@dataclass
+class ct_testing_10:
+    dataset: str = "clinical_trials_dataset"
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    data_path: str = "data/ct_testing_10.json"
 
 @dataclass
 class alpaca_dataset:
