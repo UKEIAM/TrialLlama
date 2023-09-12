@@ -99,7 +99,7 @@ def create_JSON(
 
             full_text_size = item["instruction"] + item["input"]
             if (
-                len(full_text_size.split()) > 1900
+                len(full_text_size.split()) > 1000
             ):  # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
                 print(f"{ct} nr of words: {len(full_text_size.split())} Skipping...")
                 continue

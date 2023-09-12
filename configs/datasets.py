@@ -17,7 +17,7 @@ class ct_debug:
     dataset: str = "clinical_trials_dataset"
     train_split: str = "train"
     test_split: str = "val"
-    data_path: str = "data/ct_testing.json"
+    data_path: str = "data/ct_debug.json"
 
 @dataclass
 class ct_debug_fast:

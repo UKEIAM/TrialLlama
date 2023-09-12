@@ -258,29 +258,34 @@ def main(**kwargs):
     if not train_config.enable_fsdp or rank == 0:
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
 
-    # if train_config.use_peft:
-    #     # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
-    #     model = LlamaForCausalLM.from_pretrained(
-    #         train_config.model_name,
-    #         load_in_8bit=False,
-    #         torch_dtype=torch.float16,
-    #         device_map="auto",
-    #         offload_folder="tmp",
-    #     )
+    # TODO: somehow threw very weird error, hence commented
+    if train_config.use_peft:
+        print("Merging adapter weights with base-model...")
+        # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
+        model = LlamaForCausalLM.from_pretrained(
+            train_config.model_name,
+            load_in_8bit=False,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            offload_folder="tmp",
+        )
 
-    #     tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
+        tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
+        peft_model = os.path.join(train_config.output_dir, "adapter_weights")
 
-    #     model = PeftModel.from_pretrained(
-    #         model,
-    #         train_config.output_dir,
-    #         torch_dtype=torch.float16,
-    #         device_map="auto",
-    #         offload_folder="tmp",
-    #     )
+        model = PeftModel.from_pretrained(
+            model,
+            peft_model,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            offload_folder="tmp",
+        )
 
-    #     model = model.merge_and_unload()
-    #     model.save_pretrained(train_config.output_dir)
-    #     tokenizer.save_pretrained(train_config.output_dir)
+        model = model.merge_and_unload()
+        model.save_pretrained(train_config.output_dir)
+        tokenizer.save_pretrained(train_config.output_dir)
+
+        print(f"Merged adapter weights with base model and saved to {train_config.output_dir}")
 
 
 if __name__ == "__main__":

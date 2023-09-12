@@ -190,16 +190,20 @@ def train(
                             print(f"we are about to save the PEFT modules")
                     else:
                         print(f"we are about to save the PEFT modules")
-                    model.save_pretrained(train_config.output_dir)
-                    print(f"Model saved to: {train_config.output_dir}")
+                    
+                    model_save_path = os.path.join(train_config.output_dir, "adapter_weights")
+                    os.makedirs(model_save_path, exist_ok=True)
+
+                    model.save_pretrained(model_save_path)
+                    print(f"Model saved to: {model_save_path}")
                     if train_config.enable_fsdp:
                         if rank == 0:
                             print(
-                                f"PEFT modules are saved in {train_config.output_dir} directory"
+                                f"PEFT modules are saved in {model_save_path} directory"
                             )
                     else:
                         print(
-                            f"PEFT modules are saved in {train_config.output_dir} directory"
+                            f"PEFT modules are saved in {model_save_path} directory"
                         )
 
                 else:
