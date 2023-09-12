@@ -29,7 +29,7 @@ def create_JSON(
     config_name: Optional[str] = "train",
     out_file_name: Optional[str] = "clinical_trials.json",
     samples: Optional[str] = "all",
-    only_criteria: Optional[bool] = False,
+    only_criteria: Optional[bool] = True,
 ):
 
     if config_name == "train":
@@ -95,12 +95,12 @@ def create_JSON(
                 "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
                 "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided. If the patient profile fits the trial return '2' as answer, which means patient is eligible. If it does not match to the patient profile, return '1' as answer, which means patient is not-eligible. If the trial is not relevant for the patient, return '0' as answer.",
                 "input": f"PATIENT DESCRIPTION: {cleaned_topic}\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
-                "output": str(label),
+                "output": output_text,
             }
 
             full_text_size = item["instruction"] + item["input"]
             if (
-                len(full_text_size.split()) > 1000
+                len(full_text_size.split()) > 1000 # Set currently to 1000, since with 1900 GPU was able to compute, but eval loss sometimes returne 'nan'. More experimentation required.
             ):  # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
                 print(f"{ct} nr of words: {len(full_text_size.split())} Skipping...")
                 continue

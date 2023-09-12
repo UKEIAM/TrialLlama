@@ -33,8 +33,14 @@ class ct_debug_fast:
 class clinical_trials_testing:
     dataset: str = "clinical_trials_dataset"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
-    data_path: str = "data/ct_eval_testing.json"
+    data_path: str = "data/ct_testing.json"
 
+# Test data, never seen by the model
+@dataclass
+class ct_testing_fast:
+    dataset: str = "clinical_trials_dataset"
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    data_path: str = "data/ct_testing_fast.json"
 
 @dataclass
 class alpaca_dataset:
