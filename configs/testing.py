@@ -10,7 +10,7 @@ class test_config:
     num_workers_dataloader: int = 1
     out_file_name: str = "poc_1_eval_ready"
     max_tokens: int = 1024
-    max_new_tokens: int = 10 # The maximum numbers of tokens to generate
+    max_new_tokens: int = 20 # The maximum numbers of tokens to generate
     seed: int = 42  # seed value for reproducibility
     do_sample: bool = True  # Whether or not to use sampling ; use greedy decoding otherwise.
     min_length: int = None  # The minimum length of the sequence to be generated input prompt + min_new_tokens

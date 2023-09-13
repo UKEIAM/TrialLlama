@@ -26,11 +26,12 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
     trec_out = pd.DataFrame(columns = ["TOPIC_NO", "Q0", "ID", "SCORE", "RUN_NAME"])
     df_out = pd.DataFrame(columns = ["TOPIC_NO", "Q0", "ID", "CLASS", "PROBA"]) # df_out is for internal evaluation purposes, where we can compare the output of the model with the qrels provided
 
-    pattern = r"^(\d+)_(\d+)_(\w+)$"
+    id_pattern = r"^(\d+)_(\d+)_(\w+)$"
+    response_pattern = r"### Response:(.*)"
 
     with MemoryTrace() as memtrace:
         for step, batch in enumerate(
-            tqdm(test_dataloader, colour="green", desc="evaluating Epoch")
+            tqdm(test_dataloader, colour="green", desc="Testing iteration:")
         ):
             for key in batch.keys():
                 batch[key] = batch[key].view(1, test_config.max_tokens)
@@ -58,22 +59,26 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                 # max_probs, predicted_labels = torch.max(probs, dim=1)
                 # max_probs = max_probs.cpu().detach().numpy()
                 # predicted_labels = predicted_labels.cpu().detach().numpy()
-                if "ELIGIBLE" or "eligible" or "2" in output_text:
+                # TODO: Only consider part after "###Response: "
+                match = re.search(response_pattern, output_text)
+                response = match.group(1).strip() 
+                if "ELIGIBLE" or "eligible" or "2" in response:
                     predicted_label = 2
-                elif "NOT ELIGIBLE" or "not eligible" or "1" in output_text:
+                elif "NOT ELIGIBLE" or "not eligible" or "1" in response:
                     predicted_label = 1
-                elif "NOT RELEVANT" or "not relevant" or "0" in output_text:   
+                elif "NOT RELEVANT" or "not relevant" or "0" in response:   
                      predicted_label = 0
 
-                match = re.match(pattern, test_set_json[step]["id"])
+                match = re.match(id_pattern, test_set_json[step]["id"])
                 internal_id = match.group(1)
                 topic_id = match.group(2)
                 ct_id = match.group(3)
                     
-                print(output_text)
+                print(f"### Response: {response}")
                 # TODO: Figure out how to get probabilities for the output of LLM
-                row_trec = [topic_id, 0, ct_id, "max_probs", test_config.ft_model_name]
-                row_out = [topic_id, 0, ct_id, "max_probs", predicted_label]
+                if predicted_label in [0,1,2]:
+                    row_trec = [topic_id, 0, ct_id, "max_probs", test_config.ft_model_name]
+                    row_out = [topic_id, 0, ct_id, "max_probs", predicted_label]
     
                 # TODO: For debugging purposes, since currently model returns 'nan' values as output tensor
                 trec_out.loc[step] = row_trec
