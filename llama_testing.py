@@ -13,6 +13,8 @@ from torch.distributed.fsdp import (
 
 from transformers import (
     LlamaForCausalLM,
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
     LlamaTokenizer,
     LlamaConfig,
     default_data_collator,
@@ -22,7 +24,7 @@ from transformers.models.llama.modeling_llama import LlamaDecoderLayer
 from configs.training import train_config
 from configs.testing import test_config
 from policies.anyprecision_optimizer import AnyPrecisionAdamW
-
+    
 from utils.fsdp_utils import fsdp_auto_wrap_policy
 from utils.config_utils import (
     update_config,
@@ -45,11 +47,12 @@ def main(**kwargs):
 
     # Initialise dataloader, NO shuffling!
     tokenizer = LlamaTokenizer.from_pretrained(test_config.ft_model_name)
-    tokenizer.add_special_tokens(
-        {
-            "pad_token": "<PAD>",
-        }
-    )
+    # TODO: Check again, but my logic tells me for eval, we should not pad the input
+    # tokenizer.add_special_tokens(
+    #     {
+    #         "pad_token": "<PAD>",
+    #     }
+    # )
     dataset_config = generate_dataset_config(test_config, kwargs)
 
     dataset_test = get_preprocessed_dataset(

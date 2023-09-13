@@ -68,9 +68,9 @@ def create_JSON(
             cleaned_topic = clean_textblock(topic)
         except KeyError as e:
             continue
-        ct = row["clinical trial id"] + ".xml"
+        ct = row["clinical trial id"]
         label = row["label"]
-        ct_path = os.path.join(required_data_directory, ct)
+        ct_path = os.path.join(required_data_directory, ct + ".xml")
 
         if os.path.exists(ct_path):
             clinical_trial_dict = parse_XML_to_json(ct_path)

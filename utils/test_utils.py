@@ -58,11 +58,15 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                 # TODO: For debugging purposes, since currently model returns 'nan' values as output tensor
                 trec_out.loc[step] = row_trec
                 df_out.loc[step] = row_out
-                
 
-                # tokens = tokenizer.batch_decode(
-                #     preds.detach().cpu().numpy(), skip_special_tokens=True
-                # )
+                # DEBUGING
+                print(len(max_probs[0]))
+                preds = torch.argmax(outputs.logits, -1)
+                tokens = tokenizer.batch_decode(
+                    preds.detach().cpu().numpy(), skip_special_tokens=True
+                )
+                print(tokens)
+                print()
 
         trec_out["RANK"] = trec_out.groupby("TOPIC_NO")["SCORE"].rank(ascending=False, method="dense").astype(int)
         rank = trec_out.pop("RANK")
