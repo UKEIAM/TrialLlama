@@ -326,7 +326,7 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
                 loss = outputs.loss
                 eval_loss += loss.detach().float()
                 if math.isnan(eval_loss.item()):
-                    print(eval_loss)
+                    print("JOOO it's none again!")
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
             tokens = tokenizer.batch_decode(
@@ -514,7 +514,7 @@ def get_max_length(model):
     for length_setting in ["n_positions", "max_position_embeddings", "seq_length"]:
         max_length = getattr(model.config, length_setting, None)
         if max_length:
-            print(f"Found max lenth: {max_length}")
+            print(f"Found max length: {max_length}")
             break
     # Set "max_length" to 1024 (default value) if maximum sequence length is not found in the model configuration
     if not max_length:

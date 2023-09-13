@@ -5,12 +5,11 @@
 
 import copy
 import json
-import os
 import torch
 
 from sentencepiece import SentencePieceProcessor
 from torch.utils.data import Dataset
-from typing import List
+
 
 PROMPT_DICT = {
     "prompt_input": (
@@ -23,6 +22,10 @@ PROMPT_DICT = {
         "Write a response that appropriately completes the request.\n\n"
         "### Instruction:\n{instruction}\n\n### Response:"
     ),
+    "test_input": (
+        # TODO: Do I need to change "prompt_input?"
+        "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response:"
+    ) 
 }
 
 
@@ -44,6 +47,7 @@ class InstructionDataset(Dataset):
 
     def __getitem__(self, index):
         IGNORE_INDEX = -100  # The default setting in CrossEntropyLoss
+        # TODO: Dig deeper into the dataset code
 
         ann = self.ann[index]
         if ann.get("input", "") == "":
@@ -74,3 +78,45 @@ class InstructionDataset(Dataset):
             "labels": labels,
             "attention_mask": example_mask,
         }
+
+
+class TestingDataset(Dataset):
+    def __init__(self, dataset_config, tokenizer, partition="train", max_words=30):
+        self.ann = json.load(open(dataset_config.data_path))
+        if partition == "train":
+            self.ann = self.ann
+        else:
+            self.ann = self.ann[:200]
+
+        self.max_words = max_words
+        # tokenizer = Tokenizer(model_path=model_path + "./tokenizer.model")
+        self.tokenizer = tokenizer
+        # self.tokenizer1 = tokenizer
+
+    def __len__(self):
+        return len(self.ann)
+
+    def __getitem__(self, index):
+        # IGNORE_INDEX = -100  # The default setting in CrossEntropyLoss
+        # TODO: Dig deeper into the dataset code
+        ann = self.ann[index]
+        prompt = PROMPT_DICT["prompt_input"].format_map(ann)
+        # prompt = self.tokenizer.encode(prompt)
+        # prompt.append(self.tokenizer.eos_token_id)
+        # prompt = torch.tensor(prompt, dtype=torch.int64)
+        # padding = self.max_words - prompt.shape[0]
+        # if padding > 0:
+        #     prompt = torch.cat((prompt, torch.zeros(padding, dtype=torch.int64) - 1))
+        # elif padding < 0:
+        #     prompt = prompt[: self.max_words]
+        batch = self.tokenizer(
+          prompt,
+          padding="max_length",
+          truncation=True,
+          max_length=self.max_words,
+          return_tensors="pt",
+        )
+        
+
+
+        return batch

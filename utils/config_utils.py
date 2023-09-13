@@ -39,30 +39,30 @@ def update_config(config, **kwargs):
                 print(f"Warning: unknown parameter {k}")
 
 
-def generate_peft_config(train_config, kwargs):
+def generate_peft_config(config, kwargs):
     configs = (lora_config, llama_adapter_config, prefix_config)
     peft_configs = (LoraConfig, AdaptionPromptConfig, PrefixTuningConfig)
     names = tuple(c.__name__.rstrip("_config") for c in configs)
 
     assert (
-        train_config.peft_method in names
-    ), f"Peft config not found: {train_config.peft_method}"
+        config.peft_method in names
+    ), f"Peft config not found: {config.peft_method}"
 
-    config = configs[names.index(train_config.peft_method)]
+    config = configs[names.index(config.peft_method)]
     update_config(config, **kwargs)
     params = {k.name: getattr(config, k.name) for k in fields(config)}
-    peft_config = peft_configs[names.index(train_config.peft_method)](**params)
+    peft_config = peft_configs[names.index(config.peft_method)](**params)
 
     return peft_config
 
 
-def generate_dataset_config(train_config, kwargs):
+def generate_dataset_config(config, kwargs):
     names = tuple(DATASET_PREPROC.keys())
 
-    assert train_config.dataset in names, f"Unknown dataset: {train_config.dataset}"
+    assert config.dataset in names, f"Unknown dataset: {config.dataset}"
 
     dataset_config = {k: v for k, v in inspect.getmembers(datasets)}[
-        train_config.dataset
+        config.dataset
     ]
     update_config(dataset_config, **kwargs)
 

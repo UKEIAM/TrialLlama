@@ -92,24 +92,31 @@ def create_JSON(
             else:
                 category = "ELIGIBLE"
                 output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
-
+                
             item = {
                 "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
                 "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\n\nNOT RELEVANT\nNOT ELIGIBLE\nELIGIBLE\n\n",
                 "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
                 "output": category,
             }
+            # else:
+            #     item = {
+            #         "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
+            #         "instruction": f"Is following Patient Description: ",
+            #         "input": f"\n\n {cleaned_topic} eligable, not-eligable or not relevant for following Clinical trail description:\n\n {cleaned_ct_textblocks}",
+            #         "output": category,
+            #     }
 
-            full_text_size = item["instruction"] + item["input"]
-            if (
-                # TODO: Current word size stuff is weird. Need to resolve the unknown
-                len(full_text_size.split()) > 1025 # Set currently to 1025, since with 1900 GPU was able to compute, but eval loss sometimes returne 'nan'. More experimentation required.
-            ):  # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
-                print(f"{ct} nr of words: {len(full_text_size.split())} Skipping...")
-                continue
-            else:
-                train_list.append(item)
-                counter += 1
+            #full_text_size = item["instruction"] + item["input"]
+            # if (
+            #     # TODO: Current word size stuff is weird. Need to resolve the unknown
+            #     len(full_text_size.split()) > 1025 #  Tested max GPU was able to compute were 1900 tokens, but eval loss sometimes returne 'nan'. More experimentation required.
+            # ):  # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
+            #     print(f"{ct} nr of words: {len(full_text_size.split())} Skipping...")
+            #     continue
+            # else:
+            train_list.append(item)
+            counter += 1
         else:
             continue
 

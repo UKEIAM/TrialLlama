@@ -102,9 +102,7 @@ def main(**kwargs):
             device_map="auto" if train_config.quantization else None,
         )
     
-    # TODO: See how to set max_length given the model config, instead of manually
-    max_length = get_max_length(model)
-    print(max_length)
+
     if train_config.enable_fsdp and train_config.use_fast_kernels:
         """
         For FSDP and FSDP+PEFT, setting 'use_fast_kernels' will enable
@@ -178,13 +176,16 @@ def main(**kwargs):
 
     dataset_config = generate_dataset_config(train_config, kwargs)
 
+    max_words = get_max_length(model)
+    if max_words > 1025:
+        max_words = 1024 # Current GPU is has not enough memory for more than 1900 tokens...
     # Load and preprocess the dataset for training and validation
     dataset_train = get_preprocessed_dataset(
         tokenizer,
         dataset_config,
+        max_words,
         split="train",
     )
-
 
     if not train_config.enable_fsdp or rank == 0:
         print(f"--> Training Set Length = {len(dataset_train)}")
@@ -192,6 +193,7 @@ def main(**kwargs):
     dataset_val = get_preprocessed_dataset(
         tokenizer,
         dataset_config,
+        max_words,
         split="test",
     )
     if not train_config.enable_fsdp or rank == 0:

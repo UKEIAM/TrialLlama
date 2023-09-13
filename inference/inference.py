@@ -16,11 +16,11 @@ from model_utils import load_model, load_peft_model, load_llama_from_config
 
 
 def main(
-    model_name,
+    model_name: str = "/workspaces/mtb_ai_kevin_kraus/out/poc_1_llama-2-7b-hf",
     peft_model: str = None,
     quantization: bool = False,
     max_new_tokens=100,  # The maximum numbers of tokens to generate
-    prompt_file: str = None,
+    prompt_file: str = "/workspaces/mtb_ai_kevin_kraus/inference/samsum_prompt.txt",
     seed: int = 42,  # seed value for reproducibility
     do_sample: bool = True,  # Whether or not to use sampling ; use greedy decoding otherwise.
     min_length: int = None,  # The minimum length of the sequence to be generated, input prompt + min_new_tokens
@@ -89,20 +89,21 @@ def main(
     )
 
     # Safety check of the user prompt
-    safety_results = [check(user_prompt) for check in safety_checker]
-    are_safe = all([r[1] for r in safety_results])
-    if are_safe:
-        print("User prompt deemed safe.")
-        print(f"User prompt:\n{user_prompt}")
-    else:
-        print("User prompt deemed unsafe.")
-        for method, is_safe, report in safety_results:
-            if not is_safe:
-                print(method)
-                print(report)
-        print("Skipping the inference as the prompt is not safe.")
-        sys.exit(1)  # Exit the program with an error status
+    # safety_results = [check(user_prompt) for check in safety_checker]
+    # are_safe = all([r[1] for r in safety_results])
+    # if are_safe:
+    #     print("User prompt deemed safe.")
+    #     print(f"User prompt:\n{user_prompt}")
+    # else:
+    #     print("User prompt deemed unsafe.")
+    #     for method, is_safe, report in safety_results:
+    #         if not is_safe:
+    #             print(method)
+    #             print(report)
+    #     print("Skipping the inference as the prompt is not safe.")
+    #     sys.exit(1)  # Exit the program with an error status
 
+    
     batch = tokenizer(
         user_prompt,
         padding="max_length",

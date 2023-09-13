@@ -7,6 +7,7 @@ import torch.distributed as dist
 import torch.optim as optim
 from peft import PeftModel
 from pkg_resources import packaging
+from tqdm import tqdm
 from torch.distributed.fsdp import (
     FullyShardedDataParallel as FSDP,
 )
@@ -19,6 +20,9 @@ from transformers import (
     LlamaConfig,
     default_data_collator,
 )
+
+from inference.model_utils import load_model, load_peft_model
+
 from transformers.models.llama.modeling_llama import LlamaDecoderLayer
 
 from configs.training import train_config
@@ -47,18 +51,18 @@ def main(**kwargs):
 
     # Initialise dataloader, NO shuffling!
     tokenizer = LlamaTokenizer.from_pretrained(test_config.ft_model_name)
-    # TODO: Check again, but my logic tells me for eval, we should not pad the input
-    # tokenizer.add_special_tokens(
-    #     {
-    #         "pad_token": "<PAD>",
-    #     }
-    # )
+    tokenizer.add_special_tokens(
+        {
+            "pad_token": "<PAD>",
+        }
+    )
     dataset_config = generate_dataset_config(test_config, kwargs)
 
     dataset_test = get_preprocessed_dataset(
         tokenizer,
         dataset_config,
-        split="train",  # Not to be confused: Simply used existing infrastructer, to load full dataset provided
+        max_words=test_config.max_tokens,
+        split="train",
     )
 
     test_dataloader = torch.utils.data.DataLoader(
@@ -75,13 +79,22 @@ def main(**kwargs):
     test_set_json = json.load(open(dataset_config.data_path))
 
     # Load fine-tuned model ATTENTION: Fine-tuned adapter weights, need to be merged with base-model before loading is possible!
-    model = LlamaForCausalLM.from_pretrained(
-        test_config.ft_model_name,
-        load_in_8bit=False,
-        torch_dtype=torch.float16,
-        device_map="auto",
-        offload_folder="tmp",
-    )
+    model = load_model(test_config.ft_model_name, test_config.quantization)
+    if test_config.load_peft_model:
+        model = load_peft_model(model, test_config.ft_model_name + "adapter_weights")
+
+    model.eval()
+    model.resize_token_embeddings(model.config.vocab_size + 1)
+    # test_prompt = "This is a test sentence to tokenize."
+    # batch_plain = tokenizer(
+    #     test_prompt,
+    #     padding="max_length",
+    #     truncation=True,
+    #     max_length=test_config.max_tokens,
+    #     return_tensors="pt",
+    #     )
+    
+    # batch_plain = {k: v.to("cuda") for k, v in batch_plain.items()}
 
     trec_out, df_out = test(
         model,
@@ -90,7 +103,6 @@ def main(**kwargs):
         test_dataloader,
         tokenizer,
     )
-    
 
     # Save out_file to run with TREC Eval script
     out_path = os.path.join("out", "eval", f"{test_config.out_file_name}_trec.txt")
