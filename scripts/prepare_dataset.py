@@ -85,22 +85,26 @@ def create_JSON(
                 cleaned_ct_textblocks.append(cleaned_textblock)
             # TODO: Delete, just for testing reasons
             if label == "0":
+                category = "NOT RELEVANT"
                 output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
             elif label == "1":
+                category = "NOT ELIGIBLE"
                 output_text = f"The patient at hand is not eligible for the clinical presented clinical trial. Status code {label}"
             else:
+                category = "ELIGIBLE"
                 output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
 
             item = {
                 "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-                "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided. If the patient profile fits the trial return '2' as answer, which means patient is eligible. If it does not match to the patient profile, return '1' as answer, which means patient is not-eligible. If the trial is not relevant for the patient, return '0' as answer.",
-                "input": f"PATIENT DESCRIPTION: {cleaned_topic}\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
-                "output": output_text,
+                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\n\nNOT RELEVANT\nNOT ELIGIBLE\nELIGIBLE\n\n",
+                "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
+                "output": category,
             }
 
             full_text_size = item["instruction"] + item["input"]
             if (
-                len(full_text_size.split()) > 1000 # Set currently to 1000, since with 1900 GPU was able to compute, but eval loss sometimes returne 'nan'. More experimentation required.
+                # TODO: Current word size stuff is weird. Need to resolve the unknown
+                len(full_text_size.split()) > 1025 # Set currently to 1025, since with 1900 GPU was able to compute, but eval loss sometimes returne 'nan'. More experimentation required.
             ):  # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
                 print(f"{ct} nr of words: {len(full_text_size.split())} Skipping...")
                 continue

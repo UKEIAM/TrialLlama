@@ -43,6 +43,7 @@ from utils.train_utils import (
     clear_gpu_cache,
     print_model_size,
     get_policies,
+    get_max_length,
 )
 
 
@@ -98,6 +99,9 @@ def main(**kwargs):
             load_in_8bit=True if train_config.quantization else None,
             device_map="auto" if train_config.quantization else None,
         )
+    
+    max_length = get_max_length(model)
+    print(max_length)
     if train_config.enable_fsdp and train_config.use_fast_kernels:
         """
         For FSDP and FSDP+PEFT, setting 'use_fast_kernels' will enable
@@ -174,6 +178,7 @@ def main(**kwargs):
         dataset_config,
         split="train",
     )
+    
 
     if not train_config.enable_fsdp or rank == 0:
         print(f"--> Training Set Length = {len(dataset_train)}")

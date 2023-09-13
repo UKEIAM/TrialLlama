@@ -498,3 +498,26 @@ def save_train_params(train_config, fsdp_config, rank):
             f.write(config_yaml)
         if rank == 0:
             print(f"training params are saved in {file_name}")
+
+def get_max_length(model):
+    """
+    Extracts maximum token length from the model configuration
+
+    :param model: Hugging Face model
+    """
+
+    # Pull model configuration
+    conf = model.config
+    # Initialize a "max_length" variable to store maximum sequence length as null
+    max_length = None
+    # Find maximum sequence length in the model configuration and save it in "max_length" if found
+    for length_setting in ["n_positions", "max_position_embeddings", "seq_length"]:
+        max_length = getattr(model.config, length_setting, None)
+        if max_length:
+            print(f"Found max lenth: {max_length}")
+            break
+    # Set "max_length" to 1024 (default value) if maximum sequence length is not found in the model configuration
+    if not max_length:
+        max_length = 1024
+        print(f"Using default max length: {max_length}")
+    return max_length
