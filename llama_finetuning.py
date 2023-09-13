@@ -17,6 +17,8 @@ from torch.utils.data import DistributedSampler
 from transformers import (
     LlamaForCausalLM,
     LlamaTokenizer,
+    AutoModelForCausalLM,
+    AutoTokenizer,
     LlamaConfig,
     default_data_collator,
 )
@@ -83,7 +85,7 @@ def main(**kwargs):
                 "please install latest nightly."
             )
         if rank == 0:
-            model = LlamaForCausalLM.from_pretrained(
+            model = AutoModelForCausalLM.from_pretrained(
                 train_config.model_name,
                 load_in_8bit=True if train_config.quantization else None,
                 device_map="auto" if train_config.quantization else None,
@@ -91,15 +93,16 @@ def main(**kwargs):
         else:
             llama_config = LlamaConfig.from_pretrained(train_config.model_name)
             with torch.device("meta"):
-                model = LlamaForCausalLM(llama_config)
+                model = AutoModelForCausalLM(llama_config)
 
     else:
-        model = LlamaForCausalLM.from_pretrained(
+        model = AutoModelForCausalLM.from_pretrained(
             train_config.model_name,
             load_in_8bit=True if train_config.quantization else None,
             device_map="auto" if train_config.quantization else None,
         )
     
+    # TODO: See how to set max_length given the model config, instead of manually
     max_length = get_max_length(model)
     print(max_length)
     if train_config.enable_fsdp and train_config.use_fast_kernels:
@@ -127,12 +130,15 @@ def main(**kwargs):
         model.to(torch.bfloat16)
 
     # Load the tokenizer and add special tokens
-    tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
+    tokenizer = AutoTokenizer.from_pretrained(train_config.model_name)
     tokenizer.add_special_tokens(
         {
             "pad_token": "<PAD>",
         }
     )
+    # TODO: Evaluate if this approach suits better for my use-case. Originated from News Classification with LLM by Kshitiz Sahay
+    # tokenizer.pad_token = tokenizer.eos_token 
+
     if train_config.use_peft:
         peft_config = generate_peft_config(train_config, kwargs)
         model = get_peft_model(model, peft_config)
@@ -178,7 +184,7 @@ def main(**kwargs):
         dataset_config,
         split="train",
     )
-    
+
 
     if not train_config.enable_fsdp or rank == 0:
         print(f"--> Training Set Length = {len(dataset_train)}")
@@ -264,10 +270,10 @@ def main(**kwargs):
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
 
     # TODO: somehow threw very weird error, hence commented
-    if train_config.use_peft:
+    if train_config.merge_weights:
         print("Merging adapter weights with base-model...")
         # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
-        model = LlamaForCausalLM.from_pretrained(
+        model = AutoModelForCausalLM.from_pretrained(
             train_config.model_name,
             load_in_8bit=False,
             torch_dtype=torch.float16,
@@ -275,7 +281,7 @@ def main(**kwargs):
             offload_folder="tmp",
         )
 
-        tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
+        tokenizer = AutoTokenizer.from_pretrained(train_config.model_name)
         peft_model = os.path.join(train_config.output_dir, "adapter_weights")
 
         model = PeftModel.from_pretrained(

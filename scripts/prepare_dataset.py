@@ -47,7 +47,7 @@ def create_JSON(
     )
 
     topics_df = parse_XML_to_df(
-        os.path.join(source_data_directory, "topics2021.xml"), ["number", "topic"]
+        os.path.join(source_data_directory, f"topics{config['year_of_topics']}.xml"), ["number", "topic"]
     )
     topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
@@ -83,11 +83,10 @@ def create_JSON(
             for textblock in ct_textblock:
                 cleaned_textblock = clean_textblock(textblock)
                 cleaned_ct_textblocks.append(cleaned_textblock)
-            # TODO: Delete, just for testing reasons
-            if label == "0":
+            if label == 0:
                 category = "NOT RELEVANT"
                 output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
-            elif label == "1":
+            elif label == 1:
                 category = "NOT ELIGIBLE"
                 output_text = f"The patient at hand is not eligible for the clinical presented clinical trial. Status code {label}"
             else:

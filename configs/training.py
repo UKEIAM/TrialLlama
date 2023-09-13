@@ -1,7 +1,6 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
 from dataclasses import dataclass
-from typing import ClassVar
 
 
 @dataclass
@@ -21,15 +20,16 @@ class train_config:
     use_fp16: bool = True
     mixed_precision: bool = True
     val_batch_size: int = 1
-    dataset: str = "clinical_trials"
+    dataset: str = "ct_10"
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = True
-    output_dir: str = "out"
+    output_dir: str = "out/testing"
     freeze_layers: bool = False
     num_freeze_layers: int = 1
     quantization: bool = True
     one_gpu: bool = False
     save_model: bool = True
+    merge_weights: bool = False
     dist_checkpoint_root_folder: str = "out"  # will be used if using FSDP
     dist_checkpoint_folder: str = "fine-tuned"  # will be used if using FSDP
     save_optimizer: bool = False  # will be used if using FSDP
