@@ -28,7 +28,7 @@ train_list = []
 def create_JSON(
     config_name: Optional[str] = "train",
     out_file_name: Optional[str] = "clinical_trials.json",
-    samples: Optional[str] = "all",
+    samples: Optional[int | str] = 5000,
     only_criteria: Optional[bool] = True,
 ):
 
@@ -58,7 +58,7 @@ def create_JSON(
     )
     qrels = read_qrel_txt(qrel_path)
     if samples != "all":
-        qrels = qrels[: int(samples)]
+        qrels = qrels[: samples]
 
     counter = 0
     for index, row in tqdm(qrels.iterrows()):
@@ -95,7 +95,7 @@ def create_JSON(
                 
             item = {
                 "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\n\IRRELEVANT\nUNELIGIBLE\nELIGIBLE\n\n",
+                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\n\IRRELEVANT\nUNELIGIBLE\nELIGIBLE\n\nOnly use one of the three provided categories as answer.",
                 "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
                 "output": category,
             }
