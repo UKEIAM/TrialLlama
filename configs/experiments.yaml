@@ -1,0 +1,4 @@
+datasets: [25000, 10000, 5000, 1800, 900, 500, 300, 10]
+lrs: [1e-3, 1e-4, 1e-5, 1e-6]
+base_models: [Llama-2-3b-hf, Llama-2-7b-chat-hf, Llama-2-7b-hf, Llama-2-7b-chat-hf]
+load_peft_model: True

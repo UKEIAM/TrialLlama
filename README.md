@@ -1,5 +1,6 @@
-# masters-thesis
-Masters thesis in the domain fo NLP in cooperation with the IAM at UKE
+# Masters-Thesis
+@author Kevin Kraus
+Masters thesis in the domain of NLP in cooperation with the IAM at UKE: Fine-tuning small LLMs for precision oncology use-cases
 # MTB Patient Trial Matching based on a fine-tuned llama 2 model
 ## Setup
 - Run `pip install -r requirements.txt`
