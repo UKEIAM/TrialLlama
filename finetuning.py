@@ -175,16 +175,15 @@ def main(**kwargs):
 
     dataset_config = generate_dataset_config(train_config, kwargs)
 
-    max_words = get_max_length(model)
-    if max_words > 1025:
-        max_words = (
-            1024  # Current GPU is has not enough memory for more than 1900 tokens...
-        )
+    max_tokens = get_max_length(model)
+    if max_tokens > train_config.max_tokens:
+        max_tokens = train_config.max_tokens
+
     # Load and preprocess the dataset for training and validation
     dataset_train = get_preprocessed_dataset(
         tokenizer,
         dataset_config,
-        max_words,
+        max_tokens,
         split="train",
     )
 
@@ -194,7 +193,7 @@ def main(**kwargs):
     dataset_val = get_preprocessed_dataset(
         tokenizer,
         dataset_config,
-        max_words,
+        max_tokens,
         split="test",
     )
     if not train_config.enable_fsdp or rank == 0:

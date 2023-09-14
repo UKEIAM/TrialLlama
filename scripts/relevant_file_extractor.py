@@ -35,7 +35,7 @@ def read_qrel_txt(qrel_path: str):
 """Function takes a DataFrame as input and searches for all listed Clinical Trial IDs within the data, since most of the trials are not required for the fine-tune dataset"""
 
 
-def main(config_name: str = "config") -> None:
+def main(config_name: str = "train") -> None:
 
     if config_name == "train":
         config_file = os.path.join(base_directory, "configs/train_data.yaml")
@@ -46,11 +46,11 @@ def main(config_name: str = "config") -> None:
         with open(config_file, "r") as file:
             config = yaml.safe_load(file)
 
-    source_data_dir = os.path.join(data_directory, config["year_of_data"])
+    source_data_dir = os.path.join(data_directory, str(config["year_of_data"]))
 
     qrel_path = os.path.join(
         data_directory,
-        config["year_of_data"],
+        str(config["year_of_data"]),
         config["qrels_path"],
     )
 
@@ -63,7 +63,7 @@ def main(config_name: str = "config") -> None:
 
     for filename in tqdm(qrels["clinical trial id"]):
         source_dir = search_target_directory(
-            filename, source_data_dir, config["year_of_data"]
+            filename, source_data_dir, str(config["year_of_data"])
         )
         full_filename = filename + ".xml"
         source_file = os.path.join(source_dir, full_filename)

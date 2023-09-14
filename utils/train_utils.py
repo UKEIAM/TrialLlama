@@ -135,9 +135,6 @@ def train(
                         optimizer.zero_grad()
                         pbar.update(step // gradient_accumulation_steps)
 
-                if math.isnan(loss.detach().float().item()):
-                    print(loss.detach().float())
-
                 pbar.set_description(
                     f"Training Epoch: {epoch}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})"
                 )
@@ -311,7 +308,7 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
     eval_preds = []
     eval_loss = 0.0  # Initialize evaluation loss
     with MemoryTrace() as memtrace:
-        for step, batch in enumerate(tqdm(eval_dataloader,colour="green", desc="evaluating Epoch")):
+        for step, batch in enumerate(tqdm(eval_dataloader, colour="green", desc="evaluating Epoch")):
             for key in batch.keys():
                 if train_config.enable_fsdp:
                     batch[key] = batch[key].to(local_rank)
@@ -322,6 +319,9 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
                 # Forward pass and compute loss
                 outputs = model(**batch)
                 loss = outputs.loss
+                if math.isnan(loss.detach().float().item()):
+                    x = tokenizer.decode(batch["input_ids"][0], skip_special_tokens=True)
+                    print(loss.detach().float())
                 eval_loss += loss.detach().float()
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)

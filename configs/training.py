@@ -11,7 +11,7 @@ class train_config:
     run_validation: bool = True
     batch_size_training: int = 4
     gradient_accumulation_steps: int = 1
-    num_epochs: int = 1
+    num_epochs: int = 3
     num_workers_dataloader: int = 1
     lr: float = 1e-4
     weight_decay: float = 0.0
@@ -20,10 +20,10 @@ class train_config:
     use_fp16: bool = True
     mixed_precision: bool = True
     val_batch_size: int = 1
-    dataset: str = "ct_10"
+    dataset: str = "ct_1800"
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = True
-    output_dir: str = "out/poc_20"
+    output_dir: str = "out"
     freeze_layers: bool = False
     num_freeze_layers: int = 1
     quantization: bool = True
@@ -35,3 +35,4 @@ class train_config:
     save_optimizer: bool = False  # will be used if using FSDP
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers, make use Flash Attention and Xformer memory-efficient kernels
     # max_words: int = 1900 # Since the input is so long, the output of the model while in eval mode is even longer. Hence, we need to restrict the preds output.
+    max_tokens: int = 1024

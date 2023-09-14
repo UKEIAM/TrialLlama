@@ -5,6 +5,7 @@ import re
 import json
 import sys
 import yaml
+import torch
 
 import pandas as pd
 import xml.etree.ElementTree as ET
@@ -41,7 +42,7 @@ def create_JSON(
         with open(config_file, "r") as file:
             config = yaml.safe_load(file)
 
-    source_data_directory = os.path.join(raw_ct_data_directory, config["year_of_data"])
+    source_data_directory = os.path.join(raw_ct_data_directory, str(config["year_of_data"]))
     required_data_directory = os.path.join(
         raw_ct_data_directory, f"{config['mode']}required_cts"
     )
@@ -54,7 +55,7 @@ def create_JSON(
 
     qrel_path = os.path.join(
         raw_ct_data_directory,
-        config["year_of_data"],
+        str(config["year_of_data"]),
         config["qrels_path"],
     )
     qrels = read_qrel_txt(qrel_path)
@@ -96,26 +97,11 @@ def create_JSON(
 
             item = {
                 "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\n\IRRELEVANT\nUNELIGIBLE\nELIGIBLE\n\nOnly use one of the three provided categories as response.",
+                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\nIRRELEVANT\nUNELIGIBLE\nELIGIBLE\nOnly use one of the three provided categories as response.",
                 "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
                 "output": category,
             }
-            # else:
-            #     item = {
-            #         "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-            #         "instruction": f"Is following Patient Description: ",
-            #         "input": f"\n\n {cleaned_topic} eligable, not-eligable or not relevant for following Clinical trail description:\n\n {cleaned_ct_textblocks}",
-            #         "output": category,
-            #     }
-
-            # full_text_size = item["instruction"] + item["input"]
-            # if (
-            #     # TODO: Current word size stuff is weird. Need to resolve the unknown
-            #     len(full_text_size.split()) > 1025 #  Tested max GPU was able to compute were 1900 tokens, but eval loss sometimes returne 'nan'. More experimentation required.
-            # ):  # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
-            #     print(f"{ct} nr of words: {len(full_text_size.split())} Skipping...")
-            #     continue
-            # else:
+            
             train_list.append(item)
             counter += 1
         else:
@@ -249,3 +235,4 @@ if __name__ == "__main__":
     from jsonargparse import CLI
 
     CLI(create_JSON)
+
