@@ -311,30 +311,23 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
     eval_preds = []
     eval_loss = 0.0  # Initialize evaluation loss
     with MemoryTrace() as memtrace:
-        for step, batch in enumerate(
-            tqdm(eval_dataloader, colour="green", desc="evaluating Epoch")
-        ):
+        for step, batch in enumerate(tqdm(eval_dataloader,colour="green", desc="evaluating Epoch")):
             for key in batch.keys():
                 if train_config.enable_fsdp:
                     batch[key] = batch[key].to(local_rank)
                 else:
-                    batch[key] = batch[key].to("cuda:0")
+                    batch[key] = batch[key].to('cuda:0')
             # Ensure no gradients are computed for this scope to save memory
             with torch.no_grad():
                 # Forward pass and compute loss
                 outputs = model(**batch)
                 loss = outputs.loss
                 eval_loss += loss.detach().float()
-                if math.isnan(eval_loss.item()):
-                    print("JOOO it's none again!")
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
-            tokens = tokenizer.batch_decode(
-                preds.detach().cpu().numpy(), skip_special_tokens=True
+            eval_preds.extend(
+                tokenizer.batch_decode(preds.detach().cpu().numpy(), skip_special_tokens=True)
             )
-            # if len(tokens[0]) > train_config.max_words:
-            #     tokens = preds[:, :train_config.max_words]
-            eval_preds.extend(tokens)
 
     # If there's more than one CUDA device, reduce evaluation loss across all devices
     if torch.cuda.device_count() > 1 and train_config.enable_fsdp:

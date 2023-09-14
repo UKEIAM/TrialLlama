@@ -96,7 +96,7 @@ def create_JSON(
 
             item = {
                 "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\n\IRRELEVANT\nUNELIGIBLE\nELIGIBLE\n\nOnly use one of the three provided categories as answer.",
+                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\n\IRRELEVANT\nUNELIGIBLE\nELIGIBLE\n\nOnly use one of the three provided categories as response.",
                 "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
                 "output": category,
             }
