@@ -84,10 +84,10 @@ def create_JSON(
                 cleaned_textblock = clean_textblock(textblock)
                 cleaned_ct_textblocks.append(cleaned_textblock)
             if label == 0:
-                category = "NOT RELEVANT"
+                category = "IRRELEVANT"
                 output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
             elif label == 1:
-                category = "NOT ELIGIBLE"
+                category = "UNELIGIBLE"
                 output_text = f"The patient at hand is not eligible for the clinical presented clinical trial. Status code {label}"
             else:
                 category = "ELIGIBLE"
@@ -95,7 +95,7 @@ def create_JSON(
                 
             item = {
                 "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\n\nNOT RELEVANT\nNOT ELIGIBLE\nELIGIBLE\n\n",
+                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\n\IRRELEVANT\nUNELIGIBLE\nELIGIBLE\n\n",
                 "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
                 "output": category,
             }

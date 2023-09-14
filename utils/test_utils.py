@@ -6,6 +6,7 @@ import random
 import torch
 import torch.nn.functional as F
 import pandas as pd
+import numpy as np
 
 from tqdm import tqdm
 from pathlib import Path
@@ -48,26 +49,33 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                     top_k=test_config.top_k,
                     repetition_penalty=test_config.repetition_penalty,
                     length_penalty=test_config.length_penalty,
+                    return_dict_in_generate=True, 
+                    output_scores=True
                     )
-
-                output_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-                # probs = F.softmax(outputs.logits, dim=1)
-                # class_0_probability = probs[:, 0]  # Probability for class "0"
-                # class_1_probability = probs[:, 1]  # Probability for class "1"
-                # class_2_probability = probs[:, 2]
-
-                # max_probs, predicted_labels = torch.max(probs, dim=1)
-                # max_probs = max_probs.cpu().detach().numpy()
-                # predicted_labels = predicted_labels.cpu().detach().numpy()
+                # output_text = tokenizer.decode(outputs.sequences[0], skip_special_tokens=True)
                 # TODO: Only consider part after "###Response: "
-                match = re.search(response_pattern, output_text)
-                response = match.group(1).strip() 
-                if "ELIGIBLE" or "eligible" or "2" in response:
-                    predicted_label = 2
-                elif "NOT ELIGIBLE" or "not eligible" or "1" in response:
-                    predicted_label = 1
-                elif "NOT RELEVANT" or "not relevant" or "0" in response:   
-                     predicted_label = 0
+
+                transition_scores = model.compute_transition_scores(
+                    outputs.sequences, outputs.scores, normalize_logits=True)
+                input_length = 1 if model.config.is_encoder_decoder else batch["input_ids"].shape[1]
+                generated_tokens = outputs.sequences[:, input_length:]
+                response = tokenizer.decode(generated_tokens[0][idx]) # TODO: Right now, assuming Model returns only the class. 
+                for idx, tokens in enumerate(generated_tokens):
+                    response.append(tokenizer.decode(generated_tokens[0][idx]))
+
+                for idx, item in enumerate(response):
+                    if "eligible" in item.lower():
+                        proba = np.exp(transition_scores[0][idx].cpu().numpy())
+                        predicted_label = 2
+                    elif "noneligible" in item.lower():
+                        proba = np.exp(transition_scores[0][idx].cpu().numpy())
+                        predicted_label = 1
+                    elif "irrelevant" in item.lower():  
+                        proba = np.exp(transition_scores[0][idx].cpu().numpy())
+                        predicted_label = 0
+                    else:
+                        proba = None
+                        predicted_label = -1
 
                 match = re.match(id_pattern, test_set_json[step]["id"])
                 internal_id = match.group(1)
@@ -77,8 +85,8 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                 print(f"### Response: {response}")
                 # TODO: Figure out how to get probabilities for the output of LLM
                 if predicted_label in [0,1,2]:
-                    row_trec = [topic_id, 0, ct_id, "max_probs", test_config.ft_model_name]
-                    row_out = [topic_id, 0, ct_id, "max_probs", predicted_label]
+                    row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model_name]
+                    row_out = [topic_id, 0, ct_id, proba, predicted_label]
     
                 # TODO: For debugging purposes, since currently model returns 'nan' values as output tensor
                 trec_out.loc[step] = row_trec

@@ -23,7 +23,7 @@ class train_config:
     dataset: str = "ct_10"
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = True
-    output_dir: str = "out/testing"
+    output_dir: str = "out/poc_20"
     freeze_layers: bool = False
     num_freeze_layers: int = 1
     quantization: bool = True
