@@ -101,7 +101,6 @@ def main(**kwargs):
             load_in_8bit=True if train_config.quantization else None,
             device_map="auto" if train_config.quantization else None,
         )
-    
 
     if train_config.enable_fsdp and train_config.use_fast_kernels:
         """
@@ -135,7 +134,7 @@ def main(**kwargs):
         }
     )
     # TODO: Evaluate if this approach suits better for my use-case. Originated from News Classification with LLM by Kshitiz Sahay
-    # tokenizer.pad_token = tokenizer.eos_token 
+    # tokenizer.pad_token = tokenizer.eos_token
 
     if train_config.use_peft:
         peft_config = generate_peft_config(train_config, kwargs)
@@ -178,7 +177,9 @@ def main(**kwargs):
 
     max_words = get_max_length(model)
     if max_words > 1025:
-        max_words = 1024 # Current GPU is has not enough memory for more than 1900 tokens...
+        max_words = (
+            1024  # Current GPU is has not enough memory for more than 1900 tokens...
+        )
     # Load and preprocess the dataset for training and validation
     dataset_train = get_preprocessed_dataset(
         tokenizer,
@@ -298,7 +299,9 @@ def main(**kwargs):
         model.save_pretrained(train_config.output_dir)
         tokenizer.save_pretrained(train_config.output_dir)
 
-        print(f"Merged adapter weights with base model and saved to {train_config.output_dir}")
+        print(
+            f"Merged adapter weights with base model and saved to {train_config.output_dir}"
+        )
 
 
 if __name__ == "__main__":

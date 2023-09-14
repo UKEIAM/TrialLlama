@@ -28,7 +28,7 @@ from transformers.models.llama.modeling_llama import LlamaDecoderLayer
 from configs.training import train_config
 from configs.testing import test_config
 from policies.anyprecision_optimizer import AnyPrecisionAdamW
-    
+
 from utils.fsdp_utils import fsdp_auto_wrap_policy
 from utils.config_utils import (
     update_config,
@@ -93,7 +93,7 @@ def main(**kwargs):
     #     max_length=test_config.max_tokens,
     #     return_tensors="pt",
     #     )
-    
+
     # batch_plain = {k: v.to("cuda") for k, v in batch_plain.items()}
 
     trec_out, df_out = test(

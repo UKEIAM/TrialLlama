@@ -190,8 +190,10 @@ def train(
                             print(f"we are about to save the PEFT modules")
                     else:
                         print(f"we are about to save the PEFT modules")
-                    
-                    model_save_path = os.path.join(train_config.output_dir, "adapter_weights")
+
+                    model_save_path = os.path.join(
+                        train_config.output_dir, "adapter_weights"
+                    )
                     os.makedirs(model_save_path, exist_ok=True)
 
                     model.save_pretrained(model_save_path)
@@ -202,9 +204,7 @@ def train(
                                 f"PEFT modules are saved in {model_save_path} directory"
                             )
                     else:
-                        print(
-                            f"PEFT modules are saved in {model_save_path} directory"
-                        )
+                        print(f"PEFT modules are saved in {model_save_path} directory")
 
                 else:
                     if (
@@ -498,6 +498,7 @@ def save_train_params(train_config, fsdp_config, rank):
             f.write(config_yaml)
         if rank == 0:
             print(f"training params are saved in {file_name}")
+
 
 def get_max_length(model):
     """

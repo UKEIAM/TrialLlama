@@ -103,7 +103,6 @@ def main(
     #     print("Skipping the inference as the prompt is not safe.")
     #     sys.exit(1)  # Exit the program with an error status
 
-    
     batch = tokenizer(
         user_prompt,
         padding="max_length",

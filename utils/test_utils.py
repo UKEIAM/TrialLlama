@@ -24,8 +24,10 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
 
     returns a .txt file.
     """
-    trec_out = pd.DataFrame(columns = ["TOPIC_NO", "Q0", "ID", "SCORE", "RUN_NAME"])
-    df_out = pd.DataFrame(columns = ["TOPIC_NO", "Q0", "ID", "CLASS", "PROBA"]) # df_out is for internal evaluation purposes, where we can compare the output of the model with the qrels provided
+    trec_out = pd.DataFrame(columns=["TOPIC_NO", "Q0", "ID", "SCORE", "RUN_NAME"])
+    df_out = pd.DataFrame(
+        columns=["TOPIC_NO", "Q0", "ID", "CLASS", "PROBA"]
+    )  # df_out is for internal evaluation purposes, where we can compare the output of the model with the qrels provided
 
     id_pattern = r"^(\d+)_(\d+)_(\w+)$"
     response_pattern = r"### Response:(.*)"
@@ -49,17 +51,24 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                     top_k=test_config.top_k,
                     repetition_penalty=test_config.repetition_penalty,
                     length_penalty=test_config.length_penalty,
-                    return_dict_in_generate=True, 
-                    output_scores=True
-                    )
+                    return_dict_in_generate=True,
+                    output_scores=True,
+                )
                 # output_text = tokenizer.decode(outputs.sequences[0], skip_special_tokens=True)
                 # TODO: Only consider part after "###Response: "
 
                 transition_scores = model.compute_transition_scores(
-                    outputs.sequences, outputs.scores, normalize_logits=True)
-                input_length = 1 if model.config.is_encoder_decoder else batch["input_ids"].shape[1]
+                    outputs.sequences, outputs.scores, normalize_logits=True
+                )
+                input_length = (
+                    1
+                    if model.config.is_encoder_decoder
+                    else batch["input_ids"].shape[1]
+                )
                 generated_tokens = outputs.sequences[:, input_length:]
-                response = tokenizer.decode(generated_tokens[0][idx]) # TODO: Right now, assuming Model returns only the class. 
+                response = tokenizer.decode(
+                    generated_tokens[0][idx]
+                )  # TODO: Right now, assuming Model returns only the class.
                 for idx, tokens in enumerate(generated_tokens):
                     response.append(tokenizer.decode(generated_tokens[0][idx]))
 
@@ -70,7 +79,7 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                     elif "noneligible" in item.lower():
                         proba = np.exp(transition_scores[0][idx].cpu().numpy())
                         predicted_label = 1
-                    elif "irrelevant" in item.lower():  
+                    elif "irrelevant" in item.lower():
                         proba = np.exp(transition_scores[0][idx].cpu().numpy())
                         predicted_label = 0
                     else:
@@ -81,23 +90,25 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                 internal_id = match.group(1)
                 topic_id = match.group(2)
                 ct_id = match.group(3)
-                    
+
                 print(f"### Response: {response}")
                 # TODO: Figure out how to get probabilities for the output of LLM
-                if predicted_label in [0,1,2]:
+                if predicted_label in [0, 1, 2]:
                     row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model_name]
                     row_out = [topic_id, 0, ct_id, proba, predicted_label]
-    
+
                 # TODO: For debugging purposes, since currently model returns 'nan' values as output tensor
                 trec_out.loc[step] = row_trec
                 df_out.loc[step] = row_out
 
-
-        trec_out["RANK"] = trec_out.groupby("TOPIC_NO")["SCORE"].rank(ascending=False, method="dense").astype(int)
+        trec_out["RANK"] = (
+            trec_out.groupby("TOPIC_NO")["SCORE"]
+            .rank(ascending=False, method="dense")
+            .astype(int)
+        )
         rank = trec_out.pop("RANK")
-        trec_out.insert(3, "RANK", rank) # To be conform with the trec_eval format
+        trec_out.insert(3, "RANK", rank)  # To be conform with the trec_eval format
 
-        
-        #add_ranking_column(trec_out)
+        # add_ranking_column(trec_out)
 
         return trec_out, df_out

@@ -47,7 +47,8 @@ def create_JSON(
     )
 
     topics_df = parse_XML_to_df(
-        os.path.join(source_data_directory, f"topics{config['year_of_topics']}.xml"), ["number", "topic"]
+        os.path.join(source_data_directory, f"topics{config['year_of_topics']}.xml"),
+        ["number", "topic"],
     )
     topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
@@ -58,7 +59,7 @@ def create_JSON(
     )
     qrels = read_qrel_txt(qrel_path)
     if samples != "all":
-        qrels = qrels[: samples]
+        qrels = qrels[:samples]
 
     counter = 0
     for index, row in tqdm(qrels.iterrows()):
@@ -92,7 +93,7 @@ def create_JSON(
             else:
                 category = "ELIGIBLE"
                 output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
-                
+
             item = {
                 "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
                 "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\n\IRRELEVANT\nUNELIGIBLE\nELIGIBLE\n\nOnly use one of the three provided categories as answer.",
@@ -107,7 +108,7 @@ def create_JSON(
             #         "output": category,
             #     }
 
-            #full_text_size = item["instruction"] + item["input"]
+            # full_text_size = item["instruction"] + item["input"]
             # if (
             #     # TODO: Current word size stuff is weird. Need to resolve the unknown
             #     len(full_text_size.split()) > 1025 #  Tested max GPU was able to compute were 1900 tokens, but eval loss sometimes returne 'nan'. More experimentation required.

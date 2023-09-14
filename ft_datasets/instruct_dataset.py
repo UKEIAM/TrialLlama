@@ -25,7 +25,7 @@ PROMPT_DICT = {
     "test_input": (
         # TODO: Do I need to change "prompt_input?"
         "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response:"
-    ) 
+    ),
 }
 
 
@@ -110,13 +110,11 @@ class TestingDataset(Dataset):
         # elif padding < 0:
         #     prompt = prompt[: self.max_words]
         batch = self.tokenizer(
-          prompt,
-          padding="max_length",
-          truncation=True,
-          max_length=self.max_words,
-          return_tensors="pt",
+            prompt,
+            padding="max_length",
+            truncation=True,
+            max_length=self.max_words,
+            return_tensors="pt",
         )
-        
-
 
         return batch

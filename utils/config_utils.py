@@ -44,9 +44,7 @@ def generate_peft_config(config, kwargs):
     peft_configs = (LoraConfig, AdaptionPromptConfig, PrefixTuningConfig)
     names = tuple(c.__name__.rstrip("_config") for c in configs)
 
-    assert (
-        config.peft_method in names
-    ), f"Peft config not found: {config.peft_method}"
+    assert config.peft_method in names, f"Peft config not found: {config.peft_method}"
 
     config = configs[names.index(config.peft_method)]
     update_config(config, **kwargs)
@@ -61,9 +59,7 @@ def generate_dataset_config(config, kwargs):
 
     assert config.dataset in names, f"Unknown dataset: {config.dataset}"
 
-    dataset_config = {k: v for k, v in inspect.getmembers(datasets)}[
-        config.dataset
-    ]
+    dataset_config = {k: v for k, v in inspect.getmembers(datasets)}[config.dataset]
     update_config(dataset_config, **kwargs)
 
     return dataset_config

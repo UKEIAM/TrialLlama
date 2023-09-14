@@ -5,10 +5,7 @@ import torch
 
 from functools import partial
 
-from ft_datasets.instruct_dataset import (
-   InstructionDataset,
-   TestingDataset
-)
+from ft_datasets.instruct_dataset import InstructionDataset, TestingDataset
 
 from typing import Optional
 
