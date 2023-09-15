@@ -1,7 +1,6 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
 from dataclasses import dataclass
-from typing import ClassVar
 
 
 @dataclass
@@ -21,7 +20,7 @@ class train_config:
     use_fp16: bool = True
     mixed_precision: bool = True
     val_batch_size: int = 1
-    dataset = "clinical_trials"
+    dataset: str = "ct_1800"
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = True
     output_dir: str = "out"
@@ -30,8 +29,10 @@ class train_config:
     quantization: bool = True
     one_gpu: bool = False
     save_model: bool = True
+    merge_weights: bool = False
     dist_checkpoint_root_folder: str = "out"  # will be used if using FSDP
     dist_checkpoint_folder: str = "fine-tuned"  # will be used if using FSDP
     save_optimizer: bool = False  # will be used if using FSDP
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers, make use Flash Attention and Xformer memory-efficient kernels
-    max_words: int = 1900  # Since the input is so long, the output of the model while in eval mode is even longer. Hence, we need to restrict the preds output.
+    # max_words: int = 1900 # Since the input is so long, the output of the model while in eval mode is even longer. Hence, we need to restrict the preds output.
+    max_tokens: int = 1900 # Max Token Size based on 24gb GPU and batch_size of 4

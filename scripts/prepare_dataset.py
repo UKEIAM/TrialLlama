@@ -3,14 +3,20 @@
 import os
 import re
 import json
+import sys
 import yaml
+import torch
 
 import pandas as pd
 import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
+from pathlib import Path
 from typing import Optional
 
+# from configs.config import train_config, eval_config
+
+# sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 base_directory = os.path.dirname(os.path.dirname((__file__)))
 data_directory = os.path.join(base_directory, "data")
@@ -21,33 +27,40 @@ train_list = []
 
 
 def create_JSON(
-    config_name: Optional[str] = "config",
+    config_name: Optional[str] = "train",
     out_file_name: Optional[str] = "clinical_trials.json",
-    samples: Optional[str] = "all",
-    only_criteria: Optional[bool] = False,
+    samples: Optional[int | str] = 5000,
+    only_criteria: Optional[bool] = True,
 ):
-    config_file = os.path.join(base_directory, f"configs/{config_name}.yaml")
-    with open(config_file, "r") as file:
-        config = yaml.safe_load(file)
 
-    source_data_directory = os.path.join(raw_ct_data_directory, config["year_of_data"])
+    if config_name == "train":
+        config_file = os.path.join(base_directory, "configs/train_data.yaml")
+        with open(config_file, "r") as file:
+            config = yaml.safe_load(file)
+    else:
+        config_file = os.path.join(base_directory, "configs/test_data.yaml")
+        with open(config_file, "r") as file:
+            config = yaml.safe_load(file)
+
+    source_data_directory = os.path.join(raw_ct_data_directory, str(config["year_of_data"]))
     required_data_directory = os.path.join(
         raw_ct_data_directory, f"{config['mode']}required_cts"
     )
 
     topics_df = parse_XML_to_df(
-        os.path.join(source_data_directory, "topics2021.xml"), ["number", "topic"]
+        os.path.join(source_data_directory, f"topics{config['year_of_topics']}.xml"),
+        ["number", "topic"],
     )
     topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
     qrel_path = os.path.join(
         raw_ct_data_directory,
-        config["year_of_data"],
+        str(config["year_of_data"]),
         config["qrels_path"],
     )
     qrels = read_qrel_txt(qrel_path)
     if samples != "all":
-        qrels = qrels[: int(samples)]
+        qrels = qrels[:samples]
 
     counter = 0
     for index, row in tqdm(qrels.iterrows()):
@@ -57,9 +70,9 @@ def create_JSON(
             cleaned_topic = clean_textblock(topic)
         except KeyError as e:
             continue
-        ct = row["clinical trial id"] + ".xml"
+        ct = row["clinical trial id"]
         label = row["label"]
-        ct_path = os.path.join(required_data_directory, ct)
+        ct_path = os.path.join(required_data_directory, ct + ".xml")
 
         if os.path.exists(ct_path):
             clinical_trial_dict = parse_XML_to_json(ct_path)
@@ -72,30 +85,25 @@ def create_JSON(
             for textblock in ct_textblock:
                 cleaned_textblock = clean_textblock(textblock)
                 cleaned_ct_textblocks.append(cleaned_textblock)
-            # TODO: Delete, just for testing reasons
-            if label == "0":
+            if label == 0:
+                category = "IRRELEVANT"
                 output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
-            elif label == "1":
+            elif label == 1:
+                category = "UNELIGIBLE"
                 output_text = f"The patient at hand is not eligible for the clinical presented clinical trial. Status code {label}"
             else:
+                category = "ELIGIBLE"
                 output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
 
             item = {
                 "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-                "instruction": "Please match the eligibility of following patient to the succeeding clinical trial provided. If the patient profile fits the trial return '2' as answer, which means patient is eligible. If it does not match to the patient profile, return '1' as answer, which means patient is not-eligible. If the trial is not relevant for the patient, return '0' as answer.",
-                "input": f"PATIENT DESCRIPTION: {cleaned_topic}\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
-                "output": str(label),
+                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\nIRRELEVANT\nUNELIGIBLE\nELIGIBLE\nOnly use one of the three provided categories as response.",
+                "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
+                "output": category,
             }
-
-            full_text_size = item["instruction"] + item["input"]
-            if (
-                len(full_text_size.split()) > 1900
-            ):  # TODO: The current way of creating the dataset concats all available textblock elements within one clinical trial xml. A GPU with 24GB can only handle an max number of input words of 1900. Hence we have to skip all items which are above
-                print(f"{ct} nr of words: {len(full_text_size.split())} Skipping...")
-                continue
-            else:
-                train_list.append(item)
-                counter += 1
+            
+            train_list.append(item)
+            counter += 1
         else:
             continue
 
@@ -227,3 +235,4 @@ if __name__ == "__main__":
     from jsonargparse import CLI
 
     CLI(create_JSON)
+

@@ -22,6 +22,7 @@ RUN chown dev: /home/dev
 COPY requirements.txt /tmp/pip-tmp/
 RUN pip install --upgrade pip \
     && pip --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
+    && pip --disable-pip-verision-check --no-cache-dir uninstall transformer-engine \
     && rm -rf /tmp/pip-tmp
 
 # Expose SSH Server and install graphxplore module in editable mode

@@ -7,7 +7,7 @@ import fire
 import torch
 import torch.distributed as dist
 import torch.optim as optim
-from peft import get_peft_model, prepare_model_for_kbit_training
+from peft import PeftModel, get_peft_model, prepare_model_for_kbit_training
 from pkg_resources import packaging
 from torch.distributed.fsdp import (
     FullyShardedDataParallel as FSDP,
@@ -17,6 +17,8 @@ from torch.utils.data import DistributedSampler
 from transformers import (
     LlamaForCausalLM,
     LlamaTokenizer,
+    AutoModelForCausalLM,
+    AutoTokenizer,
     LlamaConfig,
     default_data_collator,
 )
@@ -43,6 +45,7 @@ from utils.train_utils import (
     clear_gpu_cache,
     print_model_size,
     get_policies,
+    get_max_length,
 )
 
 
@@ -82,7 +85,7 @@ def main(**kwargs):
                 "please install latest nightly."
             )
         if rank == 0:
-            model = LlamaForCausalLM.from_pretrained(
+            model = AutoModelForCausalLM.from_pretrained(
                 train_config.model_name,
                 load_in_8bit=True if train_config.quantization else None,
                 device_map="auto" if train_config.quantization else None,
@@ -90,14 +93,15 @@ def main(**kwargs):
         else:
             llama_config = LlamaConfig.from_pretrained(train_config.model_name)
             with torch.device("meta"):
-                model = LlamaForCausalLM(llama_config)
+                model = AutoModelForCausalLM(llama_config)
 
     else:
-        model = LlamaForCausalLM.from_pretrained(
+        model = AutoModelForCausalLM.from_pretrained(
             train_config.model_name,
             load_in_8bit=True if train_config.quantization else None,
             device_map="auto" if train_config.quantization else None,
         )
+
     if train_config.enable_fsdp and train_config.use_fast_kernels:
         """
         For FSDP and FSDP+PEFT, setting 'use_fast_kernels' will enable
@@ -123,12 +127,15 @@ def main(**kwargs):
         model.to(torch.bfloat16)
 
     # Load the tokenizer and add special tokens
-    tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
+    tokenizer = AutoTokenizer.from_pretrained(train_config.model_name)
     tokenizer.add_special_tokens(
         {
             "pad_token": "<PAD>",
         }
     )
+    # TODO: Evaluate if this approach suits better for my use-case. Originated from News Classification with LLM by Kshitiz Sahay
+    # tokenizer.pad_token = tokenizer.eos_token
+
     if train_config.use_peft:
         peft_config = generate_peft_config(train_config, kwargs)
         model = get_peft_model(model, peft_config)
@@ -168,10 +175,15 @@ def main(**kwargs):
 
     dataset_config = generate_dataset_config(train_config, kwargs)
 
+    max_tokens = get_max_length(model)
+    if max_tokens > train_config.max_tokens:
+        max_tokens = train_config.max_tokens
+
     # Load and preprocess the dataset for training and validation
     dataset_train = get_preprocessed_dataset(
         tokenizer,
         dataset_config,
+        max_tokens,
         split="train",
     )
 
@@ -181,6 +193,7 @@ def main(**kwargs):
     dataset_val = get_preprocessed_dataset(
         tokenizer,
         dataset_config,
+        max_tokens,
         split="test",
     )
     if not train_config.enable_fsdp or rank == 0:
@@ -257,6 +270,37 @@ def main(**kwargs):
     )
     if not train_config.enable_fsdp or rank == 0:
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
+
+    # TODO: somehow threw very weird error, hence commented
+    if train_config.merge_weights:
+        print("Merging adapter weights with base-model...")
+        # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
+        model = LlamaForCausalLM.from_pretrained(
+            train_config.model_name,
+            load_in_8bit=False,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            offload_folder="tmp",
+        )
+
+        tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
+        peft_model = os.path.join(train_config.output_dir, "adapter_weights")
+
+        model = PeftModel.from_pretrained(
+            model,
+            peft_model,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            offload_folder="tmp",
+        )
+
+        model = model.merge_and_unload()
+        model.save_pretrained(train_config.output_dir)
+        tokenizer.save_pretrained(train_config.output_dir)
+
+        print(
+            f"Merged adapter weights with base model and saved to {train_config.output_dir}"
+        )
 
 
 if __name__ == "__main__":

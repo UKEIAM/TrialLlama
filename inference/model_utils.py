@@ -1,5 +1,6 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the GNU General Public License version 3.
+import torch
 
 from peft import PeftModel
 from transformers import LlamaForCausalLM, LlamaConfig
@@ -8,6 +9,7 @@ from transformers import LlamaForCausalLM, LlamaConfig
 def load_model(model_name, quantization):
     model = LlamaForCausalLM.from_pretrained(
         model_name,
+        torch_dtype=torch.float16,
         return_dict=True,
         load_in_8bit=quantization,
         device_map="auto",
@@ -18,7 +20,11 @@ def load_model(model_name, quantization):
 
 # Function to load the PeftModel for performance optimization
 def load_peft_model(model, peft_model):
-    peft_model = PeftModel.from_pretrained(model, peft_model)
+    peft_model = PeftModel.from_pretrained(
+        model, 
+        peft_model,
+        torch_dtype=torch.float16,
+    )
     return peft_model
 
 

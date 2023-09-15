@@ -135,9 +135,6 @@ def train(
                         optimizer.zero_grad()
                         pbar.update(step // gradient_accumulation_steps)
 
-                if math.isnan(loss.detach().float().item()):
-                    print(loss.detach().float())
-
                 pbar.set_description(
                     f"Training Epoch: {epoch}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})"
                 )
@@ -190,17 +187,21 @@ def train(
                             print(f"we are about to save the PEFT modules")
                     else:
                         print(f"we are about to save the PEFT modules")
-                    model.save_pretrained(train_config.output_dir)
-                    print(f"Model saved to: {train_config.output_dir}")
+
+                    model_save_path = os.path.join(
+                        train_config.output_dir, "adapter_weights"
+                    )
+                    os.makedirs(model_save_path, exist_ok=True)
+
+                    model.save_pretrained(model_save_path)
+                    print(f"Model saved to: {model_save_path}")
                     if train_config.enable_fsdp:
                         if rank == 0:
                             print(
-                                f"PEFT modules are saved in {train_config.output_dir} directory"
+                                f"PEFT modules are saved in {model_save_path} directory"
                             )
                     else:
-                        print(
-                            f"PEFT modules are saved in {train_config.output_dir} directory"
-                        )
+                        print(f"PEFT modules are saved in {model_save_path} directory")
 
                 else:
                     if (
@@ -307,30 +308,26 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
     eval_preds = []
     eval_loss = 0.0  # Initialize evaluation loss
     with MemoryTrace() as memtrace:
-        for step, batch in enumerate(
-            tqdm(eval_dataloader, colour="green", desc="evaluating Epoch")
-        ):
+        for step, batch in enumerate(tqdm(eval_dataloader, colour="green", desc="evaluating Epoch")):
             for key in batch.keys():
                 if train_config.enable_fsdp:
                     batch[key] = batch[key].to(local_rank)
                 else:
-                    batch[key] = batch[key].to("cuda:0")
+                    batch[key] = batch[key].to('cuda:0')
             # Ensure no gradients are computed for this scope to save memory
             with torch.no_grad():
                 # Forward pass and compute loss
                 outputs = model(**batch)
                 loss = outputs.loss
+                if math.isnan(loss.detach().float().item()):
+                    x = tokenizer.decode(batch["input_ids"][0], skip_special_tokens=True)
+                    print(loss.detach().float())
                 eval_loss += loss.detach().float()
-                if math.isnan(eval_loss.item()):
-                    print(eval_loss)
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
-            tokens = tokenizer.batch_decode(
-                preds.detach().cpu().numpy(), skip_special_tokens=True
+            eval_preds.extend(
+                tokenizer.batch_decode(preds.detach().cpu().numpy(), skip_special_tokens=True)
             )
-            if len(tokens[0]) > train_config.max_words:
-                tokens = preds[:, : train_config.max_words]
-            eval_preds.extend(tokens)
 
     # If there's more than one CUDA device, reduce evaluation loss across all devices
     if torch.cuda.device_count() > 1 and train_config.enable_fsdp:
@@ -494,3 +491,27 @@ def save_train_params(train_config, fsdp_config, rank):
             f.write(config_yaml)
         if rank == 0:
             print(f"training params are saved in {file_name}")
+
+
+def get_max_length(model):
+    """
+    Extracts maximum token length from the model configuration
+
+    :param model: Hugging Face model
+    """
+
+    # Pull model configuration
+    conf = model.config
+    # Initialize a "max_length" variable to store maximum sequence length as null
+    max_length = None
+    # Find maximum sequence length in the model configuration and save it in "max_length" if found
+    for length_setting in ["n_positions", "max_position_embeddings", "seq_length"]:
+        max_length = getattr(model.config, length_setting, None)
+        if max_length:
+            print(f"Found max length: {max_length}")
+            break
+    # Set "max_length" to 1024 (default value) if maximum sequence length is not found in the model configuration
+    if not max_length:
+        max_length = 1024
+        print(f"Using default max length: {max_length}")
+    return max_length

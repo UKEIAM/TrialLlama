@@ -1,19 +1,39 @@
-[tool.poetry]
-name = "masters-thesis"
-version = "0.1.0"
-description = ""
-authors = ["kevinkrs <kraus.kevin@proton.me>"]
-readme = "README.md"
-packages = [{include = "masters_thesis"}]
-
-[tool.poetry.dependencies]
-python = "^3.8"
-transformers = "^4.31.0"
-pandas = "^2.0.3"
-pytorch-lightning = "^2.0.5"
-gpustat = "^1.1"
-
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling", "hatch-requirements-txt"]
+build-backend = "hatchling.build"
+
+[project]
+name = "master-thesis"
+version = "0.0.1"
+authors = [
+  { name="Kevin Kraus", email="kevin.kraus@studium.uni-hamburg.de" },
+]
+description = "Adaptation of the llama-recipes repository for my master-thesis. The repositories backbone stays the same, even tough it was enhanced and new requirements where implemented"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+]
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+vllm = ["vllm"]
+tests = ["pytest-mock"]
+auditnlg = ["auditnlg"]
+
+[project.urls]
+"Homepage" = "https://github.com/facebookresearch/llama-recipes/"
+"Bug Tracker" = "https://github.com/facebookresearch/llama-recipes/issues"
+
+[tool.hatch.build]
+exclude = [
+  "dist/*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]

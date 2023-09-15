@@ -5,23 +5,28 @@ import torch
 
 from functools import partial
 
-from ft_datasets.instruct_dataset import (
-    InstructionDataset,
-)
+from ft_datasets.instruct_dataset import InstructionDataset, TestingDataset
+
 from typing import Optional
+
+from configs.training import train_config
 
 
 DATASET_PREPROC = {
     "clinical_trials_dataset": partial(
-        InstructionDataset, max_words=1900
-    ),  # Adjust max_words based on the input and GPU capacities
-    "ct_testing": partial(InstructionDataset, max_words=1900),
-    "alpaca_dataset": partial(InstructionDataset, max_words=224),
+        InstructionDataset
+    ),  # Adjust max_words based on the requrired input-length input and GPU capacities
+    "ct_500": partial(InstructionDataset),
+    "ct_300": partial(InstructionDataset),
+    "ct_10": partial(InstructionDataset),  
+    "clinical_trials_testing": partial(TestingDataset),
+    "ct_testing_300": partial(TestingDataset),
+    "ct_testing_10": partial(TestingDataset),
 }
 
 
 def get_preprocessed_dataset(
-    tokenizer, dataset_config, split: str = "train"
+    tokenizer, dataset_config, max_tokens, split: str = "train"
 ) -> torch.utils.data.Dataset:
     if not dataset_config.dataset in DATASET_PREPROC:
         raise NotImplementedError(f"{dataset_config.dataset} is not (yet) implemented")
@@ -37,4 +42,5 @@ def get_preprocessed_dataset(
         dataset_config,
         tokenizer,
         get_split(),
+        max_tokens,
     )

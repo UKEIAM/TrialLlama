@@ -12,6 +12,7 @@ from peft import (
 import configs.datasets as datasets
 from configs.peft import lora_config, llama_adapter_config, prefix_config
 from configs.training import train_config
+from configs.testing import test_config
 from .dataset_utils import DATASET_PREPROC
 
 
@@ -34,6 +35,9 @@ def update_config(config, **kwargs):
                         print(f"Warning: {config_name} does not accept parameter: {k}")
             elif isinstance(config, train_config):
                 print(f"Warning: unknown parameter {k}")
+            elif isinstance(config, test_config):
+                print(f"Warning: unknown parameter {k}")
+
 
 
 def generate_peft_config(train_config, kwargs):
@@ -53,14 +57,12 @@ def generate_peft_config(train_config, kwargs):
     return peft_config
 
 
-def generate_dataset_config(train_config, kwargs):
+def generate_dataset_config(config, kwargs):
     names = tuple(DATASET_PREPROC.keys())
 
-    assert train_config.dataset in names, f"Unknown dataset: {train_config.dataset}"
+    assert config.dataset in names, f"Unknown dataset: {config.dataset}"
 
-    dataset_config = {k: v for k, v in inspect.getmembers(datasets)}[
-        train_config.dataset
-    ]
+    dataset_config = {k: v for k, v in inspect.getmembers(datasets)}[config.dataset]
     update_config(dataset_config, **kwargs)
 
     return dataset_config
