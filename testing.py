@@ -14,8 +14,6 @@ from torch.distributed.fsdp import (
 
 from transformers import (
     LlamaForCausalLM,
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
     LlamaTokenizer,
     LlamaConfig,
     default_data_collator,
@@ -61,7 +59,7 @@ def main(**kwargs):
     dataset_test = get_preprocessed_dataset(
         tokenizer,
         dataset_config,
-        max_words=test_config.max_tokens,
+        max_tokens=test_config.max_tokens,
         split="train",
     )
 
@@ -79,9 +77,26 @@ def main(**kwargs):
     test_set_json = json.load(open(dataset_config.data_path))
 
     # Load fine-tuned model ATTENTION: Fine-tuned adapter weights, need to be merged with base-model before loading is possible!
-    model = load_model(test_config.ft_model_name, test_config.quantization)
     if test_config.load_peft_model:
-        model = load_peft_model(model, test_config.ft_model_name + "adapter_weights")
+        base_model = LlamaForCausalLM.from_pretrained(
+            test_config.model,
+            return_dict=True,
+            load_in_8bit=test_config.quantization,
+            device_map="auto",
+            low_cpu_mem_usage=True,
+        )
+        model = PeftModel.from_pretrained(
+            base_model, 
+            os.path.join(test_config.ft_model_name, "adapter_weights"),
+        )
+    else:
+        model = LlamaForCausalLM.from_pretrained(
+            test_config.ft_model_name,
+            return_dict=True,
+            load_in_8bit=test_config.quantization,
+            device_map="auto",
+            low_cpu_mem_usage=True,
+        )
 
     model.eval()
     model.resize_token_embeddings(model.config.vocab_size + 1)

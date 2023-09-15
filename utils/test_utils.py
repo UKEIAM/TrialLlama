@@ -30,7 +30,6 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
     )  # df_out is for internal evaluation purposes, where we can compare the output of the model with the qrels provided
 
     id_pattern = r"^(\d+)_(\d+)_(\w+)$"
-    response_pattern = r"### Response:(.*)"
 
     with MemoryTrace() as memtrace:
         for step, batch in enumerate(
@@ -66,41 +65,49 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                     else batch["input_ids"].shape[1]
                 )
                 generated_tokens = outputs.sequences[:, input_length:]
-                response = tokenizer.decode(
-                    generated_tokens[0][idx]
-                )  # TODO: Right now, assuming Model returns only the class.
-                for idx, tokens in enumerate(generated_tokens):
-                    response.append(tokenizer.decode(generated_tokens[0][idx]))
-
-                for idx, item in enumerate(response):
-                    if "eligible" in item.lower():
-                        proba = np.exp(transition_scores[0][idx].cpu().numpy())
-                        predicted_label = 2
-                    elif "noneligible" in item.lower():
-                        proba = np.exp(transition_scores[0][idx].cpu().numpy())
-                        predicted_label = 1
-                    elif "irrelevant" in item.lower():
-                        proba = np.exp(transition_scores[0][idx].cpu().numpy())
-                        predicted_label = 0
-                    else:
-                        proba = None
-                        predicted_label = -1
+                response = []
+                for token in generated_tokens[0]:
+                    response.append(tokenizer.decode(token))  # TODO: Right now, assuming Model returns only the class.
+                # for idx, tokens in enumerate(generated_tokens):
+                #     response.append(tokenizer.decode(generated_tokens[0][idx]))
+                response = ''.join(response)
+                response = response.replace("</s>", "")
+                probas = []
+                if "eligible" in response.lower():
+                    for item in transition_scores[0]:
+                        probas.append(np.exp(item.cpu().numpy()))
+                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
+                    proba = sum(probas) / len(probas)
+                    predicted_label = 2
+                elif "uneligible" in response.lower() or "ineligible" in response.lower():
+                    for item in transition_scores[0]:
+                        probas.append(np.exp(item.cpu().numpy()))
+                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
+                    proba = sum(probas) / len(probas)
+                    predicted_label = 1
+                elif "irrelevant" in response.lower() or "notrelevant" in response.lower():
+                    for item in transition_scores[0]:
+                        probas.append(np.exp(item.cpu().numpy()))
+                    proba = sum(probas) / len(probas)
+                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
+                    predicted_label = 0
+                else:
+                    proba = None
+                    predicted_label = -1
 
                 match = re.match(id_pattern, test_set_json[step]["id"])
                 internal_id = match.group(1)
                 topic_id = match.group(2)
                 ct_id = match.group(3)
 
-                print(f"### Response: {response}")
-                # TODO: Figure out how to get probabilities for the output of LLM
-                if predicted_label in [0, 1, 2]:
-                    row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model_name]
-                    row_out = [topic_id, 0, ct_id, proba, predicted_label]
+                row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model_name]
+                row_out = [topic_id, 0, ct_id, proba, predicted_label]
 
                 # TODO: For debugging purposes, since currently model returns 'nan' values as output tensor
                 trec_out.loc[step] = row_trec
                 df_out.loc[step] = row_out
 
+        # Special format required by trec_eval script. Not relevant
         trec_out["RANK"] = (
             trec_out.groupby("TOPIC_NO")["SCORE"]
             .rank(ascending=False, method="dense")

@@ -4,15 +4,16 @@ from dataclasses import dataclass
 @dataclass
 class test_config:
     batch_size: int = 1
+    model: str = "checkpoints/meta-llama/Llama-2-7b-hf"
     ft_model_name: str = "out/poc_1_llama-2-7b-hf"
     quantization: bool = True
     dataset: str = (
-        "ct_testing_10"  # TODO: Change to full dataset once debugging finished
+        "ct_testing_300"
     )
     num_workers_dataloader: int = 1
     out_file_name: str = "poc_1_eval_ready"
     max_tokens: int = 1024
-    max_new_tokens: int = 1  # Should be 1 since we want a classification. But could also cause the system not to work
+    max_new_tokens: int = 20  # Should be 1 since we want a classification. But could also cause the system not to work
     seed: int = 42  # seed value for reproducibility
     do_sample: bool = (
         True  # Whether or not to use sampling ; use greedy decoding otherwise.

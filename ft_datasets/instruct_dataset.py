@@ -94,34 +94,42 @@ class TestingDataset(Dataset):
         # TODO: Dig deeper into the dataset code
         ann = self.ann[index]
         prompt = PROMPT_DICT["prompt_input"].format_map(ann)
-        # prompt = self.tokenizer.encode(prompt)
-        # prompt.append(self.tokenizer.eos_token_id)
-        # prompt = torch.tensor(prompt, dtype=torch.int64)
-        # padding = self.max_tokens - prompt.shape[0]
-        # if padding > 0:
-        #     prompt = torch.cat((prompt, torch.zeros(padding, dtype=torch.int64) - 1))
-        # elif padding < 0:
-        #     prompt = prompt[: self.max_tokens]
-        batch = self.tokenizer(
-            prompt,
-            padding="max_length",
-            truncation=True,
-            max_length=self.max_tokens,
-            return_tensors="pt",
-        )
-
-        while len(batch["input_ids"]) > self.max_tokens:
-            ann = self.ann[index]
+        ann = self.ann[index]
+        prompt = PROMPT_DICT["prompt_input"].format_map(ann)
+        prompt = torch.tensor(self.tokenizer.encode(prompt), dtype=torch.int64)
+        while len(prompt) > self.max_tokens:
             words = ann["input"].split()
             ann["input"] = " ".join(words[:-1])
             prompt = PROMPT_DICT["prompt_input"].format_map(ann)
+            prompt = torch.tensor(self.tokenizer.encode(prompt), dtype=torch.int64)
+            prompt = self.tokenizer.encode(prompt)
+        example = torch.tensor(example, dtype=torch.int64)
+        padding = self.max_tokens - example.shape[0]
+        if padding > 0:
+            example = torch.cat((example, torch.zeros(padding, dtype=torch.int64) - 1))
+        # batch = self.tokenizer(
+        #     prompt,
+        #     padding="max_length",
+        #     truncation=True,
+        #     max_length=self.max_tokens,
+        #     return_tensors="pt",
+        # )
 
-            batch = self.tokenizer(
-            prompt,
-            padding="max_length",
-            truncation=True,
-            max_length=self.max_tokens,
-            return_tensors="pt",
-        )
+        # while len(batch["input_ids"]) > self.max_tokens:
+        #     ann = self.ann[index]
+        #     words = ann["input"].split()
+        #     ann["input"] = " ".join(words[:-1])
+        #     prompt = PROMPT_DICT["prompt_input"].format_map(ann)
 
-        return batch
+        #     batch = self.tokenizer(
+        #     prompt,
+        #     padding="max_length",
+        #     truncation=True,
+        #     max_length=self.max_tokens,
+        #     return_tensors="pt",
+        # )
+
+        # return batch
+        return {
+            "input_ids": prompt
+        }
