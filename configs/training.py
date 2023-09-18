@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class train_config:
-    model_name: str = "checkpoints/meta-llama/Llama-2-7b-hf"
+    model_name: str = "checkpoints/meta-llama/Llama-2-7b-chat-hf"
     enable_fsdp: bool = False
     low_cpu_fsdp: bool = False
     run_validation: bool = True

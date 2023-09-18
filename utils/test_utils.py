@@ -16,7 +16,7 @@ from .memory_utils import MemoryTrace
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 
-def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.DataFrame:
+def test(model, test_set_json, test_config, test_dataloader, tokenizer, max_tokens) -> pd.DataFrame:
     """
     Run the model on a given test dataset. Returns a class 0, 1 or 2, which is saved to a
     .txt mapping the patient topic and the clinical trial ID.
@@ -36,7 +36,7 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
             tqdm(test_dataloader, colour="green", desc="Testing iteration:")
         ):
             for key in batch.keys():
-                batch[key] = batch[key].view(1, test_config.max_tokens)
+                batch[key] = batch[key].view(1, max_tokens)
                 batch[key] = batch[key].to("cuda:0")
             with torch.no_grad():
                 outputs = model.generate(
@@ -52,6 +52,7 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                     length_penalty=test_config.length_penalty,
                     return_dict_in_generate=True,
                     output_scores=True,
+                    # logprobs= True, TODO: Test this one
                 )
                 # output_text = tokenizer.decode(outputs.sequences[0], skip_special_tokens=True)
                 # TODO: Only consider part after "###Response: "
@@ -92,7 +93,7 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                     # proba = np.exp(transition_scores[0][0].cpu().numpy())
                     predicted_label = 0
                 else:
-                    proba = None
+                    proba = 0
                     predicted_label = -1
 
                 match = re.match(id_pattern, test_set_json[step]["id"])
@@ -119,3 +120,26 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
         # add_ranking_column(trec_out)
 
         return trec_out, df_out
+
+def get_max_length(model):
+    """
+    Extracts maximum token length from the model configuration
+
+    :param model: Hugging Face model
+    """
+
+    # Pull model configuration
+    conf = model.config
+    # Initialize a "max_length" variable to store maximum sequence length as null
+    max_length = None
+    # Find maximum sequence length in the model configuration and save it in "max_length" if found
+    for length_setting in ["n_positions", "max_position_embeddings", "seq_length"]:
+        max_length = getattr(model.config, length_setting, None)
+        if max_length:
+            print(f"Found max length: {max_length}")
+            break
+    # Set "max_length" to 1024 (default value) if maximum sequence length is not found in the model configuration
+    if not max_length:
+        max_length = 1024
+        print(f"Using default max length: {max_length}")
+    return max_length

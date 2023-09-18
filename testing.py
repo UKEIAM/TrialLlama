@@ -39,7 +39,7 @@ from utils.train_utils import (
     clear_gpu_cache,
 )
 
-from utils.test_utils import test
+from utils.test_utils import test, get_max_length
 
 
 def main(**kwargs):
@@ -55,26 +55,6 @@ def main(**kwargs):
         }
     )
     dataset_config = generate_dataset_config(test_config, kwargs)
-
-    dataset_test = get_preprocessed_dataset(
-        tokenizer,
-        dataset_config,
-        max_tokens=test_config.max_tokens,
-        split="train",
-    )
-
-    test_dataloader = torch.utils.data.DataLoader(
-        dataset_test,
-        batch_size=test_config.batch_size,
-        num_workers=test_config.num_workers_dataloader,
-        pin_memory=True,
-        sampler=None,
-        drop_last=True,
-        collate_fn=default_data_collator,
-    )
-
-    # Load JSON for mapping
-    test_set_json = json.load(open(dataset_config.data_path))
 
     # Load fine-tuned model ATTENTION: Fine-tuned adapter weights, need to be merged with base-model before loading is possible!
     if test_config.load_peft_model:
@@ -98,6 +78,28 @@ def main(**kwargs):
             low_cpu_mem_usage=True,
         )
 
+    max_tokens = get_max_length(model) # In the case of running our inference batch evaluation, we have a batch_size of 1, so even with 24gb the max_tokens defined by the model (llama2 4096) is no problem
+    dataset_test = get_preprocessed_dataset(
+        tokenizer,
+        dataset_config,
+        max_tokens=max_tokens,
+        split="train",
+    )
+
+    test_dataloader = torch.utils.data.DataLoader(
+        dataset_test,
+        batch_size=test_config.batch_size,
+        num_workers=test_config.num_workers_dataloader,
+        pin_memory=True,
+        sampler=None,
+        drop_last=True,
+        collate_fn=default_data_collator,
+    )
+
+    # Load JSON for mapping
+    test_set_json = json.load(open(dataset_config.data_path))
+
+
     model.eval()
     model.resize_token_embeddings(model.config.vocab_size + 1)
     # test_prompt = "This is a test sentence to tokenize."
@@ -117,6 +119,7 @@ def main(**kwargs):
         test_config,
         test_dataloader,
         tokenizer,
+        max_tokens,
     )
 
     # Save out_file to run with TREC Eval script

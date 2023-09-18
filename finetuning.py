@@ -275,7 +275,7 @@ def main(**kwargs):
     if train_config.merge_weights:
         print("Merging adapter weights with base-model...")
         # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
-        model = LlamaForCausalLM.from_pretrained(
+        base_model = LlamaForCausalLM.from_pretrained(
             train_config.model_name,
             load_in_8bit=False,
             torch_dtype=torch.float16,
@@ -287,7 +287,7 @@ def main(**kwargs):
         peft_model = os.path.join(train_config.output_dir, "adapter_weights")
 
         model = PeftModel.from_pretrained(
-            model,
+            base_model,
             peft_model,
             torch_dtype=torch.float16,
             device_map="auto",
