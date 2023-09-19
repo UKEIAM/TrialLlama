@@ -53,7 +53,7 @@ def main(**kwargs):
 
     # Load fine-tuned model ATTENTION: Fine-tuned adapter weights, need to be merged with base-model before loading is possible!
     if test_config.load_peft_model:
-        model_path = os.path.join("checkpoints", "meta-llama", test_config.model)
+        model_path = os.path.join("checkpoints", "meta-llama", test_config.base_model)
         base_model = LlamaForCausalLM.from_pretrained(
             model_path,
             return_dict=True,
@@ -75,7 +75,7 @@ def main(**kwargs):
             low_cpu_mem_usage=True,
         )
     tokenizer = LlamaTokenizer.from_pretrained(
-        os.path.join("checkpoints", "meta-llama", test_config.model)
+        os.path.join("checkpoints", "meta-llama", test_config.base_model)
     )
     tokenizer.add_special_tokens(
         {

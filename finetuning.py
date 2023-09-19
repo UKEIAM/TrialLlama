@@ -62,7 +62,7 @@ def main(**kwargs):
     torch.cuda.manual_seed(train_config.seed)
     torch.manual_seed(train_config.seed)
 
-    model_path = os.path.join("checkpoints", "meta-llama", train_config.model_name)
+    model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
 
     if train_config.enable_fsdp:
         setup()

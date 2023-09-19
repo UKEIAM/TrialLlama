@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class train_config:
-    model_name: str = "Llama-2-7b-chat-hf"
+    base_model: str = "Llama-2-7b-chat-hf"
     enable_fsdp: bool = False
     low_cpu_fsdp: bool = False
     run_validation: bool = True

@@ -412,15 +412,15 @@ def print_model_size(model, config, rank: int = 0) -> None:
 
     Args:
         model: The PyTorch model.
-        model_name (str): Name of the model.
+        base_model (str): Name of the base model.
         init_time_start (float): Initialization start time.
         init_time_end (float): Initialization end time.
         rank (int, optional): Current process's rank. Defaults to 0.
     """
     if rank == 0:
-        print(f"--> Model {config.model_name}")
+        print(f"--> Model {config.base_model}")
         total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        print(f"\n--> {config.model_name} has {total_params / 1e6} Million params\n")
+        print(f"\n--> {config.base_model} has {total_params / 1e6} Million params\n")
 
 
 def get_policies(cfg, rank):
@@ -477,7 +477,7 @@ def save_train_params(train_config, fsdp_config, rank):
         + "/"
         + train_config.dist_checkpoint_folder
         + "-"
-        + train_config.model_name
+        + train_config.base_model
     )
 
     save_dir = Path.cwd() / folder_name
