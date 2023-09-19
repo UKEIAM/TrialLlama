@@ -74,7 +74,9 @@ def main(**kwargs):
             device_map="auto",
             low_cpu_mem_usage=True,
         )
-    tokenizer = LlamaTokenizer.from_pretrained(os.path.join("out", test_config.model))
+    tokenizer = LlamaTokenizer.from_pretrained(
+        os.path.join("checkpoints", "meta-llama", test_config.model)
+    )
     tokenizer.add_special_tokens(
         {
             "pad_token": "<PAD>",
