@@ -16,7 +16,9 @@ from .memory_utils import MemoryTrace
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 
-def test(model, test_set_json, test_config, test_dataloader, tokenizer, max_tokens) -> pd.DataFrame:
+def test(
+    model, test_set_json, test_config, test_dataloader, tokenizer, max_tokens
+) -> pd.DataFrame:
     """
     Run the model on a given test dataset. Returns a class 0, 1 or 2, which is saved to a
     .txt mapping the patient topic and the clinical trial ID.
@@ -68,11 +70,16 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer, max_toke
                 generated_tokens = outputs.sequences[:, input_length:]
                 response = []
                 for token in generated_tokens[0]:
-                    response.append(tokenizer.decode(token))  # TODO: Right now, assuming Model returns only the class.
+                    response.append(
+                        tokenizer.decode(token)
+                    )  # TODO: Right now, assuming Model returns only the class.
                 # for idx, tokens in enumerate(generated_tokens):
                 #     response.append(tokenizer.decode(generated_tokens[0][idx]))
-                response = ''.join(response)
+                response = "".join(response)
                 response = response.replace("</s>", "")
+                if test_config.debug:
+                    print(f"### Response: {response}")
+
                 probas = []
                 if "eligible" in response.lower():
                     for item in transition_scores[0]:
@@ -80,13 +87,18 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer, max_toke
                     # proba = np.exp(transition_scores[0][0].cpu().numpy())
                     proba = sum(probas) / len(probas)
                     predicted_label = 2
-                elif "uneligible" in response.lower() or "ineligible" in response.lower():
+                elif (
+                    "uneligible" in response.lower() or "ineligible" in response.lower()
+                ):
                     for item in transition_scores[0]:
                         probas.append(np.exp(item.cpu().numpy()))
                     # proba = np.exp(transition_scores[0][0].cpu().numpy())
                     proba = sum(probas) / len(probas)
                     predicted_label = 1
-                elif "irrelevant" in response.lower() or "notrelevant" in response.lower():
+                elif (
+                    "irrelevant" in response.lower()
+                    or "notrelevant" in response.lower()
+                ):
                     for item in transition_scores[0]:
                         probas.append(np.exp(item.cpu().numpy()))
                     proba = sum(probas) / len(probas)
@@ -120,6 +132,7 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer, max_toke
         # add_ranking_column(trec_out)
 
         return trec_out, df_out
+
 
 def get_max_length(model):
     """

@@ -1,7 +1,9 @@
-datasets: [25000, 10000, 5000, 1800, 900, 500, 300, 10]
+base_models: [Llama-2-13b-hf, Llama-2-13b-chat-hf, Llama-2-7b-hf, Llama-2-7b-chat-hf]
+dataset_sizes: [25000, 10000, 5000, 1800, 900, 500, 300, 10]
 lrs: [1e-3, 1e-4, 1e-5, 1e-6]
 batch_sizes: [2, 3, 4]
 epochs: [2,3,4,5,6,7,8,9,10]
-base_models: [Llama-2-3b-hf, Llama-2-7b-chat-hf, Llama-2-7b-hf, Llama-2-7b-chat-hf]
 load_peft_model: True
-
+ft_models: [llama-7b-chat-300, llama-7b-chat-500, llama-7b-chat-900, llama-7b-chat-1800]
+gold_labels_21: trec.nist.gov_data_trials_qrels2021.txt
+gold_labels_22: trec.nist.gov_data_trials_qrels2022.txt

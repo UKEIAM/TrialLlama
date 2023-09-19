@@ -47,10 +47,14 @@ from utils.test_utils import test, get_max_length
 def main(**kwargs):
     # Update the configuration for the training and sharding process
     update_config((test_config), **kwargs)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(test_config.device_id)
+    import torch
+
     clear_gpu_cache()
 
-    # Initialise dataloader, NO shuffling!
-    tokenizer = LlamaTokenizer.from_pretrained(test_config.ft_model_name)
+    # TODO: Is that working, if model was not merged and only adapter_weigths are available...?
+    # If not, change to test_config.model
+    tokenizer = LlamaTokenizer.from_pretrained(test_config.ft_model)
     tokenizer.add_special_tokens(
         {
             "pad_token": "<PAD>",
@@ -69,11 +73,11 @@ def main(**kwargs):
         )
         model = PeftModel.from_pretrained(
             base_model,
-            os.path.join(test_config.ft_model_name, "adapter_weights"),
+            os.path.join("out", test_config.ft_model, "adapter_weights"),
         )
     else:
         model = LlamaForCausalLM.from_pretrained(
-            test_config.ft_model_name,
+            os.path.join("out", test_config.ft_model),
             return_dict=True,
             load_in_8bit=test_config.quantization,
             device_map="auto",
@@ -105,16 +109,6 @@ def main(**kwargs):
 
     model.eval()
     model.resize_token_embeddings(model.config.vocab_size + 1)
-    # test_prompt = "This is a test sentence to tokenize."
-    # batch_plain = tokenizer(
-    #     test_prompt,
-    #     padding="max_length",
-    #     truncation=True,
-    #     max_length=test_config.max_tokens,
-    #     return_tensors="pt",
-    #     )
-
-    # batch_plain = {k: v.to("cuda") for k, v in batch_plain.items()}
 
     trec_out, df_out = test(
         model,
@@ -129,8 +123,8 @@ def main(**kwargs):
     out_dir = os.path.join("out", "eval")
     os.makedirs(out_dir, exist_ok=True)
 
-    out_path = os.path.join(out_dir, f"{test_config.out_file_name}_trec.txt")
-    out_path_2 = os.path.join(out_dir, f"{test_config.out_file_name}_qrels.txt")
+    out_path = os.path.join(out_dir, f"eval_{test_config.ft_model}_trec.txt")
+    out_path_2 = os.path.join(out_dir, f"eval_{test_config.ft_model}_qrels.txt")
     trec_out.to_csv(out_path, sep="\t", index=False, header=False)
     df_out.to_csv(out_path_2, sep="\t", index=False, header=False)
     print(f"Evaluation file for trec_eval script successfully saved under {out_dir}")

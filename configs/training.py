@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class train_config:
-    model_name: str = "checkpoints/meta-llama/Llama-2-7b-chat-hf"
+    model_name: str = "Llama-2-7b-chat-hf"
     enable_fsdp: bool = False
     low_cpu_fsdp: bool = False
     run_validation: bool = True
@@ -35,5 +35,6 @@ class train_config:
     save_optimizer: bool = False  # will be used if using FSDP
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers, make use Flash Attention and Xformer memory-efficient kernels
     # max_words: int = 1900 # Since the input is so long, the output of the model while in eval mode is even longer. Hence, we need to restrict the preds output.
-    max_tokens: int = 1900  # Max Token Size based on 24gb GPU and batch_size of 4
+    max_tokens: int = 2048  # Fixed
     debug: bool = False
+    device_id: int = 0

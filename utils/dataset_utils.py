@@ -16,9 +16,14 @@ DATASET_PREPROC = {
     "clinical_trials_dataset": partial(
         InstructionDataset
     ),  # Adjust max_words based on the requrired input-length input and GPU capacities
+    "ct_25000": partial(InstructionDataset),
+    "ct_10000": partial(InstructionDataset),
+    "ct_5000": partial(InstructionDataset),
+    "ct_1800": partial(InstructionDataset),
+    "ct_900": partial(InstructionDataset),
     "ct_500": partial(InstructionDataset),
     "ct_300": partial(InstructionDataset),
-    "ct_10": partial(InstructionDataset),  
+    "ct_10": partial(InstructionDataset),
     "clinical_trials_testing": partial(TestingDataset),
     "ct_testing_300": partial(TestingDataset),
     "ct_testing_10": partial(TestingDataset),

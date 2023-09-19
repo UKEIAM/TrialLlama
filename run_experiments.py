@@ -1,20 +1,92 @@
 # TODO: Prepare experiment script
 
 import mlflow
+import mlflow.pytorch
 import yaml
 import os
+import logging
+import fire
+
+
+from finetuning import main as ft_main
+from testing import main as test_main
+from utils.eval_utils import calculate_metrics
+from configs.training import train_config
+from configs.testing import test_config
+from configs.experiments import experiment_config
+
+from utils.config_utils import update_config
 
 base_directory = os.path.dirname(os.path.dirname((__file__)))
 
-with open(os.path.join(base_directory, "configs", "experiments.yaml"), "r") as file:
-  experiment_config = yaml.safe_load(file)
+# with open(os.path.join(base_directory, "configs", "experiments.yaml"), "r") as file:
+#   experiment_config = yaml.safe_load(file)
+#
+# base_models = experiment_config["base_models"]
+# dataset_sozes =  experiment_config["dataset_sizes"]
+# learning_rates = experiment_config["lrs"]
+# epochs = experiment_config["epochs"]
+# batch_sizes = experiment_config["batch_sizes"]
+# load_peft_model = experiment_config["load_peft_model"]
+# ft_models = experiment_config["ft_models"]
 
-for item in experiment_config:
-  with mlflow as run:
+
+def train_different_models(**kwargs):
+    update_config((experiment_config), **kwargs)
+
+    dataset = f"ct_{experiment_config.dataset_size}.json"
+    dataset_testing = f"ct_{experiment_config.dataset_size}_testing.json"
+    dataset_path = os.path.join("data", dataset)
+    dataset_testing_path = os.path.join(
+        "data", f"ct_{experiment_config.dataset_size}_testing.json"
+    )
+    base_model_path = os.path.join(
+        "checkpoints", "meta-llama", experiment_config.base_model
+    )
+    ft_model_path = experiment_config.ft_model
+    qrels_2022_path = os.path.join("data", experiment_config.gold_labels_year)
+
+    mlflow.set_experiment(f"{experiment_config.ft_model}")
+    with mlflow as run:
+        mlflow.log_param("batch_size", experiment_config.batch_size)
+        mlflow.log_param("num_epochs", experiment_config.num_epochs)
+        mlflow.log_param("learning_rate", experiment_config.lr)
+        mlflow.log_param("dataset_size", experiment_config.dataset_size)
+        mlflow.log_param("dataset_name", dataset)
+        mlflow.log_param("qrels_year", experiment_config.gold_labels_year)
+        mlflow.log_param("max_tokens", experiment_config.max_tokens)
+        mlflow.log_param("max_new_tokens", experiment_config.max_new_tokens)
+
+        if experiment_config.run_training:
+            ft_main(
+                dataset=dataset,
+                device_id=experiment_config.device_id,
+                lr=experiment_config.lr,
+                num_epochs=experiment_config.num_epochs,
+                model_name=experiment_config.base_model,
+                gamma_float=experiment_config.gamma,  # TODO: Figure out what Gamma is doing
+                max_tokens=experiment_config.max_tokens,
+            )
+        if experiment_config.run_testing:
+            test_main(
+                dataset=dataset_testing,
+                device_id=experiment_config.device_id,
+                model_name=experiment_config.base_model,
+                load_peft_model=True,
+                max_new_tokens=experiment_config.max_new_tokens,
+            )
+
+        if experiment_config.run_eval:
+            scores = calculate_metrics(ft_model_path, qrels_2022_path)
+            mlflow.log_metrics(scores)
+
     # Set experiment ID
     # Run experiments from experiment.yaml
-      # Train model on different parameters
-      # Run llama_testing.py with fine-tuned model variation
-      # Output file with predicted classes
-      # Use files to calculate metrics as accuracy, F1 and AUC, etc.
-    pass
+    # Train model on different parameters
+    # Run llama_testing.py with fine-tuned model variation
+    # Output file with predicted classes
+    # Use files to calculate metrics as accuracy, F1 and AUC, etc.
+
+
+if __name__ == "__main__":
+    fire.Fire(main)

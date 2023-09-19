@@ -3,9 +3,6 @@
 
 import os
 
-# when calling "import torch" pytorch calls torch.cuda.is_available(), muting all os.environ calls. Hence, it has to be called before
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
-
 import fire
 import torch
 import mlflow
@@ -58,9 +55,15 @@ from utils.merge_lora_weights import merge_weights
 def main(**kwargs):
     # Update the configuration for the training and sharding process
     update_config((train_config, fsdp_config), **kwargs)
+    # when calling "import torch" pytorch calls torch.cuda.is_available(), muting all os.environ calls. Hence, it has to be called before
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(train_config.device_id)
+    import torch
+
     # Set the seeds for reproducibility
     torch.cuda.manual_seed(train_config.seed)
     torch.manual_seed(train_config.seed)
+
+    model_path = os.path.join("checkpoints", "meta-llama", train_config.model_name)
 
     if train_config.enable_fsdp:
         setup()
@@ -91,18 +94,18 @@ def main(**kwargs):
             )
         if rank == 0:
             model = AutoModelForCausalLM.from_pretrained(
-                train_config.model_name,
+                model_path,
                 load_in_8bit=True if train_config.quantization else None,
                 device_map="auto" if train_config.quantization else None,
             )
         else:
-            llama_config = LlamaConfig.from_pretrained(train_config.model_name)
+            llama_config = LlamaConfig.from_pretrained(model_path)
             with torch.device("meta"):
                 model = AutoModelForCausalLM(llama_config)
 
     else:
         model = AutoModelForCausalLM.from_pretrained(
-            train_config.model_name,
+            model_path,
             load_in_8bit=True if train_config.quantization else None,
             device_map="auto" if train_config.quantization else None,
         )
@@ -132,7 +135,7 @@ def main(**kwargs):
         model.to(torch.bfloat16)
 
     # Load the tokenizer and add special tokens
-    tokenizer = AutoTokenizer.from_pretrained(train_config.model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
     tokenizer.add_special_tokens(
         {
             "pad_token": "<PAD>",
@@ -274,6 +277,7 @@ def main(**kwargs):
         local_rank if train_config.enable_fsdp else None,
         rank if train_config.enable_fsdp else None,
     )
+    mlflow.log_metrics(results)
     if not train_config.enable_fsdp or rank == 0:
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
 
@@ -281,34 +285,10 @@ def main(**kwargs):
     if train_config.merge_weights:
         print("Merging adapter weights with base-model...")
         peft_model = os.path.join(train_config.output_dir, "adapter_weights")
-        merge_weights(train_config.model_name, peft_model, train_config.output_dir)
+        merge_weights(model_path, peft_model, train_config.output_dir)
         print(
             f"Merged adapter weights with base model and saved to {train_config.output_dir}"
         )
-
-        # # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
-        # base_model = LlamaForCausalLM.from_pretrained(
-        #     train_config.model_name,
-        #     load_in_8bit=False,
-        #     torch_dtype=torch.float16,
-        #     device_map="auto",
-        #     offload_folder="tmp",
-        # )
-        #
-        # tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
-        # peft_model = os.path.join(train_config.output_dir, "adapter_weights")
-        #
-        # model = PeftModel.from_pretrained(
-        #     base_model,
-        #     peft_model,
-        #     torch_dtype=torch.float16,
-        #     device_map="auto",
-        #     offload_folder="tmp",
-        # )
-        #
-        # model = model.merge_and_unload()
-        # model.save_pretrained(train_config.output_dir)
-        # tokenizer.save_pretrained(train_config.output_dir)
 
 
 if __name__ == "__main__":
