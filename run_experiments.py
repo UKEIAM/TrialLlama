@@ -47,15 +47,19 @@ def train_different_models(**kwargs):
     qrels_2022_path = os.path.join("data", experiment_config.gold_labels_year)
 
     mlflow.set_experiment(f"{experiment_config.ft_model}")
-    with mlflow as run:
-        mlflow.log_param("batch_size", experiment_config.batch_size)
-        mlflow.log_param("num_epochs", experiment_config.num_epochs)
-        mlflow.log_param("learning_rate", experiment_config.lr)
-        mlflow.log_param("dataset_size", experiment_config.dataset_size)
-        mlflow.log_param("dataset_name", dataset)
-        mlflow.log_param("qrels_year", experiment_config.gold_labels_year)
-        mlflow.log_param("max_tokens", experiment_config.max_tokens)
-        mlflow.log_param("max_new_tokens", experiment_config.max_new_tokens)
+    with mlflow.start_run() as run:
+        mlflow.log_params(
+            {
+                "batch_size": experiment_config.batch_size,
+                "num_epochs": experiment_config.num_epochs,
+                "learning_rate": experiment_config.lr,
+                "dataset_size": experiment_config.dataset_size,
+                "dataset_name": dataset,
+                "qrels_year": experiment_config.gold_labels_year,
+                "max_tokens": experiment_config.max_tokens,
+                "max_new_tokens": experiment_config.max_new_tokens,
+            }
+        )
 
         if experiment_config.run_training:
             ft_main(

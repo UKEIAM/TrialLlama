@@ -278,6 +278,7 @@ def main(**kwargs):
         rank if train_config.enable_fsdp else None,
     )
     mlflow.log_metrics(results)
+
     if not train_config.enable_fsdp or rank == 0:
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
 
