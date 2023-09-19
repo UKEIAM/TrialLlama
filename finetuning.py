@@ -1,7 +1,8 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
-
 import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 import fire
 import torch
@@ -56,8 +57,6 @@ def main(**kwargs):
     # Update the configuration for the training and sharding process
     update_config((train_config, fsdp_config), **kwargs)
     # when calling "import torch" pytorch calls torch.cuda.is_available(), muting all os.environ calls. Hence, it has to be called before
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(train_config.device_id)
-    import torch
 
     # Set the seeds for reproducibility
     torch.cuda.manual_seed(train_config.seed)
@@ -277,6 +276,10 @@ def main(**kwargs):
         local_rank if train_config.enable_fsdp else None,
         rank if train_config.enable_fsdp else None,
     )
+    for key, value in results.items():
+        if type(value) == torch.Tensor:
+            element = {key: value.item()}
+            results.update(element)
     mlflow.log_metrics(results)
 
     if not train_config.enable_fsdp or rank == 0:

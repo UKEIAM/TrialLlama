@@ -31,20 +31,23 @@ base_directory = os.path.dirname(os.path.dirname((__file__)))
 # ft_models = experiment_config["ft_models"]
 
 
-def train_different_models(**kwargs):
+def main(**kwargs):
     update_config((experiment_config), **kwargs)
 
-    dataset = f"ct_{experiment_config.dataset_size}.json"
-    dataset_testing = f"ct_{experiment_config.dataset_size}_testing.json"
+    dataset = f"ct_{experiment_config.dataset_size}"
+    dataset_testing = f"ct_testing_{experiment_config.dataset_size}"
     dataset_path = os.path.join("data", dataset)
     dataset_testing_path = os.path.join(
         "data", f"ct_{experiment_config.dataset_size}_testing.json"
     )
-    base_model_path = os.path.join(
-        "checkpoints", "meta-llama", experiment_config.base_model
+    eval_output_path = os.path.join(
+        "out", "eval", f"eval_{experiment_config.ft_model}_qrels.txt"
     )
-    ft_model_path = experiment_config.ft_model
-    qrels_2022_path = os.path.join("data", experiment_config.gold_labels_year)
+
+    qrels_2022_path = os.path.join(
+        "data",
+        f"trec.nist.gov_data_trials_qrels{experiment_config.gold_labels_year}.txt",
+    )
 
     mlflow.set_experiment(f"{experiment_config.ft_model}")
     with mlflow.start_run() as run:
@@ -64,24 +67,28 @@ def train_different_models(**kwargs):
         if experiment_config.run_training:
             ft_main(
                 dataset=dataset,
-                device_id=experiment_config.device_id,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
                 model_name=experiment_config.base_model,
-                gamma_float=experiment_config.gamma,  # TODO: Figure out what Gamma is doing
+                output_dir=experiment_config.ft_model,
+                gamma=experiment_config.gamma,  # TODO: Figure out what Gamma is doing
                 max_tokens=experiment_config.max_tokens,
             )
         if experiment_config.run_testing:
             test_main(
                 dataset=dataset_testing,
-                device_id=experiment_config.device_id,
                 model_name=experiment_config.base_model,
+                ft_model=experiment_config.ft_model,
                 load_peft_model=True,
                 max_new_tokens=experiment_config.max_new_tokens,
             )
 
         if experiment_config.run_eval:
-            scores = calculate_metrics(ft_model_path, qrels_2022_path)
+            scores = calculate_metrics(
+                eval_output_path=eval_output_path,
+                gold_labels_file=qrels_2022_path,
+                ft_model_name=experiment_config.ft_model,
+            )
             mlflow.log_metrics(scores)
 
     # Set experiment ID

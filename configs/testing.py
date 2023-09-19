@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class test_config:
     batch_size: int = 1
-    model: str = "checkpoints/meta-llama/Llama-2-7b-chat-hf"
+    model: str = "Llama-2-7b-chat-hf"
     ft_model: str = "llama-2-7b-chat-hf"
     quantization: bool = True
     dataset: str = "ct_testing_300"

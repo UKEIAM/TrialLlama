@@ -2,7 +2,6 @@ import os
 import json
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
-
 import fire
 import torch
 import torch.distributed as dist
@@ -47,33 +46,25 @@ from utils.test_utils import test, get_max_length
 def main(**kwargs):
     # Update the configuration for the training and sharding process
     update_config((test_config), **kwargs)
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(test_config.device_id)
-    import torch
 
     clear_gpu_cache()
 
-    # TODO: Is that working, if model was not merged and only adapter_weigths are available...?
-    # If not, change to test_config.model
-    tokenizer = LlamaTokenizer.from_pretrained(test_config.ft_model)
-    tokenizer.add_special_tokens(
-        {
-            "pad_token": "<PAD>",
-        }
-    )
     dataset_config = generate_dataset_config(test_config, kwargs)
 
     # Load fine-tuned model ATTENTION: Fine-tuned adapter weights, need to be merged with base-model before loading is possible!
     if test_config.load_peft_model:
+        model_path = os.path.join("checkpoints", "meta-llama", test_config.model)
         base_model = LlamaForCausalLM.from_pretrained(
-            test_config.model,
+            model_path,
             return_dict=True,
             load_in_8bit=test_config.quantization,
             device_map="auto",
             low_cpu_mem_usage=True,
         )
+        ft_model_path = os.path.join("out", test_config.ft_model, "adapter_weights")
         model = PeftModel.from_pretrained(
             base_model,
-            os.path.join("out", test_config.ft_model, "adapter_weights"),
+            ft_model_path,
         )
     else:
         model = LlamaForCausalLM.from_pretrained(
@@ -83,6 +74,12 @@ def main(**kwargs):
             device_map="auto",
             low_cpu_mem_usage=True,
         )
+    tokenizer = LlamaTokenizer.from_pretrained(os.path.join("out", test_config.model))
+    tokenizer.add_special_tokens(
+        {
+            "pad_token": "<PAD>",
+        }
+    )
 
     max_tokens = get_max_length(
         model

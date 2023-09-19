@@ -189,7 +189,7 @@ def train(
                         print(f"we are about to save the PEFT modules")
 
                     model_save_path = os.path.join(
-                        train_config.output_dir, "adapter_weights"
+                        "out", train_config.output_dir, "adapter_weights"
                     )
                     os.makedirs(model_save_path, exist_ok=True)
 
@@ -308,25 +308,31 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
     eval_preds = []
     eval_loss = 0.0  # Initialize evaluation loss
     with MemoryTrace() as memtrace:
-        for step, batch in enumerate(tqdm(eval_dataloader, colour="green", desc="evaluating Epoch")):
+        for step, batch in enumerate(
+            tqdm(eval_dataloader, colour="green", desc="evaluating Epoch")
+        ):
             for key in batch.keys():
                 if train_config.enable_fsdp:
                     batch[key] = batch[key].to(local_rank)
                 else:
-                    batch[key] = batch[key].to('cuda:0')
+                    batch[key] = batch[key].to("cuda:0")
             # Ensure no gradients are computed for this scope to save memory
             with torch.no_grad():
                 # Forward pass and compute loss
                 outputs = model(**batch)
                 loss = outputs.loss
                 if math.isnan(loss.detach().float().item()):
-                    x = tokenizer.decode(batch["input_ids"][0], skip_special_tokens=True)
+                    x = tokenizer.decode(
+                        batch["input_ids"][0], skip_special_tokens=True
+                    )
                     print(loss.detach().float())
                 eval_loss += loss.detach().float()
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
             eval_preds.extend(
-                tokenizer.batch_decode(preds.detach().cpu().numpy(), skip_special_tokens=True)
+                tokenizer.batch_decode(
+                    preds.detach().cpu().numpy(), skip_special_tokens=True
+                )
             )
 
     # If there's more than one CUDA device, reduce evaluation loss across all devices

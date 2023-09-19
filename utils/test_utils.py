@@ -113,7 +113,7 @@ def test(
                 topic_id = match.group(2)
                 ct_id = match.group(3)
 
-                row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model_name]
+                row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model]
                 row_out = [topic_id, 0, ct_id, proba, predicted_label]
 
                 # TODO: For debugging purposes, since currently model returns 'nan' values as output tensor
