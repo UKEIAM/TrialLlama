@@ -3,8 +3,12 @@
 
 import os
 
+# when calling "import torch" pytorch calls torch.cuda.is_available(), muting all os.environ calls. Hence, it has to be called before
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+
 import fire
 import torch
+import mlflow
 import torch.distributed as dist
 import torch.optim as optim
 from peft import PeftModel, get_peft_model, prepare_model_for_kbit_training
@@ -48,11 +52,12 @@ from utils.train_utils import (
     get_max_length,
 )
 
+from utils.merge_lora_weights import merge_weights
+
 
 def main(**kwargs):
     # Update the configuration for the training and sharding process
     update_config((train_config, fsdp_config), **kwargs)
-
     # Set the seeds for reproducibility
     torch.cuda.manual_seed(train_config.seed)
     torch.manual_seed(train_config.seed)
@@ -255,6 +260,7 @@ def main(**kwargs):
     scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
 
     # Start the training process
+
     results = train(
         model,
         train_dataloader,
@@ -274,33 +280,35 @@ def main(**kwargs):
     # TODO: somehow threw very weird error, hence commented
     if train_config.merge_weights:
         print("Merging adapter weights with base-model...")
-        # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
-        base_model = LlamaForCausalLM.from_pretrained(
-            train_config.model_name,
-            load_in_8bit=False,
-            torch_dtype=torch.float16,
-            device_map="auto",
-            offload_folder="tmp",
-        )
-
-        tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
         peft_model = os.path.join(train_config.output_dir, "adapter_weights")
-
-        model = PeftModel.from_pretrained(
-            base_model,
-            peft_model,
-            torch_dtype=torch.float16,
-            device_map="auto",
-            offload_folder="tmp",
-        )
-
-        model = model.merge_and_unload()
-        model.save_pretrained(train_config.output_dir)
-        tokenizer.save_pretrained(train_config.output_dir)
-
+        merge_weights(train_config.model_name, peft_model, train_config.output_dir)
         print(
             f"Merged adapter weights with base model and saved to {train_config.output_dir}"
         )
+
+        # # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
+        # base_model = LlamaForCausalLM.from_pretrained(
+        #     train_config.model_name,
+        #     load_in_8bit=False,
+        #     torch_dtype=torch.float16,
+        #     device_map="auto",
+        #     offload_folder="tmp",
+        # )
+        #
+        # tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
+        # peft_model = os.path.join(train_config.output_dir, "adapter_weights")
+        #
+        # model = PeftModel.from_pretrained(
+        #     base_model,
+        #     peft_model,
+        #     torch_dtype=torch.float16,
+        #     device_map="auto",
+        #     offload_folder="tmp",
+        # )
+        #
+        # model = model.merge_and_unload()
+        # model.save_pretrained(train_config.output_dir)
+        # tokenizer.save_pretrained(train_config.output_dir)
 
 
 if __name__ == "__main__":

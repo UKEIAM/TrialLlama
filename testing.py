@@ -1,6 +1,8 @@
 import os
 import json
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+
 import fire
 import torch
 import torch.distributed as dist
@@ -66,7 +68,7 @@ def main(**kwargs):
             low_cpu_mem_usage=True,
         )
         model = PeftModel.from_pretrained(
-            base_model, 
+            base_model,
             os.path.join(test_config.ft_model_name, "adapter_weights"),
         )
     else:
@@ -78,7 +80,9 @@ def main(**kwargs):
             low_cpu_mem_usage=True,
         )
 
-    max_tokens = get_max_length(model) # In the case of running our inference batch evaluation, we have a batch_size of 1, so even with 24gb the max_tokens defined by the model (llama2 4096) is no problem
+    max_tokens = get_max_length(
+        model
+    )  # In the case of running our inference batch evaluation, we have a batch_size of 1, so even with 24gb the max_tokens defined by the model (llama2 4096) is no problem
     dataset_test = get_preprocessed_dataset(
         tokenizer,
         dataset_config,
@@ -98,7 +102,6 @@ def main(**kwargs):
 
     # Load JSON for mapping
     test_set_json = json.load(open(dataset_config.data_path))
-
 
     model.eval()
     model.resize_token_embeddings(model.config.vocab_size + 1)
@@ -123,11 +126,14 @@ def main(**kwargs):
     )
 
     # Save out_file to run with TREC Eval script
-    out_path = os.path.join("out", "eval", f"{test_config.out_file_name}_trec.txt")
-    out_path_2 = os.path.join("out", "eval", f"{test_config.out_file_name}_qrels.txt")
+    out_dir = os.path.join("out", "eval")
+    os.makedirs(out_dir, exist_ok=True)
+
+    out_path = os.path.join(out_dir, f"{test_config.out_file_name}_trec.txt")
+    out_path_2 = os.path.join(out_dir, f"{test_config.out_file_name}_qrels.txt")
     trec_out.to_csv(out_path, sep="\t", index=False, header=False)
     df_out.to_csv(out_path_2, sep="\t", index=False, header=False)
-    print(f"Evaluation file for trec_eval script successfully saved under {out_path}")
+    print(f"Evaluation file for trec_eval script successfully saved under {out_dir}")
 
 
 if __name__ == "__main__":

@@ -7,9 +7,7 @@ class test_config:
     model: str = "checkpoints/meta-llama/Llama-2-7b-chat-hf"
     ft_model_name: str = "out/poc_1_llama-2-7b-chat-hf"
     quantization: bool = True
-    dataset: str = (
-        "ct_testing_300"
-    )
+    dataset: str = "ct_testing_300"
     num_workers_dataloader: int = 1
     out_file_name: str = "poc_1_llama_2_7b_hf_eval"
     max_new_tokens: int = 20  # Should be 1 since we want a classification. But could also cause the system not to work

@@ -35,4 +35,5 @@ class train_config:
     save_optimizer: bool = False  # will be used if using FSDP
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers, make use Flash Attention and Xformer memory-efficient kernels
     # max_words: int = 1900 # Since the input is so long, the output of the model while in eval mode is even longer. Hence, we need to restrict the preds output.
-    max_tokens: int = 1900 # Max Token Size based on 24gb GPU and batch_size of 4
+    max_tokens: int = 1900  # Max Token Size based on 24gb GPU and batch_size of 4
+    debug: bool = False
