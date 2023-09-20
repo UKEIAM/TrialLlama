@@ -34,12 +34,6 @@ base_directory = os.path.dirname(os.path.dirname((__file__)))
 def main(**kwargs):
     update_config((experiment_config), **kwargs)
 
-    dataset = f"ct_{experiment_config.dataset_size}"
-    dataset_testing = f"ct_testing_{experiment_config.dataset_size}"
-    dataset_path = os.path.join("data", dataset)
-    dataset_testing_path = os.path.join(
-        "data", f"ct_{experiment_config.dataset_size}_testing.json"
-    )
     eval_output_path = os.path.join(
         "out", "eval", f"eval_{experiment_config.ft_model}_qrels.txt"
     )
@@ -57,7 +51,6 @@ def main(**kwargs):
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,
                 "dataset_size": experiment_config.dataset_size,
-                "dataset_name": dataset,
                 "qrels_year": experiment_config.gold_labels_year,
                 "max_tokens": experiment_config.max_tokens,
                 "max_new_tokens": experiment_config.max_new_tokens,
@@ -71,7 +64,7 @@ def main(**kwargs):
 
         if experiment_config.run_training:
             ft_main(
-                dataset=dataset,
+                dataset_size=experiment_config.dataset_size,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
                 model_name=experiment_config.base_model,
@@ -81,7 +74,7 @@ def main(**kwargs):
             )
         if experiment_config.run_testing:
             test_main(
-                dataset=dataset_testing,
+                dataset_size=experiment_config.dataset_size,
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
                 load_peft_model=True,

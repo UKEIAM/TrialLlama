@@ -189,7 +189,7 @@ def train(
                         print(f"we are about to save the PEFT modules")
 
                     model_save_path = os.path.join(
-                        "out", train_config.output_dir, "adapter_weights"
+                        "out", train_config.ft_model, "adapter_weights"
                     )
                     os.makedirs(model_save_path, exist_ok=True)
 

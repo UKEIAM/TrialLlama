@@ -37,7 +37,7 @@ from utils.config_utils import (
     generate_peft_config,
     generate_dataset_config,
 )
-from utils.dataset_utils import get_preprocessed_dataset
+from utils.dataset_utils import get_preprocessed_dataset, create_dataset_sample
 
 from utils.train_utils import (
     train,
@@ -63,6 +63,7 @@ def main(**kwargs):
     torch.manual_seed(train_config.seed)
 
     model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
+    create_dataset_sample(dataset_size=train_config.dataset_size, type="train")
 
     if train_config.enable_fsdp:
         setup()
@@ -285,14 +286,12 @@ def main(**kwargs):
     if not train_config.enable_fsdp or rank == 0:
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
 
-    # TODO: somehow threw very weird error, hence commented
     if train_config.merge_weights:
         print("Merging adapter weights with base-model...")
-        peft_model = os.path.join(train_config.output_dir, "adapter_weights")
-        merge_weights(model_path, peft_model, train_config.output_dir)
-        print(
-            f"Merged adapter weights with base model and saved to {train_config.output_dir}"
-        )
+        ft_model_path = os.path.join("out", train_config.ft_model)
+        peft_model = os.path.join(ft_model_path, "adapter_weights")
+        merge_weights(model_path, peft_model, ft_model_path)
+        print(f"Merged adapter weights with base model and saved to {ft_model_path}")
 
 
 if __name__ == "__main__":

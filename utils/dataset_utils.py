@@ -54,4 +54,4 @@ def create_dataset_sample(dataset_size: int = 300, type: str = "train") -> None:
 
     data_sample = df.sample(n=dataset_size, random_state=42, ignore_index=True)
 
-    data_sample.to_json(out_path)
+    data_sample.to_json(out_path, orient="records")

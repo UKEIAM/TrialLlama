@@ -34,7 +34,7 @@ from utils.config_utils import (
     generate_peft_config,
     generate_dataset_config,
 )
-from utils.dataset_utils import get_preprocessed_dataset
+from utils.dataset_utils import get_preprocessed_dataset, create_dataset_sample
 
 from utils.train_utils import (
     clear_gpu_cache,
@@ -49,6 +49,7 @@ def main(**kwargs):
 
     clear_gpu_cache()
 
+    create_dataset_sample(dataset_size=train_config.dataset_size, type="test")
     dataset_config = generate_dataset_config(test_config, kwargs)
 
     # Load fine-tuned model ATTENTION: Fine-tuned adapter weights, need to be merged with base-model before loading is possible!
