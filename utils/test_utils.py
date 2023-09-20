@@ -81,32 +81,27 @@ def test(
                     print(f"### Response: {response}")
 
                 probas = []
-                if "eligible" in response.lower():
-                    for item in transition_scores[0]:
-                        probas.append(np.exp(item.cpu().numpy()))
-                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
-                    proba = sum(probas) / len(probas)
-                    predicted_label = 2
-                elif (
-                    "uneligible" in response.lower() or "ineligible" in response.lower()
-                ):
+                if "uneligible" in response.lower():
                     for item in transition_scores[0]:
                         probas.append(np.exp(item.cpu().numpy()))
                     # proba = np.exp(transition_scores[0][0].cpu().numpy())
                     proba = sum(probas) / len(probas)
                     predicted_label = 1
-                elif (
-                    "irrelevant" in response.lower()
-                    or "notrelevant" in response.lower()
-                ):
+                elif "eligible" in response.lower():
+                    for item in transition_scores[0]:
+                        probas.append(np.exp(item.cpu().numpy()))
+                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
+                    proba = sum(probas) / len(probas)
+                    predicted_label = 2
+                # elif (
+                #     "irrelevant" in response.lower()
+                # ): # TODO Model outputs a lot of gibberish or just nothing, to make calculating metrics easier we could make the assumption of labeling those outputs as "IRRELEVANT"
+                else:
                     for item in transition_scores[0]:
                         probas.append(np.exp(item.cpu().numpy()))
                     proba = sum(probas) / len(probas)
                     # proba = np.exp(transition_scores[0][0].cpu().numpy())
                     predicted_label = 0
-                else:
-                    proba = 0
-                    predicted_label = -1
 
                 match = re.match(id_pattern, test_set_json[step]["id"])
                 internal_id = match.group(1)
@@ -120,7 +115,7 @@ def test(
                 trec_out.loc[step] = row_trec
                 df_out.loc[step] = row_out
 
-        # Special format required by trec_eval script. Not relevant
+        # trec_eval script requires a document ranking. For that reason we simply use score calculated by the averaged token probablities to create a doucment ranking
         trec_out["RANK"] = (
             trec_out.groupby("TOPIC_NO")["SCORE"]
             .rank(ascending=False, method="dense")

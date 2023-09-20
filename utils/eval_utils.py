@@ -31,31 +31,32 @@ def calculate_metrics(eval_output_path, gold_labels_file, ft_model_name):
     accuracy = accuracy_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="weighted")
     auc = roc_auc_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="weighted"
+        merged_df["LABEL_gold"],
+        merged_df["LABEL_pred"],
+        average="weighted",
+        multi_class="ovr",
     )
-
-    # print(f"Accuracy: {accuracy:.4f}")
-    # print(f"F1 Score: {f1:.4f}")
-    # print(f"AUC: {auc:.4f}")
 
     # Create a confusion matrix
     conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
 
-    # Plot the confusion matrix TODO: Not working yet
-    # plt.figure(figsize=(8, 6))
-    # sns.heatmap(
-    #     conf_matrix,
-    #     annot=True,
-    #     fmt="d",
-    #     cmap="Blues",
-    #     xticklabels=["0", "1", "2"],
-    #     yticklabels=["0", "1", "2"],
-    # )
-    # plt.xlabel("Predicted")
-    # plt.ylabel("Actual")
-    # plt.title("Confusion Matrix")
-    # out_img_path = os.path.join("out", "eval", "img", f"{ft_model_name}.png")
-    # os.makedir(out_img_path, exist_ok=True)
-    # plt.savefig(out_img_path)
+    # Plot the confusion matrix TODO: Not working  yet
+    print(conf_matrix)
+    print(type(conf_matrix))
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(
+        conf_matrix,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        xticklabels=["irrelevant", "uneligible", "eligible"],
+        yticklabels=["irrelevant", "uneligible", "eligible"],
+    )
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
+    out_img_path = os.path.join("out", "eval", "img")
+    os.makedirs(out_img_path, exist_ok=True)
+    plt.savefig(os.path.join(out_img_path, f"{ft_model_name}.png"))
 
     return {"accuracy": accuracy, "f1": f1, "auc": auc}
