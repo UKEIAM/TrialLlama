@@ -67,13 +67,16 @@ def test(
                 generated_tokens = outputs.sequences[:, input_length:]
                 response = []
                 for token in generated_tokens[0]:
-                    response.append(
-                        tokenizer.decode(token)
-                    )  # TODO: Right now, assuming Model returns only the class.
+                    response.append(tokenizer.decode(token))
                 response = "".join(response)
                 response = response.replace("</s>", "")
                 if test_config.debug:
                     print(f"### Response: {response}")
+
+                match = re.match(id_pattern, test_set_json[step]["id"])
+                internal_id = match.group(1)
+                topic_id = match.group(2)
+                ct_id = match.group(3)
 
                 probas = []
                 if "uneligible" in response.lower():
@@ -92,14 +95,15 @@ def test(
                     proba = sum(probas) / len(probas)
                     predicted_label = 0
                 else:
-                    # TODO: Currently, model response is often gibberish or nothing at all. Don't know yet how to handle such values
-                    print("Response gibbersish or empty. Continuing to next example.")
+                    print()
+                    if test_config.debug:
+                        # TODO: Currently, model response is often gibberish or nothing at all. Don't know yet how to handle such values
+                        # TODO: Has to be considered in evaluation, since less examples are evaluated between the models...
+                        print(match)
+                        print(
+                            "Response gibberish or empty. Continuing to next example."
+                        )
                     continue
-
-                match = re.match(id_pattern, test_set_json[step]["id"])
-                internal_id = match.group(1)
-                topic_id = match.group(2)
-                ct_id = match.group(3)
 
                 row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model]
                 row_out = [topic_id, 0, ct_id, proba, predicted_label]

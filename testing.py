@@ -1,45 +1,25 @@
 import os
 import json
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 import fire
 import torch
-import torch.distributed as dist
-import torch.optim as optim
-from peft import PeftModel
-from pkg_resources import packaging
-from tqdm import tqdm
-from torch.distributed.fsdp import (
-    FullyShardedDataParallel as FSDP,
-)
 
+
+from peft import PeftModel
 from transformers import (
     LlamaForCausalLM,
     LlamaTokenizer,
-    LlamaConfig,
     default_data_collator,
 )
-
-from inference.model_utils import load_model, load_peft_model
-
-from transformers.models.llama.modeling_llama import LlamaDecoderLayer
-
 from configs.training import train_config
 from configs.testing import test_config
-from policies.anyprecision_optimizer import AnyPrecisionAdamW
-
-from utils.fsdp_utils import fsdp_auto_wrap_policy
 from utils.config_utils import (
     update_config,
-    generate_peft_config,
     generate_dataset_config,
 )
 from utils.dataset_utils import get_preprocessed_dataset, create_dataset_sample
-
 from utils.train_utils import (
     clear_gpu_cache,
 )
-
 from utils.test_utils import test, get_max_length
 
 
@@ -49,7 +29,7 @@ def main(**kwargs):
 
     clear_gpu_cache()
 
-    create_dataset_sample(dataset_size=train_config.dataset_size, type="test")
+    create_dataset_sample(dataset_size=test_config.dataset_size, type="test")
     dataset_config = generate_dataset_config(test_config, kwargs)
 
     # Load fine-tuned model ATTENTION: Fine-tuned adapter weights, need to be merged with base-model before loading is possible!

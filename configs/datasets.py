@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ct:
-    dataset: str = "clinical_trials"
+    dataset: str = "ct"
     train_split: str = "train"
     test_split: str = "val"
     data_path: str = "data/ct.json"
@@ -15,6 +15,6 @@ class ct:
 # Test data, never seen by the model
 @dataclass
 class ct_testing:
-    dataset: str = "clinical_trials_testing"
+    dataset: str = "ct_testing"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
     data_path: str = "data/ct_testing.json"

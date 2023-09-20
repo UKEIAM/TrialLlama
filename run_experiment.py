@@ -2,7 +2,6 @@
 
 import mlflow
 import mlflow.pytorch
-import yaml
 import os
 import logging
 import fire
@@ -11,24 +10,10 @@ import fire
 from finetuning import main as ft_main
 from testing import main as test_main
 from utils.eval_utils import calculate_metrics
-from configs.training import train_config
-from configs.testing import test_config
 from configs.experiments import experiment_config
-
 from utils.config_utils import update_config
 
 base_directory = os.path.dirname(os.path.dirname((__file__)))
-
-# with open(os.path.join(base_directory, "configs", "experiments.yaml"), "r") as file:
-#   experiment_config = yaml.safe_load(file)
-#
-# base_models = experiment_config["base_models"]
-# dataset_sozes =  experiment_config["dataset_sizes"]
-# learning_rates = experiment_config["lrs"]
-# epochs = experiment_config["epochs"]
-# batch_sizes = experiment_config["batch_sizes"]
-# load_peft_model = experiment_config["load_peft_model"]
-# ft_models = experiment_config["ft_models"]
 
 
 def main(**kwargs):
@@ -51,6 +36,7 @@ def main(**kwargs):
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,
                 "dataset_size": experiment_config.dataset_size,
+                "dataset_size_testing": experiment_config.dataset_size_testing,
                 "qrels_year": experiment_config.gold_labels_year,
                 "max_tokens": experiment_config.max_tokens,
                 "max_new_tokens": experiment_config.max_new_tokens,
@@ -74,7 +60,7 @@ def main(**kwargs):
             )
         if experiment_config.run_testing:
             test_main(
-                dataset_size=experiment_config.dataset_size,
+                dataset_size=experiment_config.dataset_size_testing,
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
                 load_peft_model=True,

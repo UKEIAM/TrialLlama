@@ -1,12 +1,11 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
 import os
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
-
 import fire
 import torch
 import mlflow
+
+import policies
 import torch.distributed as dist
 import torch.optim as optim
 from peft import PeftModel, get_peft_model, prepare_model_for_kbit_training
@@ -25,8 +24,6 @@ from transformers import (
     default_data_collator,
 )
 from transformers.models.llama.modeling_llama import LlamaDecoderLayer
-
-import policies
 from configs.training import train_config
 from configs.fsdp import fsdp_config
 from policies.anyprecision_optimizer import AnyPrecisionAdamW
