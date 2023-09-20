@@ -81,6 +81,11 @@ def main(**kwargs):
                 ft_model=experiment_config.ft_model,
                 load_peft_model=True,
                 max_new_tokens=experiment_config.max_new_tokens,
+                temperature=experiment_config.temperature,
+                top_k=experiment_config.top_k,
+                top_p=experiment_config.top_p,
+                length_penalty=experiment_config.length_penalty,
+                repetition_penalty=experiment_config.repetition_penalty,
             )
 
         if experiment_config.run_eval:

@@ -54,11 +54,11 @@ def test(
                     length_penalty=test_config.length_penalty,
                     return_dict_in_generate=True,
                     output_scores=True,
-                    # logprobs= True, TODO: Test this one
+                    logprobs=True,
                 )
                 # output_text = tokenizer.decode(outputs.sequences[0], skip_special_tokens=True)
                 # TODO: Only consider part after "###Response: "
-
+                print(model.logprobs)
                 transition_scores = model.compute_transition_scores(
                     outputs.sequences, outputs.scores, normalize_logits=True
                 )

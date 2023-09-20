@@ -134,8 +134,13 @@ class ct_testing_300:
     data_path: str = "data/ct_testing_300.json"
 
 
-# Test data, never seen by the model
 @dataclass
+class ct_testing_100:
+    dataset: str = "ct_testing_100"
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    data_path: str = "data/ct_testing_100.json"
+
+
 class ct_testing_10:
     dataset: str = "ct_testing_10"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!

@@ -25,7 +25,14 @@ DATASET_PREPROC = {
     "ct_300": partial(InstructionDataset),
     "ct_10": partial(InstructionDataset),
     "clinical_trials_testing": partial(TestingDataset),
+    "ct_testing_25000": partial(InstructionDataset),
+    "ct_testing_10000": partial(InstructionDataset),
+    "ct_testing_5000": partial(InstructionDataset),
+    "ct_testing_1800": partial(InstructionDataset),
+    "ct_testing_900": partial(InstructionDataset),
+    "ct_testing_500": partial(InstructionDataset),
     "ct_testing_300": partial(TestingDataset),
+    "ct_testing_100": partial(TestingDataset),
     "ct_testing_10": partial(TestingDataset),
 }
 
