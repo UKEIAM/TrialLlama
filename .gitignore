@@ -7,5 +7,5 @@ __pycache__
 #data
 data
 experiments
-checkpoints
 out
+checkpoints/*

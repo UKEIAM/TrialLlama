@@ -18,3 +18,4 @@ jsonargparse
 protobuf==3.20.3
 pandas<1.6.0dev0,>=1.3
 mlflow
+huggingface-hub

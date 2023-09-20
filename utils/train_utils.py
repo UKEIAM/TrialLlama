@@ -189,7 +189,7 @@ def train(
                         print(f"we are about to save the PEFT modules")
 
                     model_save_path = os.path.join(
-                        train_config.output_dir, "adapter_weights"
+                        "out", train_config.ft_model, "adapter_weights"
                     )
                     os.makedirs(model_save_path, exist_ok=True)
 
@@ -308,25 +308,31 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
     eval_preds = []
     eval_loss = 0.0  # Initialize evaluation loss
     with MemoryTrace() as memtrace:
-        for step, batch in enumerate(tqdm(eval_dataloader, colour="green", desc="evaluating Epoch")):
+        for step, batch in enumerate(
+            tqdm(eval_dataloader, colour="green", desc="evaluating Epoch")
+        ):
             for key in batch.keys():
                 if train_config.enable_fsdp:
                     batch[key] = batch[key].to(local_rank)
                 else:
-                    batch[key] = batch[key].to('cuda:0')
+                    batch[key] = batch[key].to("cuda:0")
             # Ensure no gradients are computed for this scope to save memory
             with torch.no_grad():
                 # Forward pass and compute loss
                 outputs = model(**batch)
                 loss = outputs.loss
                 if math.isnan(loss.detach().float().item()):
-                    x = tokenizer.decode(batch["input_ids"][0], skip_special_tokens=True)
+                    x = tokenizer.decode(
+                        batch["input_ids"][0], skip_special_tokens=True
+                    )
                     print(loss.detach().float())
                 eval_loss += loss.detach().float()
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
             eval_preds.extend(
-                tokenizer.batch_decode(preds.detach().cpu().numpy(), skip_special_tokens=True)
+                tokenizer.batch_decode(
+                    preds.detach().cpu().numpy(), skip_special_tokens=True
+                )
             )
 
     # If there's more than one CUDA device, reduce evaluation loss across all devices
@@ -406,15 +412,15 @@ def print_model_size(model, config, rank: int = 0) -> None:
 
     Args:
         model: The PyTorch model.
-        model_name (str): Name of the model.
+        base_model (str): Name of the base model.
         init_time_start (float): Initialization start time.
         init_time_end (float): Initialization end time.
         rank (int, optional): Current process's rank. Defaults to 0.
     """
     if rank == 0:
-        print(f"--> Model {config.model_name}")
+        print(f"--> Model {config.base_model}")
         total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        print(f"\n--> {config.model_name} has {total_params / 1e6} Million params\n")
+        print(f"\n--> {config.base_model} has {total_params / 1e6} Million params\n")
 
 
 def get_policies(cfg, rank):
@@ -471,7 +477,7 @@ def save_train_params(train_config, fsdp_config, rank):
         + "/"
         + train_config.dist_checkpoint_folder
         + "-"
-        + train_config.model_name
+        + train_config.base_model
     )
 
     save_dir = Path.cwd() / folder_name

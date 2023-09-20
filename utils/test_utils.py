@@ -16,7 +16,9 @@ from .memory_utils import MemoryTrace
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 
-def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.DataFrame:
+def test(
+    model, test_set_json, test_config, test_dataloader, tokenizer, max_tokens
+) -> pd.DataFrame:
     """
     Run the model on a given test dataset. Returns a class 0, 1 or 2, which is saved to a
     .txt mapping the patient topic and the clinical trial ID.
@@ -36,7 +38,7 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
             tqdm(test_dataloader, colour="green", desc="Testing iteration:")
         ):
             for key in batch.keys():
-                batch[key] = batch[key].view(1, test_config.max_tokens)
+                batch[key] = batch[key].view(1, max_tokens)
                 batch[key] = batch[key].to("cuda:0")
             with torch.no_grad():
                 outputs = model.generate(
@@ -53,8 +55,6 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                     return_dict_in_generate=True,
                     output_scores=True,
                 )
-                # output_text = tokenizer.decode(outputs.sequences[0], skip_special_tokens=True)
-                # TODO: Only consider part after "###Response: "
 
                 transition_scores = model.compute_transition_scores(
                     outputs.sequences, outputs.scores, normalize_logits=True
@@ -67,47 +67,52 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
                 generated_tokens = outputs.sequences[:, input_length:]
                 response = []
                 for token in generated_tokens[0]:
-                    response.append(tokenizer.decode(token))  # TODO: Right now, assuming Model returns only the class.
-                # for idx, tokens in enumerate(generated_tokens):
-                #     response.append(tokenizer.decode(generated_tokens[0][idx]))
-                response = ''.join(response)
+                    response.append(tokenizer.decode(token))
+                response = "".join(response)
                 response = response.replace("</s>", "")
-                probas = []
-                if "eligible" in response.lower():
-                    for item in transition_scores[0]:
-                        probas.append(np.exp(item.cpu().numpy()))
-                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
-                    proba = sum(probas) / len(probas)
-                    predicted_label = 2
-                elif "uneligible" in response.lower() or "ineligible" in response.lower():
-                    for item in transition_scores[0]:
-                        probas.append(np.exp(item.cpu().numpy()))
-                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
-                    proba = sum(probas) / len(probas)
-                    predicted_label = 1
-                elif "irrelevant" in response.lower() or "notrelevant" in response.lower():
-                    for item in transition_scores[0]:
-                        probas.append(np.exp(item.cpu().numpy()))
-                    proba = sum(probas) / len(probas)
-                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
-                    predicted_label = 0
-                else:
-                    proba = None
-                    predicted_label = -1
+                if test_config.debug:
+                    print(f"### Response: {response}")
 
                 match = re.match(id_pattern, test_set_json[step]["id"])
                 internal_id = match.group(1)
                 topic_id = match.group(2)
                 ct_id = match.group(3)
 
-                row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model_name]
+                probas = []
+                if "uneligible" in response.lower():
+                    for item in transition_scores[0]:
+                        probas.append(np.exp(item.cpu().numpy()))
+                    proba = sum(probas) / len(probas)
+                    predicted_label = 1
+                elif "eligible" in response.lower():
+                    for item in transition_scores[0]:
+                        probas.append(np.exp(item.cpu().numpy()))
+                    proba = sum(probas) / len(probas)
+                    predicted_label = 2
+                elif "irrelevant" in response.lower():
+                    for item in transition_scores[0]:
+                        probas.append(np.exp(item.cpu().numpy()))
+                    proba = sum(probas) / len(probas)
+                    predicted_label = 0
+                else:
+                    print()
+                    if test_config.debug:
+                        # TODO: Currently, model response is often gibberish or nothing at all. Don't know yet how to handle such values
+                        # TODO: Has to be considered in evaluation, since less examples are evaluated between the models...
+                        print(match)
+                        print(
+                            "Response gibberish or empty. Continuing to next example."
+                        )
+                    continue
+
+                row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model]
                 row_out = [topic_id, 0, ct_id, proba, predicted_label]
 
                 # TODO: For debugging purposes, since currently model returns 'nan' values as output tensor
                 trec_out.loc[step] = row_trec
                 df_out.loc[step] = row_out
 
-        # Special format required by trec_eval script. Not relevant
+        # trec_eval script requires a document ranking. For that reason we simply use score calculated by the averaged token probablities to create a doucment ranking
         trec_out["RANK"] = (
             trec_out.groupby("TOPIC_NO")["SCORE"]
             .rank(ascending=False, method="dense")
@@ -119,3 +124,27 @@ def test(model, test_set_json, test_config, test_dataloader, tokenizer) -> pd.Da
         # add_ranking_column(trec_out)
 
         return trec_out, df_out
+
+
+def get_max_length(model):
+    """
+    Extracts maximum token length from the model configuration
+
+    :param model: Hugging Face model
+    """
+
+    # Pull model configuration
+    conf = model.config
+    # Initialize a "max_length" variable to store maximum sequence length as null
+    max_length = None
+    # Find maximum sequence length in the model configuration and save it in "max_length" if found
+    for length_setting in ["n_positions", "max_position_embeddings", "seq_length"]:
+        max_length = getattr(model.config, length_setting, None)
+        if max_length:
+            print(f"Found max length: {max_length}")
+            break
+    # Set "max_length" to 1024 (default value) if maximum sequence length is not found in the model configuration
+    if not max_length:
+        max_length = 1024
+        print(f"Using default max length: {max_length}")
+    return max_length

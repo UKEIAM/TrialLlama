@@ -1,10 +1,11 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
-
 import os
-
 import fire
 import torch
+import mlflow
+
+import policies
 import torch.distributed as dist
 import torch.optim as optim
 from peft import PeftModel, get_peft_model, prepare_model_for_kbit_training
@@ -23,8 +24,6 @@ from transformers import (
     default_data_collator,
 )
 from transformers.models.llama.modeling_llama import LlamaDecoderLayer
-
-import policies
 from configs.training import train_config
 from configs.fsdp import fsdp_config
 from policies.anyprecision_optimizer import AnyPrecisionAdamW
@@ -35,7 +34,7 @@ from utils.config_utils import (
     generate_peft_config,
     generate_dataset_config,
 )
-from utils.dataset_utils import get_preprocessed_dataset
+from utils.dataset_utils import get_preprocessed_dataset, create_dataset_sample
 
 from utils.train_utils import (
     train,
@@ -48,14 +47,20 @@ from utils.train_utils import (
     get_max_length,
 )
 
+from utils.merge_lora_weights import merge_weights
+
 
 def main(**kwargs):
     # Update the configuration for the training and sharding process
     update_config((train_config, fsdp_config), **kwargs)
+    # when calling "import torch" pytorch calls torch.cuda.is_available(), muting all os.environ calls. Hence, it has to be called before
 
     # Set the seeds for reproducibility
     torch.cuda.manual_seed(train_config.seed)
     torch.manual_seed(train_config.seed)
+
+    model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
+    create_dataset_sample(dataset_size=train_config.dataset_size, type="train")
 
     if train_config.enable_fsdp:
         setup()
@@ -86,18 +91,18 @@ def main(**kwargs):
             )
         if rank == 0:
             model = AutoModelForCausalLM.from_pretrained(
-                train_config.model_name,
+                model_path,
                 load_in_8bit=True if train_config.quantization else None,
                 device_map="auto" if train_config.quantization else None,
             )
         else:
-            llama_config = LlamaConfig.from_pretrained(train_config.model_name)
+            llama_config = LlamaConfig.from_pretrained(model_path)
             with torch.device("meta"):
                 model = AutoModelForCausalLM(llama_config)
 
     else:
         model = AutoModelForCausalLM.from_pretrained(
-            train_config.model_name,
+            model_path,
             load_in_8bit=True if train_config.quantization else None,
             device_map="auto" if train_config.quantization else None,
         )
@@ -127,7 +132,7 @@ def main(**kwargs):
         model.to(torch.bfloat16)
 
     # Load the tokenizer and add special tokens
-    tokenizer = AutoTokenizer.from_pretrained(train_config.model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
     tokenizer.add_special_tokens(
         {
             "pad_token": "<PAD>",
@@ -255,6 +260,7 @@ def main(**kwargs):
     scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
 
     # Start the training process
+
     results = train(
         model,
         train_dataloader,
@@ -268,39 +274,21 @@ def main(**kwargs):
         local_rank if train_config.enable_fsdp else None,
         rank if train_config.enable_fsdp else None,
     )
+    for key, value in results.items():
+        if type(value) == torch.Tensor:
+            element = {key: value.item()}
+            results.update(element)
+    mlflow.log_metrics(results)
+
     if not train_config.enable_fsdp or rank == 0:
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
 
-    # TODO: somehow threw very weird error, hence commented
     if train_config.merge_weights:
         print("Merging adapter weights with base-model...")
-        # If LoRA is being used, directly merge the adapter weights with the base model, so direct use of the model is possible
-        model = LlamaForCausalLM.from_pretrained(
-            train_config.model_name,
-            load_in_8bit=False,
-            torch_dtype=torch.float16,
-            device_map="auto",
-            offload_folder="tmp",
-        )
-
-        tokenizer = LlamaTokenizer.from_pretrained(train_config.model_name)
-        peft_model = os.path.join(train_config.output_dir, "adapter_weights")
-
-        model = PeftModel.from_pretrained(
-            model,
-            peft_model,
-            torch_dtype=torch.float16,
-            device_map="auto",
-            offload_folder="tmp",
-        )
-
-        model = model.merge_and_unload()
-        model.save_pretrained(train_config.output_dir)
-        tokenizer.save_pretrained(train_config.output_dir)
-
-        print(
-            f"Merged adapter weights with base model and saved to {train_config.output_dir}"
-        )
+        ft_model_path = os.path.join("out", train_config.ft_model)
+        peft_model = os.path.join(ft_model_path, "adapter_weights")
+        merge_weights(model_path, peft_model, ft_model_path)
+        print(f"Merged adapter weights with base model and saved to {ft_model_path}")
 
 
 if __name__ == "__main__":

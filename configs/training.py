@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class train_config:
-    model_name: str = "checkpoints/meta-llama/Llama-2-7b-hf"
+    base_model: str = "Llama-2-7b-chat-hf"
     enable_fsdp: bool = False
     low_cpu_fsdp: bool = False
     run_validation: bool = True
@@ -20,10 +20,11 @@ class train_config:
     use_fp16: bool = True
     mixed_precision: bool = True
     val_batch_size: int = 1
-    dataset: str = "ct_1800"
+    dataset: str = "ct"
+    dataset_size: int = 900
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = True
-    output_dir: str = "out"
+    ft_model: str = "ft-model"  # Name for the output ft-model
     freeze_layers: bool = False
     num_freeze_layers: int = 1
     quantization: bool = True
@@ -31,8 +32,10 @@ class train_config:
     save_model: bool = True
     merge_weights: bool = False
     dist_checkpoint_root_folder: str = "out"  # will be used if using FSDP
-    dist_checkpoint_folder: str = "fine-tuned"  # will be used if using FSDP
+    dist_checkpoint_folder: str = "ft-model"  # will be used if using FSDP
     save_optimizer: bool = False  # will be used if using FSDP
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers, make use Flash Attention and Xformer memory-efficient kernels
     # max_words: int = 1900 # Since the input is so long, the output of the model while in eval mode is even longer. Hence, we need to restrict the preds output.
-    max_tokens: int = 1900 # Max Token Size based on 24gb GPU and batch_size of 4
+    max_tokens: int = 2048  # Fixed
+    debug: bool = False
+    device_id: int = 0
