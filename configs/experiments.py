@@ -12,7 +12,6 @@ class experiment_config:
     num_epochs: int = 3
     ft_model: str = "llama-7b-chat-300"
     gold_labels_year: int = 2022
-    device_id: int = 3  # TODO: Whysoever not working, even if I import torch after setting environment variable
     gamma: float = 0.85
     run_training: bool = True
     run_testing: bool = True

@@ -12,6 +12,11 @@ Beside a whole bunch of utils, scripts and data-related files the most important
 ## Setup
 - Run `pip install -r requirements.txt`
 - Run `pip uninstall transformer-engine`, since there is some kind of bug caused by the `peft` library import
+-
+### Single- vs Multi-GPU system
+Pytorch has a weird bug (or feature?) that requires the definition of `CUDA_VISIBLE_DEVICES` before the `import torch` call. Hence, right now when working on a multi-gpu system it is hardcoded within the `finetuning.py` as well as the `testing.py`.
+So please consider to change the value, depending in your system
+- TODO: Find better solution
 
 ## Credits
 This repository is an adaptaion of the llama-recipies repository by facebookresearch: https://github.com/facebookresearch/llama-recipes
