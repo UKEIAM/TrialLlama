@@ -278,7 +278,6 @@ def main(**kwargs):
         if type(value) == torch.Tensor:
             element = {key: value.item()}
             results.update(element)
-    mlflow.log_metrics(results)
 
     if not train_config.enable_fsdp or rank == 0:
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
@@ -289,6 +288,8 @@ def main(**kwargs):
         peft_model = os.path.join(ft_model_path, "adapter_weights")
         merge_weights(model_path, peft_model, ft_model_path)
         print(f"Merged adapter weights with base model and saved to {ft_model_path}")
+
+    return results
 
 
 if __name__ == "__main__":

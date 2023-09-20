@@ -17,7 +17,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 
 def test(
-    model, test_set_json, test_config, test_dataloader, tokenizer, max_tokens
+    model, test_data_json, test_config, test_dataloader, tokenizer, max_tokens
 ) -> pd.DataFrame:
     """
     Run the model on a given test dataset. Returns a class 0, 1 or 2, which is saved to a
@@ -32,6 +32,7 @@ def test(
     )  # df_out is for internal evaluation purposes, where we can compare the output of the model with the qrels provided
 
     id_pattern = r"^(\d+)_(\d+)_(\w+)$"
+    empty_response_counter = 0
 
     with MemoryTrace() as memtrace:
         for step, batch in enumerate(
@@ -41,20 +42,25 @@ def test(
                 batch[key] = batch[key].view(1, max_tokens)
                 batch[key] = batch[key].to("cuda:0")
             with torch.no_grad():
-                outputs = model.generate(
-                    **batch,
-                    max_new_tokens=test_config.max_new_tokens,
-                    do_sample=test_config.do_sample,
-                    top_p=test_config.top_p,
-                    temperature=test_config.temperature,
-                    min_length=test_config.min_length,
-                    use_cache=test_config.use_cache,
-                    top_k=test_config.top_k,
-                    repetition_penalty=test_config.repetition_penalty,
-                    length_penalty=test_config.length_penalty,
-                    return_dict_in_generate=True,
-                    output_scores=True,
-                )
+                try:
+                    outputs = model.generate(
+                        **batch,
+                        max_new_tokens=test_config.max_new_tokens,
+                        do_sample=test_config.do_sample,
+                        top_p=test_config.top_p,
+                        temperature=test_config.temperature,
+                        min_length=test_config.min_length,
+                        use_cache=test_config.use_cache,
+                        top_k=test_config.top_k,
+                        repetition_penalty=test_config.repetition_penalty,
+                        length_penalty=test_config.length_penalty,
+                        return_dict_in_generate=True,
+                        output_scores=True,
+                    )
+                except RuntimeError as e:
+                    print(e)
+                    print(test_data_json[step]["id"])
+                    continue
 
                 transition_scores = model.compute_transition_scores(
                     outputs.sequences, outputs.scores, normalize_logits=True
@@ -73,7 +79,7 @@ def test(
                 if test_config.debug:
                     print(f"### Response: {response}")
 
-                match = re.match(id_pattern, test_set_json[step]["id"])
+                match = re.match(id_pattern, test_data_json[step]["id"])
                 internal_id = match.group(1)
                 topic_id = match.group(2)
                 ct_id = match.group(3)
@@ -95,11 +101,12 @@ def test(
                     proba = sum(probas) / len(probas)
                     predicted_label = 0
                 else:
-                    print()
+                    empty_response_counter += 1
                     if test_config.debug:
                         # TODO: Currently, model response is often gibberish or nothing at all. Don't know yet how to handle such values
                         # TODO: Has to be considered in evaluation, since less examples are evaluated between the models...
-                        print(match)
+                        print(f"Internal ID: {match.group(1)}")
+
                         print(
                             "Response gibberish or empty. Continuing to next example."
                         )
@@ -123,7 +130,7 @@ def test(
 
         # add_ranking_column(trec_out)
 
-        return trec_out, df_out
+        return trec_out, df_out, empty_response_counter
 
 
 def get_max_length(model):
