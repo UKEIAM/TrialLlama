@@ -57,6 +57,6 @@ def calculate_metrics(eval_output_path, gold_labels_file, ft_model_name):
     plt.title("Confusion Matrix")
     out_img_path = os.path.join("out", "eval", "img")
     os.makedirs(out_img_path, exist_ok=True)
-    plt.savefig(os.path.join(out_img_path, f"{ft_model_name}.png"))
+    plt.savefig(os.path.join(out_img_path, f"cm_{ft_model_name}.png"))
 
     return {"accuracy": accuracy, "f1": f1, "auc": auc}

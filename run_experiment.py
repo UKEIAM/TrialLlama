@@ -54,7 +54,7 @@ def main(**kwargs):
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
                 model_name=experiment_config.base_model,
-                output_dir=experiment_config.ft_model,
+                ft_model=experiment_config.ft_model,
                 gamma=experiment_config.gamma,  # TODO: Figure out what Gamma is doing
                 max_tokens=experiment_config.max_tokens,
             )
