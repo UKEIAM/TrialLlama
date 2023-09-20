@@ -22,3 +22,4 @@ class experiment_config:
     top_k: int = 50
     repetition_penalty: float = 1.0
     length_penalty: int = 1
+    debug: bool = True

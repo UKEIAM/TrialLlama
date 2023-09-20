@@ -75,6 +75,7 @@ def main(**kwargs):
                 top_p=experiment_config.top_p,
                 length_penalty=experiment_config.length_penalty,
                 repetition_penalty=experiment_config.repetition_penalty,
+                debug=experiment_config.debug,
             )
             mlflow.log_metric("number_of_empty_responses", results)
 
@@ -89,6 +90,7 @@ def main(**kwargs):
 
         # Clean gpu_cache before next mlflow run
         clear_gpu_cache()
+        print(f"Run with ID {run.info.run_id} finished successful")
     # Set experiment ID
     # Run experiments from experiment.yaml
     # Train model on different parameters

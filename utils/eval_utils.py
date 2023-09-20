@@ -46,7 +46,6 @@ def calculate_metrics(eval_output_path, gold_labels_file, ft_model_name):
 
     # Plot the confusion matrix TODO: Not working  yet
     print(conf_matrix)
-    print(type(conf_matrix))
     plt.figure(figsize=(8, 6))
     sns.heatmap(
         conf_matrix,
