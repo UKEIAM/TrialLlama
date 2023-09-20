@@ -61,6 +61,11 @@ def main(**kwargs):
                 "qrels_year": experiment_config.gold_labels_year,
                 "max_tokens": experiment_config.max_tokens,
                 "max_new_tokens": experiment_config.max_new_tokens,
+                "temperature": experiment_config.temperature,
+                "top_k": experiment_config.top_k,
+                "top_p": experiment_config.top_p,
+                "length_penalty": experiment_config.length_penalty,
+                "repetition_penalty": experiment_config.repetition_penalty,
             }
         )
 
