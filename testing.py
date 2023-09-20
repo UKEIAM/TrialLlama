@@ -2,7 +2,7 @@ import os
 import json
 import fire
 import torch
-
+import mlflow
 
 from peft import PeftModel
 from transformers import (
@@ -90,7 +90,7 @@ def main(**kwargs):
     model.eval()
     model.resize_token_embeddings(model.config.vocab_size + 1)
 
-    trec_out, df_out = test(
+    trec_out, df_out, erc = test(
         model,
         test_set_json,
         test_config,
@@ -108,6 +108,8 @@ def main(**kwargs):
     trec_out.to_csv(out_path, sep="\t", index=False, header=False)
     df_out.to_csv(out_path_2, sep="\t", index=False, header=False)
     print(f"Evaluation file for trec_eval script successfully saved under {out_dir}")
+
+    return erc
 
 
 if __name__ == "__main__":

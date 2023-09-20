@@ -49,7 +49,7 @@ def main(**kwargs):
         )
 
         if experiment_config.run_training:
-            ft_main(
+            results = ft_main(
                 dataset_size=experiment_config.dataset_size,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
@@ -58,8 +58,10 @@ def main(**kwargs):
                 gamma=experiment_config.gamma,  # TODO: Figure out what Gamma is doing
                 max_tokens=experiment_config.max_tokens,
             )
+            mlflow.log_metrics(results)
+
         if experiment_config.run_testing:
-            test_main(
+            results = test_main(
                 dataset_size=experiment_config.dataset_size_testing,
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
@@ -71,6 +73,7 @@ def main(**kwargs):
                 length_penalty=experiment_config.length_penalty,
                 repetition_penalty=experiment_config.repetition_penalty,
             )
+            mlflow.log_metrics(results)
 
         if experiment_config.run_eval:
             scores = calculate_metrics(
