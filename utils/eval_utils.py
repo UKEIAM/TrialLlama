@@ -30,12 +30,16 @@ def calculate_metrics(eval_output_path, gold_labels_file, ft_model_name):
     # Calculate Accuracy, F1 score, and AUC
     accuracy = accuracy_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="weighted")
-    auc = roc_auc_score(
-        merged_df["LABEL_gold"],
-        merged_df["LABEL_pred"],
-        average="weighted",
-        multi_class="ovr",
-    )
+    try:
+        auc = roc_auc_score(
+            merged_df["LABEL_gold"],
+            merged_df["LABEL_pred"],
+            average="weighted",
+            multi_class="ovr",
+        )
+    except Exception as e:
+        # TODO: Delete, for debug reasons only!
+        auc = 0
 
     # Create a confusion matrix
     conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])

@@ -6,7 +6,7 @@ import os
 import logging
 import fire
 
-
+from utils.train_utils import clear_gpu_cache
 from finetuning import main as ft_main
 from testing import main as test_main
 from utils.eval_utils import calculate_metrics
@@ -29,7 +29,8 @@ def main(**kwargs):
     )
 
     mlflow.set_experiment(f"{experiment_config.ft_model}")
-    with mlflow.start_run() as run:
+    description = f"Fine-tuned {experiment_config.ft_model} with a batch-size of {experiment_config.batch_size}, number of epochs of {experiment_config.num_epochs} and a lr of {experiment_config.lr}. Used qrels from {experiment_config.gold_labels_year}"
+    with mlflow.start_run(description=description) as run:
         mlflow.log_params(
             {
                 "batch_size": experiment_config.batch_size,
@@ -49,6 +50,7 @@ def main(**kwargs):
         )
 
         if experiment_config.run_training:
+            print("Running training...")
             results = ft_main(
                 dataset_size=experiment_config.dataset_size,
                 lr=experiment_config.lr,
@@ -61,6 +63,7 @@ def main(**kwargs):
             mlflow.log_metrics(results)
 
         if experiment_config.run_testing:
+            print("Running testing...")
             results = test_main(
                 dataset_size=experiment_config.dataset_size_testing,
                 model_name=experiment_config.base_model,
@@ -73,9 +76,10 @@ def main(**kwargs):
                 length_penalty=experiment_config.length_penalty,
                 repetition_penalty=experiment_config.repetition_penalty,
             )
-            mlflow.log_metrics(results)
+            mlflow.log_metric("number_of_empty_responses", results)
 
         if experiment_config.run_eval:
+            print("Running evaluation...")
             scores = calculate_metrics(
                 eval_output_path=eval_output_path,
                 gold_labels_file=qrels_2022_path,
@@ -83,6 +87,8 @@ def main(**kwargs):
             )
             mlflow.log_metrics(scores)
 
+        # Clean gpu_cache before next mlflow run
+        clear_gpu_cache()
     # Set experiment ID
     # Run experiments from experiment.yaml
     # Train model on different parameters
