@@ -3,7 +3,7 @@ import os
 from utils.eval_utils import calculate_metrics
 from configs.experiments import experiment_config
 
-eval_output_path = os.path.join("out", "eval", f"eval_llama-13b-300_qrels.txt")
+eval_output_path = os.path.join("out", "eval", f"eval_llama-7b-chat-300_qrels.txt")
 
 qrels_2022_path = os.path.join(
     "data",

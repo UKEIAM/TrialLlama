@@ -54,11 +54,8 @@ def test(
                     length_penalty=test_config.length_penalty,
                     return_dict_in_generate=True,
                     output_scores=True,
-                    logprobs=True,
                 )
-                # output_text = tokenizer.decode(outputs.sequences[0], skip_special_tokens=True)
-                # TODO: Only consider part after "###Response: "
-                print(model.logprobs)
+
                 transition_scores = model.compute_transition_scores(
                     outputs.sequences, outputs.scores, normalize_logits=True
                 )
@@ -73,8 +70,6 @@ def test(
                     response.append(
                         tokenizer.decode(token)
                     )  # TODO: Right now, assuming Model returns only the class.
-                # for idx, tokens in enumerate(generated_tokens):
-                #     response.append(tokenizer.decode(generated_tokens[0][idx]))
                 response = "".join(response)
                 response = response.replace("</s>", "")
                 if test_config.debug:
@@ -84,24 +79,22 @@ def test(
                 if "uneligible" in response.lower():
                     for item in transition_scores[0]:
                         probas.append(np.exp(item.cpu().numpy()))
-                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
                     proba = sum(probas) / len(probas)
                     predicted_label = 1
                 elif "eligible" in response.lower():
                     for item in transition_scores[0]:
                         probas.append(np.exp(item.cpu().numpy()))
-                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
                     proba = sum(probas) / len(probas)
                     predicted_label = 2
-                # elif (
-                #     "irrelevant" in response.lower()
-                # ): # TODO Model outputs a lot of gibberish or just nothing, to make calculating metrics easier we could make the assumption of labeling those outputs as "IRRELEVANT"
-                else:
+                elif "irrelevant" in response.lower():
                     for item in transition_scores[0]:
                         probas.append(np.exp(item.cpu().numpy()))
                     proba = sum(probas) / len(probas)
-                    # proba = np.exp(transition_scores[0][0].cpu().numpy())
                     predicted_label = 0
+                else:
+                    # TODO: Currently, model response is often gibberish or nothing at all. Don't know yet how to handle such values
+                    print("Response gibbersish or empty. Continuing to next example.")
+                    continue
 
                 match = re.match(id_pattern, test_set_json[step]["id"])
                 internal_id = match.group(1)

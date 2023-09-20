@@ -1,7 +1,7 @@
 # Masters-Thesis
 @author Kevin Kraus
 Masters thesis in the domain of NLP in cooperation with the IAM at UKE: Fine-tuning small LLMs for precision oncology use-cases
-# MTB Patient Trial Matching based on a fine-tuned llama 2 model
+# MTB Patient Trial Matching based on a fine-tuned Llama2-7b model
 ## Repo structure
 Beside a whole bunch of utils, scripts and data-related files the most important python files are:
 - `scripts/prepare_dataset.py` for preparing the dataset for fine-tuning based on the data provided by TREC Precision Medicine Track Challenge
@@ -12,7 +12,7 @@ Beside a whole bunch of utils, scripts and data-related files the most important
 ## Setup
 - Run `pip install -r requirements.txt`
 - Run `pip uninstall transformer-engine`, since there is some kind of bug caused by the `peft` library import
--
+
 ### Single- vs Multi-GPU system
 Pytorch has a weird bug (or feature?) that requires the definition of `CUDA_VISIBLE_DEVICES` before the `import torch` call. Hence, right now when working on a multi-gpu system it is hardcoded within the `finetuning.py` as well as the `testing.py`.
 So please consider to change the value, depending in your system
