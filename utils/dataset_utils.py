@@ -2,39 +2,21 @@
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
 
 import torch
+import os
+
+import pandas as pd
 
 from functools import partial
 
 from ft_datasets.instruct_dataset import InstructionDataset, TestingDataset
 
-from typing import Optional
-
-from configs.training import train_config
-
 
 DATASET_PREPROC = {
-    "clinical_trials_dataset": partial(
-        InstructionDataset
-    ),  # Adjust max_words based on the requrired input-length input and GPU capacities
-    "ct_25000": partial(InstructionDataset),
-    "ct_10000": partial(InstructionDataset),
-    "ct_5000": partial(InstructionDataset),
-    "ct_1800": partial(InstructionDataset),
-    "ct_900": partial(InstructionDataset),
-    "ct_500": partial(InstructionDataset),
-    "ct_300": partial(InstructionDataset),
-    "ct_10": partial(InstructionDataset),
-    "clinical_trials_testing": partial(TestingDataset),
-    "ct_testing_25000": partial(InstructionDataset),
-    "ct_testing_10000": partial(InstructionDataset),
-    "ct_testing_5000": partial(InstructionDataset),
-    "ct_testing_1800": partial(InstructionDataset),
-    "ct_testing_900": partial(InstructionDataset),
-    "ct_testing_500": partial(InstructionDataset),
-    "ct_testing_300": partial(TestingDataset),
-    "ct_testing_100": partial(TestingDataset),
-    "ct_testing_10": partial(TestingDataset),
+    "ct": partial(InstructionDataset),
+    "ct_testing": partial(TestingDataset),
 }
+
+base_dir = os.path.dirname(os.path.dirname(__file__))
 
 
 def get_preprocessed_dataset(
@@ -56,3 +38,20 @@ def get_preprocessed_dataset(
         get_split(),
         max_tokens,
     )
+
+
+def create_dataset_sample(dataset_size: int = 300, type: str = "train") -> None:
+    path = base_dir
+    out_path = base_dir
+    if type == "train":
+        path = os.path.join(base_dir, "data", "ct_full.json")
+        out_path = os.path.join(base_dir, "data", "ct.json")
+    elif type == "test":
+        path = os.path.join(base_dir, "data", "ct_testing_full.json")
+        out_path = os.path.join(base_dir, "data", "ct_testing.json")
+
+    df = pd.read_json(path)
+
+    data_sample = df.sample(n=dataset_size, random_state=42, ignore_index=True)
+
+    data_sample.to_json(out_path)
