@@ -29,7 +29,6 @@ data_list = []
 def create_JSON(
     config_name: Optional[str] = "train",
     out_file_name: Optional[str] = "ct_full.json",
-    only_criteria: Optional[bool] = True,
     task: str = "categorization",
 ):
 
@@ -62,6 +61,9 @@ def create_JSON(
     )
     qrels = read_qrel_txt(qrel_path)
 
+    # DEBUG
+    qrels = qrels[:10]
+
     counter = 0
     for index, row in tqdm(qrels.iterrows()):
         topic_nr = row["topic"]
@@ -76,15 +78,7 @@ def create_JSON(
 
         if os.path.exists(ct_path):
             clinical_trial_dict = parse_XML_to_json(ct_path)
-            if only_criteria:
-                clinical_trial_dict = extract_criteria_from_clinical_trials(
-                    clinical_trial_dict
-                )
-            ct_textblock = extract_textblocks_from_clinical_trials(clinical_trial_dict)
-            cleaned_ct_textblocks = []
-            for textblock in ct_textblock:
-                cleaned_textblock = clean_textblock(textblock)
-                cleaned_ct_textblocks.append(cleaned_textblock)
+            ct_data = extract_required_data_from_clinical_trials(clinical_trial_dict)
             if label == 0:
                 category = "IRRELEVANT"
                 output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
@@ -98,7 +92,7 @@ def create_JSON(
                 item = {
                     "id": f"{index}_{topic_nr}_{ct}",
                     "instruction": "Is the following patient given the PATIENT DESCRIPTION eligible for the given CLINICAL TRIAL DESCRIPTION? Please also give an explanation for your answer.",
-                    "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
+                    "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {ct_data}",
                     "output": category,
                 }
             else:
@@ -115,7 +109,6 @@ def create_JSON(
             continue
 
     """The below function is returning the full CT parsed into a JSON format + cleaned"""
-    # cleaned_list = clean_textblock_data_recursively(data_list)
     if task == "reasoning":
         out_directory = os.path.join(data_directory, f"reasoning_{out_file_name}")
     else:
@@ -129,33 +122,30 @@ def create_JSON(
 
 
 def clean_textblock(text):
-    # pattern = r'[^\x00-\x7F]'
-    # cleaned_text = re.sub(pattern, "", text)
     cleaned_text = text.replace(r'\\"', r"'")
-    # cleaned_text = re.sub(r'[@#$*_{}\[\]"\'\|\\~`]', ' ', cleaned_text)
     cleaned_text = re.sub(r"\s+", " ", cleaned_text.strip())
     return cleaned_text
 
 
-def clean_textblock_data_recursively(json_obj: list | dict) -> dict:
-    """Recursive function to find nested 'textblock' elements and clean the string from unnessecary chars and whitespaces"""
-    if isinstance(json_obj, dict):
-        cleaned_dict = {}
-        for key, value in json_obj.items():
-            if isinstance(value, dict) or isinstance(value, list):
-                cleaned_dict[key] = clean_textblock_data_recursively(value)
-            elif key in ["patient_description", "textblock"]:
-                cleaned_dict[key] = clean_textblock(value)
-            else:
-                cleaned_dict[key] = value
-        return cleaned_dict
-    elif isinstance(json_obj, list):
-        cleaned_list = []
-        for item in json_obj:
-            cleaned_list.append(clean_textblock_data_recursively(item))
-        return cleaned_list
-    else:
-        return json_obj
+# def clean_textblock_data_recursively(json_obj: list | dict) -> dict:
+#     """Recursive function to find nested 'textblock' elements and clean the string from unnessecary chars and whitespaces"""
+#     if isinstance(json_obj, dict):
+#         cleaned_dict = {}
+#         for key, value in json_obj.items():
+#             if isinstance(value, dict) or isinstance(value, list):
+#                 cleaned_dict[key] = clean_textblock_data_recursively(value)
+#             elif key in ["patient_description", "textblock"]:
+#                 cleaned_dict[key] = clean_textblock(value)
+#             else:
+#                 cleaned_dict[key] = value
+#         return cleaned_dict
+#     elif isinstance(json_obj, list):
+#         cleaned_list = []
+#         for item in json_obj:
+#             cleaned_list.append(clean_textblock_data_recursively(item))
+#         return cleaned_list
+#     else:
+#         return json_obj
 
 
 # def extract_textblocks_from_clinical_trials(clinical_trial: list | dict) -> list:
@@ -172,23 +162,25 @@ def clean_textblock_data_recursively(json_obj: list | dict) -> dict:
 #         elif isinstance(value, dict):
 #             textblocks.extend(extract_textblocks_from_clinical_trials(value))
 #     return textblocks
-def extract_eligibility_info(eligibility_element):
+def extract_data_info(type, elements):
     info = []
+    for key, value in elements.items():
+        if type == "eligibility":
+            if key == "criteria":
+                if value is not None:
+                    textblock_element = value.get("textblock")
+                    value = clean_textblock(textblock_element)
 
-    for key, value in eligibility_element.items():
+        if type == "brief_summary":
+            value = clean_textblock(value)
         info.append(f"{key.capitalize()}: {value}")
-        # Extract and include the <textblock> element content from <criteria>
-        criteria_element = eligibility_element.get("criteria")
-        if criteria_element is not None:
-            textblock_element = criteria_element.get("textblock")
-            if textblock_element is not None:
-                textblock_content = clean_textblock(value)
-                info.append(f"Textblock: {textblock_content}")
-
+        if type == "brief_summary":
+            key = "title"
+        info.append(f"{key.capitalize()}: {value}")
     return ", ".join(info)
 
 
-def extract_eligibility_from_clinical_trials(clinical_trial: list | dict) -> list:
+def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> list:
     """Extracts all eligibility information from the 'clinical_trials' section"""
     eligibility_elements = []
 
@@ -200,10 +192,18 @@ def extract_eligibility_from_clinical_trials(clinical_trial: list | dict) -> lis
 
     for key, value in clinical_trial.items():
         if key == "eligibility" and isinstance(value, dict):
-            eligibility_info = extract_eligibility_info(value)
+            eligibility_info = extract_data_info(key, value)
+            eligibility_elements.append(eligibility_info)
+        if key == "brief_summary" and isinstance(value, dict):
+            eligibility_info = extract_data_info(key, value)
+            eligibility_elements.append(eligibility_info)
+        if key == "brief_title" and isinstance(value, dict):
+            eligibility_info = extract_data_info(key, value)
             eligibility_elements.append(eligibility_info)
         elif isinstance(value, (list, dict)):
-            eligibility_elements.extend(extract_eligibility_from_clinical_trials(value))
+            eligibility_elements.extend(
+                extract_required_data_from_clinical_trials(value)
+            )
 
     return eligibility_elements
 
