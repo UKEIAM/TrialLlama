@@ -158,20 +158,49 @@ def clean_textblock_data_recursively(json_obj: list | dict) -> dict:
         return json_obj
 
 
-def extract_textblocks_from_clinical_trials(clinical_trial: list | dict) -> list:
-    """Extracts 'textblock' elements from the 'clinical_trials' section"""
-    textblocks = []
+# def extract_textblocks_from_clinical_trials(clinical_trial: list | dict) -> list:
+#     """Extracts 'textblock' elements from the 'clinical_trials' section"""
+#     textblocks = []
+#     if isinstance(clinical_trial, list):
+#         result_dict = {}
+#         for d in clinical_trial:
+#             result_dict.update(d)
+#         clinical_trial = result_dict
+#     for key, value in clinical_trial.items():
+#         if key == "eligibility":
+#             textblocks.append(value)
+#         elif isinstance(value, dict):
+#             textblocks.extend(extract_textblocks_from_clinical_trials(value))
+#     return textblocks
+def extract_eligibility_info(eligibility_element):
+    info = []
+
+    for key, value in eligibility_element.items():
+        if key == "textblock":
+            value = clean_textblock(value)
+        info.append(f"{key.capitalize()}: {value}")
+
+    return ", ".join(info)
+
+
+def extract_eligibility_from_clinical_trials(clinical_trial: list | dict) -> list:
+    """Extracts all eligibility information from the 'clinical_trials' section"""
+    eligibility_elements = []
+
     if isinstance(clinical_trial, list):
         result_dict = {}
         for d in clinical_trial:
             result_dict.update(d)
         clinical_trial = result_dict
+
     for key, value in clinical_trial.items():
-        if key == "textblock":
-            textblocks.append(value)
-        elif isinstance(value, dict):
-            textblocks.extend(extract_textblocks_from_clinical_trials(value))
-    return textblocks
+        if key == "eligibility" and isinstance(value, dict):
+            eligibility_info = extract_eligibility_info(value)
+            eligibility_elements.append(eligibility_info)
+        elif isinstance(value, (list, dict)):
+            eligibility_elements.extend(extract_eligibility_from_clinical_trials(value))
+
+    return eligibility_elements
 
 
 def extract_criteria_from_clinical_trials(clinical_trial: dict) -> list:
