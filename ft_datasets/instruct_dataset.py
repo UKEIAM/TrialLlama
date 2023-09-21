@@ -84,28 +84,12 @@ class TestingDataset(Dataset):
 
         self.max_tokens = max_tokens
         self.tokenizer = tokenizer
-       
 
     def __len__(self):
         return len(self.ann)
 
     def __getitem__(self, index):
-        # IGNORE_INDEX = -100  # The default setting in CrossEntropyLoss
         # TODO: Funny, the approach used for tokenization in the training phase, is not working if you call model.generate(**batch). CUDA fails somehow
-        # ann = self.ann[index]
-        # prompt = PROMPT_DICT["prompt_input"].format_map(ann)
-        # prompt = torch.tensor(self.tokenizer.encode(prompt), dtype=torch.int64)
-        # while len(prompt) > self.max_tokens:
-        #     words = ann["input"].split()
-        #     ann["input"] = " ".join(words[:-1])
-        #     prompt = PROMPT_DICT["prompt_input"].format_map(ann)
-        #     prompt = torch.tensor(self.tokenizer.encode(prompt), dtype=torch.int64)
-        #     prompt = self.tokenizer.encode(prompt)
-        # prompt = torch.tensor(prompt, dtype=torch.int64)
-        # padding = self.max_tokens - prompt.shape[0]
-        # if padding > 0:
-        #     prompt = torch.cat((prompt, torch.zeros(padding, dtype=torch.int64) - 1))
-        
         ann = self.ann[index]
         prompt = PROMPT_DICT["prompt_input"].format_map(ann)
         batch = self.tokenizer(
@@ -123,12 +107,12 @@ class TestingDataset(Dataset):
             prompt = PROMPT_DICT["prompt_input"].format_map(ann)
 
             batch = self.tokenizer(
-            prompt,
-            padding="max_length",
-            truncation=True,
-            max_length=self.max_tokens,
-            return_tensors="pt",
-        )
+                prompt,
+                padding="max_length",
+                truncation=True,
+                max_length=self.max_tokens,
+                return_tensors="pt",
+            )
 
         return batch
         # return {

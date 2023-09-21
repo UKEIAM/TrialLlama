@@ -14,6 +14,7 @@ from ft_datasets.instruct_dataset import InstructionDataset, TestingDataset
 DATASET_PREPROC = {
     "ct": partial(InstructionDataset),
     "ct_testing": partial(TestingDataset),
+    "ct_reasoning": partial(TestingDataset),
 }
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
@@ -52,6 +53,25 @@ def create_dataset_sample(dataset_size: int = 300, type: str = "train") -> None:
 
     df = pd.read_json(path)
 
-    data_sample = df.sample(n=dataset_size, random_state=42, ignore_index=True)
+    """
+        BALANCING: Since "IRRELEVANT" label is predominant in the dataset, we will truncate it in extracting a random
+        sample from it based on the average number of items in the two other classes.
+        That creates a more balanced, but not perfectly balanced dataset
+     """
+
+    col_name = "output"
+    value_counts = df[col_name].value_counts()
+
+    max_label = value_counts.index[0]
+    avg_item_size_for_truncation = int((value_counts[1] + value_counts[2]) / 2)
+
+    max_label_df = df[df[col_name] == max_label]
+    trunc_max_label_df = max_label_df.sample(
+        n=avg_item_size_for_truncation, random_state=42, ignore_index=True
+    )
+
+    df = df[df[col_name] != max_label]
+    balanced_df = pd.concat([df, trunc_max_label_df], ignore_index=True)
+    data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
 
     data_sample.to_json(out_path, orient="records")

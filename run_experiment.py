@@ -12,6 +12,7 @@ from testing import main as test_main
 from utils.eval_utils import calculate_metrics
 from configs.experiments import experiment_config
 from utils.config_utils import update_config
+from utils.set_free_cuda_device import get_free_cuda_device
 
 base_directory = os.path.dirname(os.path.dirname((__file__)))
 
@@ -27,9 +28,8 @@ def main(**kwargs):
         "data",
         f"trec.nist.gov_data_trials_qrels{experiment_config.gold_labels_year}.txt",
     )
-
     mlflow.set_experiment(f"{experiment_config.ft_model}")
-    description = f"Fine-tuned {experiment_config.ft_model} with a batch-size of {experiment_config.batch_size}, number of epochs of {experiment_config.num_epochs} and a lr of {experiment_config.lr}. Used qrels from {experiment_config.gold_labels_year}"
+    description = f"Fine-tuned model {experiment_config.ft_model} | batch-size of {experiment_config.batch_size} | number of epochs of {experiment_config.num_epochs} | lr of {experiment_config.lr} | qrels {experiment_config.gold_labels_year}"
     with mlflow.start_run(description=description) as run:
         mlflow.log_params(
             {
@@ -46,9 +46,11 @@ def main(**kwargs):
                 "top_p": experiment_config.top_p,
                 "length_penalty": experiment_config.length_penalty,
                 "repetition_penalty": experiment_config.repetition_penalty,
+                "run_training": experiment_config.run_training,
+                "run_testing": experiment_config.run_testing,
+                "run_eval": experiment_config.run_eval,
             }
         )
-
         if experiment_config.run_training:
             print("Running training...")
             results = ft_main(
@@ -61,6 +63,7 @@ def main(**kwargs):
                 max_tokens=experiment_config.max_tokens,
             )
             mlflow.log_metrics(results)
+            clear_gpu_cache()
 
         if experiment_config.run_testing:
             print("Running testing...")
@@ -78,6 +81,7 @@ def main(**kwargs):
                 debug=experiment_config.debug,
             )
             mlflow.log_metric("number_of_empty_responses", results)
+            clear_gpu_cache()
 
         if experiment_config.run_eval:
             print("Running evaluation...")
@@ -87,6 +91,7 @@ def main(**kwargs):
                 ft_model_name=experiment_config.ft_model,
             )
             mlflow.log_metrics(scores)
+            clear_gpu_cache()
 
         # Clean gpu_cache before next mlflow run
         clear_gpu_cache()

@@ -1,8 +1,9 @@
 artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/771795492254090697/cf08f465db9044bf96b6c2095f934b8e/artifacts
+deleted_time: 1695277078236
 end_time: 1695202857853
 entry_point_name: ''
 experiment_id: '771795492254090697'
-lifecycle_stage: active
+lifecycle_stage: deleted
 run_id: cf08f465db9044bf96b6c2095f934b8e
 run_name: indecisive-ram-677
 run_uuid: cf08f465db9044bf96b6c2095f934b8e

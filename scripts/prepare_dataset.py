@@ -96,14 +96,14 @@ def create_JSON(
                 output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
             if task == "reasoning":
                 item = {
-                    "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
+                    "id": f"{index}_{topic_nr}_{ct}",
                     "instruction": "Is the following patient given the PATIENT DESCRIPTION eligible for the given CLINICAL TRIAL DESCRIPTION? Please also give an explanation for your answer.",
                     "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
                     "output": category,
                 }
             else:
                 item = {
-                    "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
+                    "id": f"{index}_{topic_nr}_{ct}",
                     "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\nIRRELEVANT\nUNELIGIBLE\nELIGIBLE\nOnly use one of the three provided categories as response.",
                     "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
                     "output": category,
