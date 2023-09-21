@@ -127,62 +127,31 @@ def clean_textblock(text):
     return cleaned_text
 
 
-# def clean_textblock_data_recursively(json_obj: list | dict) -> dict:
-#     """Recursive function to find nested 'textblock' elements and clean the string from unnessecary chars and whitespaces"""
-#     if isinstance(json_obj, dict):
-#         cleaned_dict = {}
-#         for key, value in json_obj.items():
-#             if isinstance(value, dict) or isinstance(value, list):
-#                 cleaned_dict[key] = clean_textblock_data_recursively(value)
-#             elif key in ["patient_description", "textblock"]:
-#                 cleaned_dict[key] = clean_textblock(value)
-#             else:
-#                 cleaned_dict[key] = value
-#         return cleaned_dict
-#     elif isinstance(json_obj, list):
-#         cleaned_list = []
-#         for item in json_obj:
-#             cleaned_list.append(clean_textblock_data_recursively(item))
-#         return cleaned_list
-#     else:
-#         return json_obj
-
-
-# def extract_textblocks_from_clinical_trials(clinical_trial: list | dict) -> list:
-#     """Extracts 'textblock' elements from the 'clinical_trials' section"""
-#     textblocks = []
-#     if isinstance(clinical_trial, list):
-#         result_dict = {}
-#         for d in clinical_trial:
-#             result_dict.update(d)
-#         clinical_trial = result_dict
-#     for key, value in clinical_trial.items():
-#         if key == "eligibility":
-#             textblocks.append(value)
-#         elif isinstance(value, dict):
-#             textblocks.extend(extract_textblocks_from_clinical_trials(value))
-#     return textblocks
-def extract_data_info(type, elements):
+def extract_data_info(element_type, elements):
     info = []
     for key, value in elements.items():
-        if type == "eligibility":
+        if element_type == "eligibility":
             if key == "criteria":
                 if value is not None:
                     textblock_element = value.get("textblock")
+                    parts = textblock_element.split(":", 1)  # Split the text at the first ":" (limiting to one split)
+                    if len(parts) > 0:
+                        extracted_part = parts[0].strip()
+                        textblock_element = parts[1].lstrip()
+                        key = extracted_part.upper()
+                    else:
+                        extracted_part = textblock_element
                     value = clean_textblock(textblock_element)
-
-        if type == "brief_summary":
+            info.append(f"{key.capitalize()}: {value},\n")
+        if element_type == "brief_summary":
             value = clean_textblock(value)
-        info.append(f"{key.capitalize()}: {value}")
-        if type == "brief_summary":
-            key = "title"
-        info.append(f"{key.capitalize()}: {value}")
-    return ", ".join(info)
+            info.append(f"{value}\n")
+    return "".join(info)
 
 
 def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> list:
     """Extracts all eligibility information from the 'clinical_trials' section"""
-    eligibility_elements = []
+    elements = []
 
     if isinstance(clinical_trial, list):
         result_dict = {}
@@ -192,30 +161,30 @@ def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> l
 
     for key, value in clinical_trial.items():
         if key == "eligibility" and isinstance(value, dict):
-            eligibility_info = extract_data_info(key, value)
-            eligibility_elements.append(eligibility_info)
+            info = extract_data_info(key, value)
+            elements.append(info)
         if key == "brief_summary" and isinstance(value, dict):
-            eligibility_info = extract_data_info(key, value)
-            eligibility_elements.append(eligibility_info)
-        if key == "brief_title" and isinstance(value, dict):
-            eligibility_info = extract_data_info(key, value)
-            eligibility_elements.append(eligibility_info)
+            info = extract_data_info(key, value)
+            elements.append(info)
+        if key == "brief_title":
+            key = "title"
+            elements.append(f"{key.capitalize()}: {value}\n")
         elif isinstance(value, (list, dict)):
-            eligibility_elements.extend(
+            elements.extend(
                 extract_required_data_from_clinical_trials(value)
             )
 
-    return eligibility_elements
+    return elements
 
 
-def extract_criteria_from_clinical_trials(clinical_trial: dict) -> list:
-    criteria = []
-    for key, value in clinical_trial.items():
-        if key == "criteria":
-            criteria.append(value)
-        elif isinstance(value, dict):
-            criteria.extend(extract_criteria_from_clinical_trials(value))
-    return criteria
+# def extract_criteria_from_clinical_trials(clinical_trial: dict) -> list:
+#     criteria = []
+#     for key, value in clinical_trial.items():
+#         if key == "criteria":
+#             criteria.append(value)
+#         elif isinstance(value, dict):
+#             criteria.extend(extract_criteria_from_clinical_trials(value))
+#     return criteria
 
 
 def read_qrel_txt(qrel_path: str) -> pd.DataFrame:
