@@ -1,1 +1,0 @@
-Fine-tuned llama-7b-chat-300-debug with a batch-size of 4, number of epochs of 1 and a lr of 0.0001. Used qrels from 2022

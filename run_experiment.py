@@ -1,10 +1,10 @@
 # TODO: Prepare experiment script
-
-import mlflow
-import mlflow.pytorch
 import os
 import logging
 import fire
+
+import mlflow
+import mlflow.pytorch
 
 from utils.train_utils import clear_gpu_cache
 from finetuning import main as ft_main
@@ -28,6 +28,7 @@ def main(**kwargs):
         "data",
         f"trec.nist.gov_data_trials_qrels{experiment_config.gold_labels_year}.txt",
     )
+
     mlflow.set_experiment(f"{experiment_config.ft_model}")
     description = f"Fine-tuned model {experiment_config.ft_model} | batch-size of {experiment_config.batch_size} | number of epochs of {experiment_config.num_epochs} | lr of {experiment_config.lr} | qrels {experiment_config.gold_labels_year}"
     with mlflow.start_run(description=description) as run:
@@ -51,6 +52,7 @@ def main(**kwargs):
                 "run_eval": experiment_config.run_eval,
             }
         )
+
         if experiment_config.run_training:
             print("Running training...")
             results = ft_main(

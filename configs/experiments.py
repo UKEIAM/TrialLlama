@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class experiment_config:
     base_model: str = "Llama-2-7b-chat-hf"
     dataset_size: int = 300
-    dataset_size_testing: int = 1000
+    dataset_size_testing: int = 100
     max_tokens: int = 2048
     max_new_tokens: int = 20
     lr: float = 1e-4
@@ -22,4 +22,4 @@ class experiment_config:
     top_k: int = 50
     repetition_penalty: float = 1.0
     length_penalty: int = 1
-    debug: bool = True
+    debug: bool = False

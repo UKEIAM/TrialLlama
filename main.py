@@ -19,22 +19,31 @@ for param_set in param_combinations:
     ft_model = (
         f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}'
     )
+
     command = [
         "python",
         "run_experiment.py",
-        f"--base_model {base_model}",
-        f"--num_epochs {num_epochs}",
-        f"--dataset_size {dataset_size}",
-        f"--ft_model {ft_model}",
-        f"--lr {lr}",
-        f"--temperature {temperature}",
-        f"--top_k {top_k}",
-        f"--top_p {top_p}",
+        "--base_model",
+        base_model,
+        "--num_epochs",
+        str(num_epochs),
+        "--dataset_size",
+        str(dataset_size),
+        "--ft_model",
+        str(ft_model),
+        "--lr",
+        str(lr),
+        "--temperature",
+        str(temperature),
+        "--top_k",
+        str(top_k),
+        "--top_p",
+        str(top_p),
     ]
-
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
     if os.path.exists(os.path.join("out", ft_model)):
-        command.append("--run_train False")
+        command.append("--run_training")
+        command.append(str(False))
 
     # Get currently free cuda device
     # TODO: Check out if this position works, putting get_free_cuda_device() to run_experiment.py did not work...
