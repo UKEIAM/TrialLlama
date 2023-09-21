@@ -176,9 +176,14 @@ def extract_eligibility_info(eligibility_element):
     info = []
 
     for key, value in eligibility_element.items():
-        if key == "textblock":
-            value = clean_textblock(value)
         info.append(f"{key.capitalize()}: {value}")
+        # Extract and include the <textblock> element content from <criteria>
+        criteria_element = eligibility_element.get("criteria")
+        if criteria_element is not None:
+            textblock_element = criteria_element.get("textblock")
+            if textblock_element is not None:
+                textblock_content = clean_textblock(value)
+                info.append(f"Textblock: {textblock_content}")
 
     return ", ".join(info)
 
