@@ -37,17 +37,17 @@ def calculate_metrics(eval_output_path, gold_labels_file, ft_model_name):
     # Calculate Accuracy, F1 score, and AUC
     accuracy = accuracy_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     precision = precision_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="micro"
+        merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
     )
     recall = recall_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="micro"
+        merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
     )
-    f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="weighted")
+    f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro")
     try:
         auc = roc_auc_score(
             merged_df["LABEL_gold"],
             merged_df["LABEL_pred"],
-            average="micro",
+            average="macro",
             multi_class="ovr",
         )
     except Exception as e:
