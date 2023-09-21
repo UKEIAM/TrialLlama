@@ -62,7 +62,7 @@ def create_JSON(
     qrels = read_qrel_txt(qrel_path)
 
     # DEBUG
-    qrels = qrels[:10]
+    # qrels = qrels[:10]
 
     counter = 0
     for index, row in tqdm(qrels.iterrows()):
@@ -99,7 +99,7 @@ def create_JSON(
                 item = {
                     "id": f"{index}_{topic_nr}_{ct}",
                     "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\nIRRELEVANT\nUNELIGIBLE\nELIGIBLE\nOnly use one of the three provided categories as response.",
-                    "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
+                    "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {ct_data}",
                     "output": category,
                 }
 
@@ -135,7 +135,7 @@ def extract_data_info(element_type, elements):
                 if value is not None:
                     textblock_element = value.get("textblock")
                     parts = textblock_element.split(":", 1)  # Split the text at the first ":" (limiting to one split)
-                    if len(parts) > 0:
+                    if len(parts) > 1:
                         extracted_part = parts[0].strip()
                         textblock_element = parts[1].lstrip()
                         key = extracted_part.upper()
