@@ -28,8 +28,7 @@ data_list = []
 
 def create_JSON(
     config_name: Optional[str] = "train",
-    out_file_name: Optional[str] = "clinical_trials.json",
-    samples: Optional[int | str] = 5000,
+    out_file_name: Optional[str] = "ct_full.json",
     only_criteria: Optional[bool] = True,
     task: str = "categorization",
 ):
@@ -62,8 +61,6 @@ def create_JSON(
         config["qrels_path"],
     )
     qrels = read_qrel_txt(qrel_path)
-    if samples != "all":
-        qrels = qrels[:samples]
 
     counter = 0
     for index, row in tqdm(qrels.iterrows()):
