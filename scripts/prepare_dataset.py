@@ -23,7 +23,7 @@ data_directory = os.path.join(base_directory, "data")
 home_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 raw_ct_data_directory = os.path.join(home_directory, "data")
 
-train_list = []
+data_list = []
 
 
 def create_JSON(
@@ -31,6 +31,7 @@ def create_JSON(
     out_file_name: Optional[str] = "clinical_trials.json",
     samples: Optional[int | str] = 5000,
     only_criteria: Optional[bool] = True,
+    task: str = "categorization",
 ):
 
     if config_name == "train":
@@ -42,7 +43,9 @@ def create_JSON(
         with open(config_file, "r") as file:
             config = yaml.safe_load(file)
 
-    source_data_directory = os.path.join(raw_ct_data_directory, str(config["year_of_data"]))
+    source_data_directory = os.path.join(
+        raw_ct_data_directory, str(config["year_of_data"])
+    )
     required_data_directory = os.path.join(
         raw_ct_data_directory, f"{config['mode']}required_cts"
     )
@@ -94,26 +97,36 @@ def create_JSON(
             else:
                 category = "ELIGIBLE"
                 output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
+            if task == "reasoning":
+                item = {
+                    "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
+                    "instruction": "Is the following patient given the PATIENT DESCRIPTION eligible for the given CLINICAL TRIAL DESCRIPTION? Please also give an explanation for your answer.",
+                    "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
+                    "output": category,
+                }
+            else:
+                item = {
+                    "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
+                    "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\nIRRELEVANT\nUNELIGIBLE\nELIGIBLE\nOnly use one of the three provided categories as response.",
+                    "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
+                    "output": category,
+                }
 
-            item = {
-                "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\nIRRELEVANT\nUNELIGIBLE\nELIGIBLE\nOnly use one of the three provided categories as response.",
-                "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
-                "output": category,
-            }
-            
-            train_list.append(item)
+            data_list.append(item)
             counter += 1
         else:
             continue
 
     """The below function is returning the full CT parsed into a JSON format + cleaned"""
-    # cleaned_list = clean_textblock_data_recursively(train_list)
-    out_directory = os.path.join(data_directory, out_file_name)
+    # cleaned_list = clean_textblock_data_recursively(data_list)
+    if task == "reasoning":
+        out_directory = os.path.join(data_directory, f"reasoning_{out_file_name}")
+    else:
+        out_directory = os.path.join(data_directory, out_file_name)
     print(f"Saving dataset to {out_directory}...")
 
     with open(out_directory, "w") as fp:
-        json.dump(train_list, fp, indent=4)
+        json.dump(data_list, fp, indent=4)
 
     print(f"Saved dataset with {counter} examples")
 
@@ -235,4 +248,3 @@ if __name__ == "__main__":
     from jsonargparse import CLI
 
     CLI(create_JSON)
-

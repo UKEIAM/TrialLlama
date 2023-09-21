@@ -16,7 +16,7 @@ get_free_cuda_device()
 # Kind of something similar to Hydra :D
 for param_set in param_combinations:
     # Unpack parameter set and add parameters and values to the command
-    base_model, dataset_size, num_epochs, lr = param_set
+    base_model, dataset_size, num_epochs, lr, temperature = param_set
     ft_model = (
         f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}'
     )
@@ -28,6 +28,7 @@ for param_set in param_combinations:
         f"--dataset_size {dataset_size}",
         f"--ft_model {ft_model}",
         f"--lr {lr}",
+        f"--temperature {temperature}",
     ]
 
     # Run the model script
