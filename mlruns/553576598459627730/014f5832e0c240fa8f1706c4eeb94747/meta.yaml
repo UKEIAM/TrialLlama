@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/553576598459627730/014f5832e0c240fa8f1706c4eeb94747/artifacts
+end_time: 1695297172505
+entry_point_name: ''
+experiment_id: '553576598459627730'
+lifecycle_stage: active
+run_id: 014f5832e0c240fa8f1706c4eeb94747
+run_name: invincible-zebra-608
+run_uuid: 014f5832e0c240fa8f1706c4eeb94747
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695296982546
+status: 3
+tags: []
+user_id: 1kkraus

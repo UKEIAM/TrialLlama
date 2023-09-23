@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/553576598459627730/211e89b01e024045921ee3a4be42b10b/artifacts
+end_time: 1695297556933
+entry_point_name: ''
+experiment_id: '553576598459627730'
+lifecycle_stage: active
+run_id: 211e89b01e024045921ee3a4be42b10b
+run_name: capable-zebra-924
+run_uuid: 211e89b01e024045921ee3a4be42b10b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695297368850
+status: 3
+tags: []
+user_id: 1kkraus

@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/553576598459627730/b111203d65d44457a31f01ca898e30bf/artifacts
+end_time: 1695447542045
+entry_point_name: ''
+experiment_id: '553576598459627730'
+lifecycle_stage: active
+run_id: b111203d65d44457a31f01ca898e30bf
+run_name: nosy-bug-477
+run_uuid: b111203d65d44457a31f01ca898e30bf
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695447284769
+status: 3
+tags: []
+user_id: 1kkraus

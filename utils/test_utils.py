@@ -17,8 +17,8 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 
 def test(
-    model, test_data_json, test_config, test_dataloader, tokenizer, max_tokens
-) -> pd.DataFrame:
+    model, test_data_json, test_config, test_dataloader, tokenizer, max_tokens, LOGGER
+) -> tuple:
     """
     Run the model on a given test dataset. Returns a class 0, 1 or 2, which is saved to a
     .txt mapping the patient topic and the clinical trial ID.
@@ -58,7 +58,7 @@ def test(
                         output_scores=True,
                     )
                 except RuntimeError as e:
-                    print(e)
+                    LOGGER.error(f"Model eval Output Error: {e}")
                     print(test_data_json[step]["id"])
                     continue
 
@@ -80,7 +80,6 @@ def test(
                     print(f"### Response: {response}")
 
                 match = re.match(id_pattern, test_data_json[step]["id"])
-                internal_id = match.group(1)
                 topic_id = match.group(2)
                 ct_id = match.group(3)
 

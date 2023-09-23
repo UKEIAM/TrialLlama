@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/553576598459627730/16c114bc33624423978087cd17dbd387/artifacts
+end_time: 1695297744651
+entry_point_name: ''
+experiment_id: '553576598459627730'
+lifecycle_stage: active
+run_id: 16c114bc33624423978087cd17dbd387
+run_name: gregarious-steed-585
+run_uuid: 16c114bc33624423978087cd17dbd387
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695297563490
+status: 4
+tags: []
+user_id: 1kkraus

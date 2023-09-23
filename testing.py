@@ -23,7 +23,7 @@ from utils.train_utils import (
 from utils.test_utils import test, get_max_length
 
 
-def main(**kwargs):
+def main(LOGGER, **kwargs):
     # Update the configuration for the training and sharding process
     update_config((test_config), **kwargs)
 
@@ -97,6 +97,7 @@ def main(**kwargs):
         test_dataloader,
         tokenizer,
         max_tokens,
+        LOGGER=LOGGER,
     )
 
     # Save out_file to run with TREC Eval script

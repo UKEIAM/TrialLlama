@@ -16,7 +16,13 @@ from sklearn.metrics import (
 )
 
 # Load the model-output and gold-labels files
-def calculate_metrics(eval_output_path, gold_labels_file, ft_model_name):
+def calculate_metrics(
+    eval_output_path: str,
+    gold_labels_file: str,
+    ft_model_name: str,
+    run_name: str,
+    LOGGER,
+):
     model_df = pd.read_csv(
         eval_output_path,
         header=None,
@@ -52,14 +58,13 @@ def calculate_metrics(eval_output_path, gold_labels_file, ft_model_name):
         )
     except Exception as e:
         # TODO: Delete, for debug reasons only!
-        print(e)
+        LOGGER.error(f"AUC error occured: {e}")
         auc = 0
 
     # Create a confusion matrix
     conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
 
     # Plot the confusion matrix TODO: Not working  yet
-    print(conf_matrix)
     plt.figure(figsize=(8, 6))
     sns.heatmap(
         conf_matrix,
@@ -74,7 +79,7 @@ def calculate_metrics(eval_output_path, gold_labels_file, ft_model_name):
     plt.title("Confusion Matrix")
     out_img_path = os.path.join("out", "eval", "img")
     os.makedirs(out_img_path, exist_ok=True)
-    plt.savefig(os.path.join(out_img_path, f"cm_{ft_model_name}.png"))
+    plt.savefig(os.path.join(out_img_path, f"cm_{ft_model_name}_{run_name}.png"))
 
     return {
         "accuracy": accuracy,

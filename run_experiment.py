@@ -12,6 +12,7 @@ from testing import main as test_main
 from utils.eval_utils import calculate_metrics
 from configs.experiments import experiment_config
 from utils.config_utils import update_config
+from utils.logger_utils import setup_logger
 from utils.set_free_cuda_device import get_free_cuda_device
 
 base_directory = os.path.dirname(os.path.dirname((__file__)))
@@ -32,6 +33,7 @@ def main(**kwargs):
     mlflow.set_experiment(f"{experiment_config.ft_model}")
     description = f"Fine-tuned model {experiment_config.ft_model} | batch-size of {experiment_config.batch_size} | number of epochs of {experiment_config.num_epochs} | lr of {experiment_config.lr} | qrels {experiment_config.gold_labels_year}"
     with mlflow.start_run(description=description) as run:
+        LOGGER = setup_logger(run_id=run.info.run_id)
         mlflow.log_params(
             {
                 "batch_size": experiment_config.batch_size,
@@ -63,6 +65,7 @@ def main(**kwargs):
                 ft_model=experiment_config.ft_model,
                 gamma=experiment_config.gamma,  # TODO: Figure out what Gamma is doing
                 max_tokens=experiment_config.max_tokens,
+                LOGGER=LOGGER,
             )
             mlflow.log_metrics(results)
             clear_gpu_cache()
@@ -81,16 +84,21 @@ def main(**kwargs):
                 length_penalty=experiment_config.length_penalty,
                 repetition_penalty=experiment_config.repetition_penalty,
                 debug=experiment_config.debug,
+                LOGGER=LOGGER,
             )
             mlflow.log_metric("number_of_empty_responses", results)
             clear_gpu_cache()
 
         if experiment_config.run_eval:
             print("Running evaluation...")
+            run_id = run.info.run_id
+            run_name = mlflow.get_run(run_id)
             scores = calculate_metrics(
                 eval_output_path=eval_output_path,
                 gold_labels_file=qrels_2022_path,
                 ft_model_name=experiment_config.ft_model,
+                run_name=run_name,
+                LOGGER=LOGGER,
             )
             mlflow.log_metrics(scores)
             clear_gpu_cache()
