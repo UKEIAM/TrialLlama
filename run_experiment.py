@@ -67,6 +67,7 @@ def main(**kwargs):
                 max_tokens=experiment_config.max_tokens,
                 LOGGER=LOGGER,
             )
+            mlflow.set_tag("initial_finetuned_model", "TRUE")
             mlflow.log_metrics(results)
             clear_gpu_cache()
 
@@ -91,8 +92,7 @@ def main(**kwargs):
 
         if experiment_config.run_eval:
             print("Running evaluation...")
-            run_id = run.info.run_id
-            run_name = mlflow.get_run(run_id)
+            run_name = run.info.run_name
             scores = calculate_metrics(
                 eval_output_path=eval_output_path,
                 gold_labels_file=qrels_2022_path,
