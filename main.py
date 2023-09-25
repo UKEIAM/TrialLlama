@@ -15,7 +15,16 @@ param_combinations = list(itertools.product(*parameters.values()))
 # Kind of something similar to Hydra :D
 for param_set in param_combinations:
     # Unpack parameter set and add parameters and values to the command
-    base_model, dataset_size, num_epochs, lr, temperature, top_k, top_p = param_set
+    (
+        base_model,
+        experiment_focus,
+        dataset_size,
+        num_epochs,
+        lr,
+        temperature,
+        top_k,
+        top_p,
+    ) = param_set
     ft_model = (
         f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}'
     )
@@ -39,6 +48,8 @@ for param_set in param_combinations:
         str(top_k),
         "--top_p",
         str(top_p),
+        "--experiment_focus",
+        str(experiment_focus),
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
     if os.path.exists(os.path.join("out", ft_model)):

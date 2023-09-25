@@ -14,6 +14,7 @@ from sklearn.metrics import (
     roc_auc_score,
     confusion_matrix,
 )
+from sklearn.preprocessing import label_binarize
 
 # Load the model-output and gold-labels files
 def calculate_metrics(
@@ -50,9 +51,11 @@ def calculate_metrics(
     )
     f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro")
     try:
+        y_true = label_binarize(merged_df["LABEL_gold"], classes=[0, 1, 2])
+        y_pred = merged_df[["LABEL_pred"]]
         auc = roc_auc_score(
-            merged_df["LABEL_gold"],
-            merged_df["LABEL_pred"],
+            y_true,
+            y_pred,
             average="macro",
             multi_class="ovr",
         )

@@ -1,0 +1,3 @@
+2023-09-25 07:36:02,477 - utils.logger_utils - ERROR - Model eval Output Error: probability tensor contains either `inf`, `nan` or element < 0
+2023-09-25 07:37:10,873 - utils.logger_utils - ERROR - Model eval Output Error: probability tensor contains either `inf`, `nan` or element < 0
+2023-09-25 07:37:25,950 - utils.logger_utils - ERROR - AUC error occured: axis 1 is out of bounds for array of dimension 1

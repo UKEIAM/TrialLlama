@@ -30,7 +30,9 @@ def main(**kwargs):
         f"trec.nist.gov_data_trials_qrels{experiment_config.gold_labels_year}.txt",
     )
 
-    mlflow.set_experiment(f"{experiment_config.ft_model}")
+    mlflow.set_experiment(
+        f"{experiment_config.ft_model}_{experiment_config.experiment_focus}"
+    )
     description = f"Fine-tuned model {experiment_config.ft_model} | batch-size of {experiment_config.batch_size} | number of epochs of {experiment_config.num_epochs} | lr of {experiment_config.lr} | qrels {experiment_config.gold_labels_year}"
     with mlflow.start_run(description=description) as run:
         LOGGER = setup_logger(run_id=run.info.run_id)
