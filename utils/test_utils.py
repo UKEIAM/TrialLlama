@@ -58,8 +58,9 @@ def test(
                         output_scores=True,
                     )
                 except RuntimeError as e:
-                    LOGGER.error(f"Model eval Output Error: {e}")
-                    print(test_data_json[step]["id"])
+                    LOGGER.error(
+                        f"Model eval Output Error: {e} | Sample Identifier {test_data_json[step]['id']}"
+                    )
                     continue
 
                 transition_scores = model.compute_transition_scores(
