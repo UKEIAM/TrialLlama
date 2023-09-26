@@ -14,6 +14,7 @@ from tqdm import tqdm
 from pathlib import Path
 from typing import Optional
 
+
 # from configs.config import train_config, eval_config
 
 # sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -61,7 +62,7 @@ def create_JSON(
     qrels = read_qrel_txt(qrel_path)
 
     # DEBUG
-    # qrels = qrels[:10]
+    # qrels = qrels[:100]
 
     counter = 0
     for index, row in tqdm(qrels.iterrows()):
@@ -74,10 +75,21 @@ def create_JSON(
         ct = row["clinical trial id"]
         label = row["label"]
         ct_path = os.path.join(required_data_directory, ct + ".xml")
-
         if os.path.exists(ct_path):
             clinical_trial_dict = parse_XML_to_json(ct_path)
             ct_data = extract_required_data_from_clinical_trials(clinical_trial_dict)
+            ct_input = ct_data.copy()
+            for idx, item in enumerate(ct_data):
+                if "exclusion criteria" in item.lower():
+                    item_index = item.lower().find("exclusion criteria")
+                    index_gender = item.lower().find("gender")
+                    inclusion_crit = item[:item_index]
+                    exclusion_crit = item[item_index:index_gender]
+                    general_inclusion_crit = item[index_gender:]
+                    ct_input.pop(idx)
+                    ct_input.insert(idx, f"{inclusion_crit}\n{general_inclusion_crit}")
+                    ct_input.append(f"Exclusion Criteria: {exclusion_crit}")
+            ct_input = "\n".join([f"{item}" for item in ct_input])
             if label == 0:
                 category = "no relevant information"
                 output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
@@ -97,8 +109,8 @@ def create_JSON(
                 "They are based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. "
                 "You should check the inclusion and exclusion criteria one-by-one. If at least one exclusion criterion is met, the patient is automaticall not eligible."
                 "For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion."
-                "Your answer should be in the following format: dict{str(inclusion_criterion): list[str(relevance_explanation)} str('eligible'|'not eligible'|'no relevant information')]}\n\n",
-                "input": f"Here is the example patient note:\n {cleaned_topic}\nHere is an example clinical trial\n: {ct_data}",
+                "Your answer should be in the following format: dict{str(inclusion_criterion): list[str(relevance_explanation)} str('eligible'|'not eligible'|'no relevant information')]}\n",
+                "input": f"Here is the example patient note:\n {cleaned_topic}\nHere is an example clinical trial\n: {ct_input}",
                 "output": category,
             }
             # item = {
@@ -137,29 +149,20 @@ def clean_textblock(text):
     cleaned_text = re.sub(r"\s+", " ", cleaned_text.strip())
     return cleaned_text
 
+def format_criteria(criteria_text):
+    return [criterion.strip() for criterion in criteria_text.strip().split('\n')]
 
 def extract_data_info(element_type, elements):
     info = []
     for key, value in elements.items():
-        if element_type == "eligibility":
+        if element_type == "Inclusion Criteria":
             if key == "criteria":
-                if value is not None:
-                    textblock_element = value.get("textblock")
-                    criteria_type = None
-                    criteria_dict = {"Inclusion Criteria": [], "Exclusion Criteria": []}
-                    if textblock_element.startswith("Inclusion Criteria:"):
-                        criteria_type = "Inclusion Criteria"
-                    elif textblock_element.startswith("Exclusion Criteria:"):
-                        criteria_type = "Exclusion Criteria"
-                    else:
-                        # Extract bullet-pointed criteria
-                        criteria = re.findall(
-                            r"\d+\.\s(.*?)(?=(?:\d+\.\s)|$)", textblock_element
-                        )
-                        criteria_dict[criteria_type].extend(criteria)
-                    value = clean_textblock(textblock_element)
-            info.append(f"{key.capitalize()}: {value},\n")
-        if element_type == "brief_summary":
+                textblock_element = value.get("textblock")
+                value = clean_textblock(textblock_element)
+                info.append(f"{value}\n")
+            else:
+                info.append(f"{key.capitalize().replace('_', ' ')}: {value}\n")
+        if element_type == "Summary":
             value = clean_textblock(value)
             info.append(f"{value}\n")
     return "".join(info)
@@ -174,19 +177,21 @@ def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> l
         for d in clinical_trial:
             result_dict.update(d)
         clinical_trial = result_dict
-
     for key, value in clinical_trial.items():
-        if key == "eligibility" and isinstance(value, dict):
-            key = "Eligibility Criteria"
+        if key == "eligibility" and isinstance(value, dict):            
+            key = "Inclusion Criteria"
             info = extract_data_info(key, value)
-            elements.append(info)
-        if key == "brief_summary" and isinstance(value, dict):
+            elements.append(f"{key}: {info}")
+        elif key == "brief_summary" and isinstance(value, dict):
             key = "Summary"
             info = extract_data_info(key, value)
-            elements.append(info)
-        if key == "brief_title":
+            elements.append(f"{key}:\n {info}\n")
+        elif key == "brief_title":
             key = "Title"
-            elements.append(f"{key.capitalize()}: {value}\n")
+            elements.append(f"{key}: {value}\n")
+        elif key == "intervention_type":
+            key = "Intervention Type"
+            elements.append(f"{key}: {value}\n")
         elif isinstance(value, (list, dict)):
             elements.extend(extract_required_data_from_clinical_trials(value))
 
