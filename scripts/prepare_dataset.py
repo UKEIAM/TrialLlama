@@ -98,7 +98,7 @@ def create_JSON(
                 "You should check the inclusion and exclusion criteria one-by-one. If at least one exclusion criterion is met, the patient is automaticall not eligible."
                 "For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion."
                 "Your answer should be in the following format: dict{str(inclusion_criterion): list[str(relevance_explanation)} str('eligible'|'not eligible'|'no relevant information')]}\n\n",
-                "input": f"Here is the example patient note: {cleaned_topic}\n\nHere is the clinical trial: {ct_data}",
+                "input": f"Here is the example patient note:\n {cleaned_topic}\nHere is an example clinical trial\n: {ct_data}",
                 "output": category,
             }
             # item = {
