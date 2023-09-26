@@ -41,10 +41,10 @@ def main(**kwargs):
         logger = setup_logger(run_id=run.info.run_id)
         mlflow.log_params(
             {
-                "dataset_version": experiment_config.dataset_version,
                 "batch_size": experiment_config.batch_size,
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,
+                "dataset_version": experiment_config.dataset_version,
                 "dataset_size": experiment_config.dataset_size,
                 "dataset_size_testing": experiment_config.dataset_size_testing,
                 "qrels_year": experiment_config.gold_labels_year,
@@ -65,6 +65,7 @@ def main(**kwargs):
             print("Running training...")
             results = ft_main(
                 logger=logger,
+                dataset=f"ct_{experiment_config.dataset_version}",
                 dataset_size=experiment_config.dataset_size,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
@@ -80,6 +81,7 @@ def main(**kwargs):
         if experiment_config.run_testing:
             print("Running testing...")
             results = test_main(
+                dataset=f"ct_testing_{experiment_config.dataset_version}",
                 dataset_size=experiment_config.dataset_size_testing,
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,

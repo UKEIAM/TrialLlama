@@ -12,9 +12,18 @@ from ft_datasets.instruct_dataset import InstructionDataset, TestingDataset
 
 
 DATASET_PREPROC = {
-    "ct": partial(InstructionDataset),
-    "ct_testing": partial(TestingDataset),
-    "ct_reasoning": partial(TestingDataset),
+    "ct_v1": partial(InstructionDataset),
+    "ct_v2": partial(InstructionDataset),
+    "ct_v3": partial(InstructionDataset),
+    "ct_v4": partial(InstructionDataset),
+    "ct_v5": partial(InstructionDataset),
+    "ct_v6": partial(InstructionDataset),
+    "ct_testing_v1": partial(TestingDataset),
+    "ct_testing_v2": partial(TestingDataset),
+    "ct_testing_v3": partial(TestingDataset),
+    "ct_testing_v4": partial(TestingDataset),
+    "ct_testing_v5": partial(TestingDataset),
+    "ct_testing_v6": partial(TestingDataset),
 }
 
 base_dir = os.path.dirname(os.path.dirname(__file__))

@@ -91,7 +91,7 @@ def main(logger: Optional[object] = None, **kwargs):
     model.eval()
     model.resize_token_embeddings(model.config.vocab_size + 1)
 
-    trec_out, df_out, erc = test(
+    raw_out, trec_out, df_out, erc = test(
         model,
         test_set_json,
         test_config,
@@ -105,11 +105,14 @@ def main(logger: Optional[object] = None, **kwargs):
     out_dir = os.path.join("out", "eval")
     os.makedirs(out_dir, exist_ok=True)
 
+    out_path_raw = os.path.join(out_dir, f"eval_{test_config.ft_model}_raw.txt")
     out_path = os.path.join(out_dir, f"eval_{test_config.ft_model}_trec.txt")
     out_path_2 = os.path.join(out_dir, f"eval_{test_config.ft_model}_qrels.txt")
+
+    raw_out.to_csv(out_path_raw, sep="\t", index=False, header=True)
     trec_out.to_csv(out_path, sep="\t", index=False, header=False)
     df_out.to_csv(out_path_2, sep="\t", index=False, header=False)
-    print(f"Evaluation file for trec_eval script successfully saved under {out_dir}")
+    print(f"Evaluation files successfully saved under {out_dir}")
 
     return erc
 

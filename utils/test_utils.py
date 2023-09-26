@@ -32,6 +32,7 @@ def test(
 
     returns a .txt file.
     """
+    raw_out = pd.DataFrame(columns=["TOPIC_NO", "ID", "RESPONSE"])
     trec_out = pd.DataFrame(columns=["TOPIC_NO", "Q0", "ID", "SCORE", "RUN_NAME"])
     df_out = pd.DataFrame(
         columns=["TOPIC_NO", "Q0", "ID", "CLASS", "PROBA"]
@@ -91,7 +92,7 @@ def test(
                 ct_id = match.group(3)
 
                 probas = []
-                if "uneligible" in response.lower():
+                if "not eligible" in response.lower():
                     for item in transition_scores[0]:
                         probas.append(np.exp(item.cpu().numpy()))
                     proba = sum(probas) / len(probas)
@@ -101,7 +102,7 @@ def test(
                         probas.append(np.exp(item.cpu().numpy()))
                     proba = sum(probas) / len(probas)
                     predicted_label = 2
-                elif "irrelevant" in response.lower():
+                elif "no relevant information" in response.lower():
                     for item in transition_scores[0]:
                         probas.append(np.exp(item.cpu().numpy()))
                     proba = sum(probas) / len(probas)
@@ -118,10 +119,12 @@ def test(
                         )
                     continue
 
+                row_raw = [topic_id, ct_id, response]
                 row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model]
                 row_out = [topic_id, 0, ct_id, proba, predicted_label]
 
                 # TODO: For debugging purposes, since currently model returns 'nan' values as output tensor
+                raw_out.loc[step] = row_raw
                 trec_out.loc[step] = row_trec
                 df_out.loc[step] = row_out
 
@@ -136,7 +139,7 @@ def test(
 
         # add_ranking_column(trec_out)
 
-        return trec_out, df_out, empty_response_counter
+        return raw_out, trec_out, df_out, empty_response_counter
 
 
 def get_max_length(model):
