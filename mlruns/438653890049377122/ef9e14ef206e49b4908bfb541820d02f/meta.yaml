@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/438653890049377122/ef9e14ef206e49b4908bfb541820d02f/artifacts
+end_time: 1695640219176
+entry_point_name: ''
+experiment_id: '438653890049377122'
+lifecycle_stage: active
+run_id: ef9e14ef206e49b4908bfb541820d02f
+run_name: wise-ant-572
+run_uuid: ef9e14ef206e49b4908bfb541820d02f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695639985143
+status: 3
+tags: []
+user_id: 1kkraus

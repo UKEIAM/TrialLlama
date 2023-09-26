@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/851928286519090741/83f50f643bf942f18ade2cc2ed292754/artifacts
+end_time: 1695634916663
+entry_point_name: ''
+experiment_id: '851928286519090741'
+lifecycle_stage: active
+run_id: 83f50f643bf942f18ade2cc2ed292754
+run_name: stately-grub-207
+run_uuid: 83f50f643bf942f18ade2cc2ed292754
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695634714775
+status: 3
+tags: []
+user_id: 1kkraus

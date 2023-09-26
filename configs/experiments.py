@@ -7,7 +7,7 @@ class experiment_config:
     dataset_size: int = 300
     dataset_size_testing: int = 100
     max_tokens: int = 2048
-    max_new_tokens: int = 20
+    max_new_tokens: int = 200
     lr: float = 1e-4
     batch_size: int = 4
     num_epochs: int = 3

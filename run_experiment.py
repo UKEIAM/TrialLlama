@@ -67,7 +67,7 @@ def main(**kwargs):
                 ft_model=experiment_config.ft_model,
                 gamma=experiment_config.gamma,  # TODO: Figure out what Gamma is doing
                 max_tokens=experiment_config.max_tokens,
-                LOGGER=LOGGER,
+                logger=LOGGER,
             )
             mlflow.set_tag("initial_finetuned_model", "TRUE")
             mlflow.log_metrics(results)

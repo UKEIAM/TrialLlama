@@ -25,9 +25,10 @@ for param_set in param_combinations:
         top_k,
         top_p,
     ) = param_set
-    ft_model = (
-        f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}'
-    )
+
+    decimal_part_lr = str(lr).split(".")[1]
+
+    ft_model = f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}-{num_epochs}-{decimal_part_lr}'
 
     command = [
         "python",
@@ -49,7 +50,7 @@ for param_set in param_combinations:
         "--top_p",
         str(top_p),
         "--experiment_focus",
-        str(experiment_focus),
+        experiment_focus,
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
     if os.path.exists(os.path.join("out", ft_model)):

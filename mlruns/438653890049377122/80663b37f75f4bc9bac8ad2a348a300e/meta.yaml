@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/438653890049377122/80663b37f75f4bc9bac8ad2a348a300e/artifacts
+end_time: 1695642893112
+entry_point_name: ''
+experiment_id: '438653890049377122'
+lifecycle_stage: active
+run_id: 80663b37f75f4bc9bac8ad2a348a300e
+run_name: overjoyed-mink-438
+run_uuid: 80663b37f75f4bc9bac8ad2a348a300e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695642601478
+status: 3
+tags: []
+user_id: 1kkraus
