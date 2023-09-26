@@ -58,7 +58,7 @@ for param_set in param_combinations:
         command.append(str(False))
 
     # Get currently free cuda device
-    # TODO: Check out if this position works, putting get_free_cuda_device() to run_experiment.py did not work...
+    # TODO: NOT WORKING...
     get_free_cuda_device()
 
     # Run the model script

@@ -22,7 +22,7 @@ def calculate_metrics(
     gold_labels_file: str,
     ft_model_name: str,
     run_name: str,
-    LOGGER,
+    logger,
 ):
     model_df = pd.read_csv(
         eval_output_path,
@@ -61,7 +61,7 @@ def calculate_metrics(
         )
     except Exception as e:
         # TODO: Delete, for debug reasons only!
-        LOGGER.error(f"AUC error occured: {e}")
+        logger.error(f"AUC error occured: {e}")
         auc = 0
 
     # Create a confusion matrix

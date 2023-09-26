@@ -12,7 +12,7 @@ import torch
 import transformers
 
 from tqdm import tqdm
-from typing import List
+from typing import List, Optional
 
 """
 Unused imports:
@@ -64,6 +64,7 @@ def train(
     fsdp_config=None,
     local_rank=None,
     rank=None,
+    logger=None,
 ):
     """
     Trains the model on the given dataloader

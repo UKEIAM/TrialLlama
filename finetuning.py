@@ -46,11 +46,11 @@ from utils.train_utils import (
     get_policies,
     get_max_length,
 )
-
 from utils.merge_lora_weights import merge_weights
+from typing import Optional
 
 
-def main(logger, **kwargs):
+def main(logger: Optional[object] = None, **kwargs):
     # Update the configuration for the training and sharding process
     update_config((train_config, fsdp_config), **kwargs)
     # when calling "import torch" pytorch calls torch.cuda.is_available(), muting all os.environ calls. Hence, it has to be called before
@@ -149,7 +149,6 @@ def main(logger, **kwargs):
     # setting up FSDP if enable_fsdp is enabled
     if train_config.enable_fsdp:
         if not train_config.use_peft and train_config.freeze_layers:
-
             freeze_transformer_layers(train_config.num_freeze_layers)
 
         mixed_precision_policy, wrapping_policy = get_policies(fsdp_config, rank)
@@ -273,7 +272,7 @@ def main(logger, **kwargs):
         fsdp_config if train_config.enable_fsdp else None,
         local_rank if train_config.enable_fsdp else None,
         rank if train_config.enable_fsdp else None,
-        LOGGER=logger,
+        logger=logger,
     )
     for key, value in results.items():
         if type(value) == torch.Tensor:

@@ -1,16 +1,16 @@
 base_model:
   - "Llama-2-7b-chat-hf"
 experiment_focus:
-  - "datasize_epochs"
+  - "epochs"
 dataset_size:
   - 300
-  - 900
-  - 1800
-  - 5000 # TODO: due to balancing, max. datasize currently is 17383 samples. There is more data in testing, but that would require further management to differenciate data.
+#  - 900
+#  - 1800
+#  - 5000 # TODO: due to balancing, max. datasize currently is 17383 samples. There is more data in testing, but that would require further management to differenciate data.
 #  - 10000
 #  - 15000
 num_epochs:
-  - 3
+#  - 3
   - 4
   - 5
 lr:

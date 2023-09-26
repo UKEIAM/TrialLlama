@@ -21,9 +21,10 @@ from utils.train_utils import (
     clear_gpu_cache,
 )
 from utils.test_utils import test, get_max_length
+from typing import Optional
 
 
-def main(LOGGER, **kwargs):
+def main(logger: Optional[object] = None, **kwargs):
     # Update the configuration for the training and sharding process
     update_config((test_config), **kwargs)
 
@@ -97,7 +98,7 @@ def main(LOGGER, **kwargs):
         test_dataloader,
         tokenizer,
         max_tokens,
-        LOGGER=LOGGER,
+        logger=logger,
     )
 
     # Save out_file to run with TREC Eval script

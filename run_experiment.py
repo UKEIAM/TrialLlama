@@ -34,8 +34,11 @@ def main(**kwargs):
         f"{experiment_config.ft_model}_{experiment_config.experiment_focus}"
     )
     description = f"Fine-tuned model {experiment_config.ft_model} | batch-size of {experiment_config.batch_size} | number of epochs of {experiment_config.num_epochs} | lr of {experiment_config.lr} | qrels {experiment_config.gold_labels_year}"
-    with mlflow.start_run(description=description) as run:
-        LOGGER = setup_logger(run_id=run.info.run_id)
+    with mlflow.start_run(
+        description=description,
+        run_name=f"ft-llama-{experiment_config.temperature}-{experiment_config.top_k}-{experiment_config.top_p}-{experiment_config}",
+    ) as run:
+        logger = setup_logger(run_id=run.info.run_id)
         mlflow.log_params(
             {
                 "batch_size": experiment_config.batch_size,
@@ -60,6 +63,7 @@ def main(**kwargs):
         if experiment_config.run_training:
             print("Running training...")
             results = ft_main(
+                logger=logger,
                 dataset_size=experiment_config.dataset_size,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
@@ -67,9 +71,8 @@ def main(**kwargs):
                 ft_model=experiment_config.ft_model,
                 gamma=experiment_config.gamma,  # TODO: Figure out what Gamma is doing
                 max_tokens=experiment_config.max_tokens,
-                logger=LOGGER,
             )
-            mlflow.set_tag("initial_finetuned_model", "TRUE")
+            mlflow.set_tag("ft-conducted", "TRUE")
             mlflow.log_metrics(results)
             clear_gpu_cache()
 
@@ -87,7 +90,7 @@ def main(**kwargs):
                 length_penalty=experiment_config.length_penalty,
                 repetition_penalty=experiment_config.repetition_penalty,
                 debug=experiment_config.debug,
-                LOGGER=LOGGER,
+                logger=logger,
             )
             mlflow.log_metric("number_of_empty_responses", results)
             clear_gpu_cache()
@@ -100,7 +103,7 @@ def main(**kwargs):
                 gold_labels_file=qrels_2022_path,
                 ft_model_name=experiment_config.ft_model,
                 run_name=run_name,
-                LOGGER=LOGGER,
+                logger=logger,
             )
             mlflow.log_metrics(scores)
             clear_gpu_cache()

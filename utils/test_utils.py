@@ -11,13 +11,19 @@ import numpy as np
 from tqdm import tqdm
 from pathlib import Path
 from .memory_utils import MemoryTrace
-
+from typing import Optional
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 
 def test(
-    model, test_data_json, test_config, test_dataloader, tokenizer, max_tokens, LOGGER
+    model,
+    test_data_json,
+    test_config,
+    test_dataloader,
+    tokenizer,
+    max_tokens,
+    logger: Optional[object] = None,
 ) -> tuple:
     """
     Run the model on a given test dataset. Returns a class 0, 1 or 2, which is saved to a
@@ -58,7 +64,7 @@ def test(
                         output_scores=True,
                     )
                 except RuntimeError as e:
-                    LOGGER.error(
+                    logger.error(
                         f"Model eval Output Error: {e} | Sample Identifier {test_data_json[step]['id']}"
                     )
                     continue
