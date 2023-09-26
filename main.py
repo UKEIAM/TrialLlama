@@ -13,6 +13,9 @@ with open("configs/experiment_definitions.yaml", "r") as yaml_file:
 param_combinations = list(itertools.product(*parameters.values()))
 # Loop through each combination and run your model script
 # Kind of something similar to Hydra :D
+# Get currently free cuda device
+get_free_cuda_device()
+
 for param_set in param_combinations:
     # Unpack parameter set and add parameters and values to the command
     (
@@ -56,10 +59,6 @@ for param_set in param_combinations:
     if os.path.exists(os.path.join("out", ft_model)):
         command.append("--run_training")
         command.append(str(False))
-
-    # Get currently free cuda device
-    # TODO: NOT WORKING...
-    get_free_cuda_device()
 
     # Run the model script
     subprocess.run(command)

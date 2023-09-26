@@ -11,7 +11,7 @@ dataset_size:
 #  - 15000
 num_epochs:
 #  - 3
-  - 4
+#  - 4
   - 5
 lr:
 #  - 0.001

@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/259200115978294778/8e7a4ab0d90e4be9a0afcfaed96eb375/artifacts
+end_time: 1695699756924
+entry_point_name: ''
+experiment_id: '259200115978294778'
+lifecycle_stage: active
+run_id: 8e7a4ab0d90e4be9a0afcfaed96eb375
+run_name: ft-llama-1.0-50-0.95-<class 'configs.experiments.experiment_config'>
+run_uuid: 8e7a4ab0d90e4be9a0afcfaed96eb375
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695699749959
+status: 4
+tags: []
+user_id: 1kkraus

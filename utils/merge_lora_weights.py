@@ -34,3 +34,7 @@ def merge_weights(base_model: str, peft_model: str, output_dir: str):
     model = model.merge_and_unload()
     model.save_pretrained(output_dir)
     tokenizer.save_pretrained(output_dir)
+
+
+if __name__ == "__main__":
+    fire.Fire(merge_weights)
