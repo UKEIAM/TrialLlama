@@ -107,16 +107,17 @@ def test(
                         probas.append(np.exp(item.cpu().numpy()))
                     proba = sum(probas) / len(probas)
                     predicted_label = 0
-                else:
+                elif "" in response.lower():
                     empty_response_counter += 1
                     if test_config.debug:
                         # TODO: Currently, model response is often gibberish or nothing at all. Don't know yet how to handle such values
                         # TODO: Has to be considered in evaluation, since less examples are evaluated between the models...
                         print(f"Internal ID: {match.group(1)}")
-
-                        print(
-                            "Response gibberish or empty. Continuing to next example."
-                        )
+                        continue
+                else:
+                    print("Response gibberish. Continuing to next example.")
+                    if test_config.debug:
+                        print(response)
                     continue
 
                 row_raw = [topic_id, ct_id, response]
