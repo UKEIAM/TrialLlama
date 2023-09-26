@@ -145,15 +145,18 @@ def extract_data_info(element_type, elements):
             if key == "criteria":
                 if value is not None:
                     textblock_element = value.get("textblock")
-                    parts = textblock_element.split(
-                        ":", 1
-                    )  # Split the text at the first ":" (limiting to one split)
-                    if len(parts) > 1:
-                        extracted_part = parts[0].strip()
-                        textblock_element = parts[1].lstrip()
-                        key = extracted_part.upper()
+                    criteria_type = None
+                    criteria_dict = {"Inclusion Criteria": [], "Exclusion Criteria": []}
+                    if textblock_element.startswith("Inclusion Criteria:"):
+                        criteria_type = "Inclusion Criteria"
+                    elif textblock_element.startswith("Exclusion Criteria:"):
+                        criteria_type = "Exclusion Criteria"
                     else:
-                        extracted_part = textblock_element
+                        # Extract bullet-pointed criteria
+                        criteria = re.findall(
+                            r"\d+\.\s(.*?)(?=(?:\d+\.\s)|$)", textblock_element
+                        )
+                        criteria_dict[criteria_type].extend(criteria)
                     value = clean_textblock(textblock_element)
             info.append(f"{key.capitalize()}: {value},\n")
         if element_type == "brief_summary":

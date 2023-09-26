@@ -2,13 +2,17 @@ import os
 from typing import Optional
 from huggingface_hub import snapshot_download
 
+base_dir = os.path.dirname(os.path.dirname(__file__))
+
 
 def download_from_hub(
     repo_id: Optional[str] = None, token: Optional[str] = os.getenv("HF_TOKEN")
 ) -> None:
+    repo_dir = os.path.join(base_dir, repo_id)
+    os.makedirs(repo_dir, exist_ok=True)
+    print(repo_dir)
 
-    os.makedirs("../checkpoints", exist_ok=True)
-
+    assert os.path.exists(repo_dir)
     snapshot_download(
         repo_id,
         local_dir=f"checkpoints/{repo_id}",
