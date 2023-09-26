@@ -20,6 +20,7 @@ for param_set in param_combinations:
     # Unpack parameter set and add parameters and values to the command
     (
         base_model,
+        dataset_version,
         experiment_focus,
         dataset_size,
         num_epochs,
@@ -31,13 +32,15 @@ for param_set in param_combinations:
 
     decimal_part_lr = str(lr).split(".")[1]
 
-    ft_model = f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}-{num_epochs}-{decimal_part_lr}'
+    ft_model = f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}-{dataset_version}'
 
     command = [
         "python",
         "run_experiment.py",
         "--base_model",
         base_model,
+        "dataset_version",
+        dataset_version,
         "--num_epochs",
         str(num_epochs),
         "--dataset_size",

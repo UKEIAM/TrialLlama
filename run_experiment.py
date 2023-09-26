@@ -41,6 +41,7 @@ def main(**kwargs):
         logger = setup_logger(run_id=run.info.run_id)
         mlflow.log_params(
             {
+                "dataset_version": experiment_config.dataset_version,
                 "batch_size": experiment_config.batch_size,
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,

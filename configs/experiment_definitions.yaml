@@ -1,5 +1,7 @@
 base_model:
   - "Llama-2-7b-chat-hf"
+dataset_version:
+  - "v3"
 experiment_focus:
   - "epochs"
 dataset_size:
@@ -10,14 +12,16 @@ dataset_size:
 #  - 10000
 #  - 15000
 num_epochs:
-#  - 3
-  - 4
-  - 5
+  - 3
+#  - 4
+#  - 5
 lr:
 #  - 0.001
   - 0.0001
 #  - 0.00001
 temperature:
+#  - 0.0 # Ideally used, for deterministic output
+#  - 0.1
 #  - 0.95
   - 1.0
 #  - 1.5

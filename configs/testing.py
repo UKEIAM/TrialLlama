@@ -8,7 +8,7 @@ class test_config:
     ft_model: str = "llama-7b-chat-300"
     quantization: bool = True
     dataset: str = "ct_testing"
-    dataset_size: int = 900
+    dataset_size: int = 1000
     num_workers_dataloader: int = 1
     max_new_tokens: int = 200  # TODO: Model produces a lot of empty output, tested different max_new_tokens -> No effect
     seed: int = 42  # seed value for reproducibility

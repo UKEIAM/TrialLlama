@@ -41,15 +41,17 @@ def get_preprocessed_dataset(
     )
 
 
-def create_dataset_sample(dataset_size: int = 300, type: str = "train") -> None:
+def create_dataset_sample(
+    dataset_size: int = 300, version: str = "v2", type: str = "train"
+) -> None:
     path = base_dir
     out_path = base_dir
     if type == "train":
-        path = os.path.join(base_dir, "data", "ct_full.json")
-        out_path = os.path.join(base_dir, "data", "ct.json")
+        path = os.path.join(base_dir, "data", f"ct_full_{version}.json")
+        out_path = os.path.join(base_dir, "data", f"ct_{version}.json")
     elif type == "test":
-        path = os.path.join(base_dir, "data", "ct_testing_full.json")
-        out_path = os.path.join(base_dir, "data", "ct_testing.json")
+        path = os.path.join(base_dir, "data", f"ct_testing_full_{version}.json")
+        out_path = os.path.join(base_dir, "data", f"ct_testing_{version}.json")
 
     df = pd.read_json(path)
 

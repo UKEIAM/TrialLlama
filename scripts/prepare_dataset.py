@@ -28,8 +28,7 @@ data_list = []
 
 def create_JSON(
     config_name: Optional[str] = "train",
-    out_file_name: Optional[str] = "ct_full.json",
-    task: str = "categorization",
+    out_file_name: Optional[str] = "ct_full_v3.json",
 ):
 
     if config_name == "train":
@@ -80,28 +79,43 @@ def create_JSON(
             clinical_trial_dict = parse_XML_to_json(ct_path)
             ct_data = extract_required_data_from_clinical_trials(clinical_trial_dict)
             if label == 0:
-                category = "IRRELEVANT"
+                category = "no relevant information"
                 output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
             elif label == 1:
-                category = "UNELIGIBLE"
+                category = "not eligible"
                 output_text = f"The patient at hand is not eligible for the clinical presented clinical trial. Status code {label}"
             else:
-                category = "ELIGIBLE"
-                output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
-            if task == "reasoning":
-                item = {
-                    "id": f"{index}_{topic_nr}_{ct}",
-                    "instruction": "Is the following patient given the PATIENT DESCRIPTION eligible for the given CLINICAL TRIAL DESCRIPTION? Please also give an explanation for your answer.",
-                    "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {ct_data}",
-                    "output": category,
-                }
-            else:
-                item = {
-                    "id": f"{index}_{topic_nr}_{ct}",
-                    "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\nIRRELEVANT\nUNELIGIBLE\nELIGIBLE\nOnly use one of the three provided categories as response.",
-                    "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {ct_data}",
-                    "output": category,
-                }
+                category = "eligible"
+            output_text = (
+                f"The clinical trial fits on the patient's profile. Status code {label}"
+            )
+            item = {
+                "id": f"{index}_{topic_nr}_{ct}",
+                "instruction": "Hello. You are a helpful assistant for clinical trial recruitment."
+                "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
+                "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
+                "They are based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. "
+                "You should check the inclusion and exclusion criteria one-by-one. If at least one exclusion criterion is met, the patient is automaticall not eligible."
+                "For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion."
+                "Your answer should be in the following format: dict{str(inclusion_criterion): list[str(relevance_explanation)} str('eligible'|'not eligible'|'no relevant information')]}\n\n",
+                "input": f"Here is the example patient note: {cleaned_topic}\n\nHere is the clinical trial: {ct_data}",
+                "output": category,
+            }
+            # item = {
+            #     "id": f"{index}_{topic_nr}_{ct}",
+            #     "instruction": "Hello. You are a helpful assistant for clinical trial recruitment."
+            #     "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
+            #     "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
+            #     "They are based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. "
+            #     "You should check the inclusion and exclusion criteria one-by-one. "
+            #     "You should check the inclusion criteria one-by-one, following the steps below: "
+            #     "1. For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion. You should explain in detail if there is relevant information. "
+            #     "2. Then, if there is relevant information, you must annotate a list of relevant sentence IDs of the patient note. If there is no relevant information, you must annotate an empty list. "
+            #     "3. Finally, annotate the patient eligibility for this specific inclusion criterion: the eligibility must be 'no relevant information' if there is no relevant information. Otherwise, the patient can only be 'included' or 'not included' if there are relevant sentences. 'included' means that the patient meets the inclusion criterion, and 'not included' means that the patient contradicts the inclusion criterion. "
+            #     "4. You should output only a JSON dict exactly formatted as: dict{str(inclusion_criterion): list[str(relevance_explanation), list[int(sentence_id)], str('included'|'not included'|'no relevant information')]}\n\n",
+            #     "input": f"Here is the example patient note: {cleaned_topic}\n\nHere is the clinical trial: {ct_data}",
+            #     "output": category,
+            # }
 
             data_list.append(item)
             counter += 1
@@ -109,10 +123,7 @@ def create_JSON(
             continue
 
     """The below function is returning the full CT parsed into a JSON format + cleaned"""
-    if task == "reasoning":
-        out_directory = os.path.join(data_directory, f"reasoning_{out_file_name}")
-    else:
-        out_directory = os.path.join(data_directory, out_file_name)
+    out_directory = os.path.join(data_directory, out_file_name)
     print(f"Saving dataset to {out_directory}...")
 
     with open(out_directory, "w") as fp:
@@ -134,7 +145,9 @@ def extract_data_info(element_type, elements):
             if key == "criteria":
                 if value is not None:
                     textblock_element = value.get("textblock")
-                    parts = textblock_element.split(":", 1)  # Split the text at the first ":" (limiting to one split)
+                    parts = textblock_element.split(
+                        ":", 1
+                    )  # Split the text at the first ":" (limiting to one split)
                     if len(parts) > 1:
                         extracted_part = parts[0].strip()
                         textblock_element = parts[1].lstrip()
@@ -161,18 +174,18 @@ def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> l
 
     for key, value in clinical_trial.items():
         if key == "eligibility" and isinstance(value, dict):
+            key = "Eligibility Criteria"
             info = extract_data_info(key, value)
             elements.append(info)
         if key == "brief_summary" and isinstance(value, dict):
+            key = "Summary"
             info = extract_data_info(key, value)
             elements.append(info)
         if key == "brief_title":
-            key = "title"
+            key = "Title"
             elements.append(f"{key.capitalize()}: {value}\n")
         elif isinstance(value, (list, dict)):
-            elements.extend(
-                extract_required_data_from_clinical_trials(value)
-            )
+            elements.extend(extract_required_data_from_clinical_trials(value))
 
     return elements
 
