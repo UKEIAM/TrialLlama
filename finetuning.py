@@ -60,7 +60,11 @@ def main(logger: Optional[object] = None, **kwargs):
     torch.manual_seed(train_config.seed)
 
     model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
-    create_dataset_sample(dataset_size=train_config.dataset_size, type="train")
+    create_dataset_sample(
+        dataset_size=train_config.dataset_size,
+        version=train_config.dataset_version,
+        type="train",
+    )
 
     if train_config.enable_fsdp:
         setup()

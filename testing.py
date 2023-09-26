@@ -30,7 +30,11 @@ def main(logger: Optional[object] = None, **kwargs):
 
     clear_gpu_cache()
 
-    create_dataset_sample(dataset_size=test_config.dataset_size, type="test")
+    create_dataset_sample(
+        dataset_size=test_config.dataset_size,
+        version=test_config.dataset_version,
+        type="test",
+    )
     dataset_config = generate_dataset_config(test_config, kwargs)
 
     # Load fine-tuned model ATTENTION: Fine-tuned adapter weights, need to be merged with base-model before loading is possible!

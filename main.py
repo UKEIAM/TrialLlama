@@ -32,7 +32,7 @@ for param_set in param_combinations:
 
     decimal_part_lr = str(lr).split(".")[1]
 
-    ft_model = f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}-{dataset_version}'
+    ft_model = f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}-{dataset_version}-{experiment_focus}'
 
     command = [
         "python",

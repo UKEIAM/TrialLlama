@@ -36,7 +36,6 @@ def main(**kwargs):
     description = f"Fine-tuned model {experiment_config.ft_model} | batch-size of {experiment_config.batch_size} | number of epochs of {experiment_config.num_epochs} | lr of {experiment_config.lr} | qrels {experiment_config.gold_labels_year}"
     with mlflow.start_run(
         description=description,
-        run_name=f"ft-llama-{experiment_config.temperature}-{experiment_config.top_k}-{experiment_config.top_p}-{experiment_config}",
     ) as run:
         logger = setup_logger(run_id=run.info.run_id)
         mlflow.log_params(
@@ -65,6 +64,7 @@ def main(**kwargs):
             print("Running training...")
             results = ft_main(
                 logger=logger,
+                dataset_version=experiment_config.dataset_version,
                 dataset=f"ct_{experiment_config.dataset_version}",
                 dataset_size=experiment_config.dataset_size,
                 lr=experiment_config.lr,
@@ -76,13 +76,16 @@ def main(**kwargs):
             )
             mlflow.set_tag("ft-conducted", "TRUE")
             mlflow.log_metrics(results)
+            # TODO: Log output .txt artifact with responses!
+            mlflow.log_artifact()
             clear_gpu_cache()
 
         if experiment_config.run_testing:
             print("Running testing...")
             results = test_main(
-                dataset=f"ct_testing_{experiment_config.dataset_version}",
                 dataset_size=experiment_config.dataset_size_testing,
+                dataset_version=experiment_config.dataset_version,
+                dataset=f"ct_testing_{experiment_config.dataset_version}",
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
                 load_peft_model=True,
