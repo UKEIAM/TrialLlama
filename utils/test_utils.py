@@ -84,6 +84,8 @@ def test(
                     response.append(tokenizer.decode(token))
                 response = "".join(response)
                 response = response.replace("</s>", "")
+                
+                # TODO: This needs refactor, ones datasets are generated and output is fixed
                 if test_config.debug:
                     print(f"### Response: {response}")
 
@@ -120,7 +122,7 @@ def test(
                         print(response)
                     continue
 
-                row_raw = [topic_id, ct_id, response]
+                row_raw = [topic_id, ct_id, response] 
                 row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model]
                 row_out = [topic_id, 0, ct_id, proba, predicted_label]
 

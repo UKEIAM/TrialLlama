@@ -28,9 +28,8 @@ data_list = []
 
 
 def create_JSON(
-    config_name: Optional[str] = "train",
-    out_file_name: Optional[str] = "ct_full_v3.json",
-    all_years: Optional[str] = False,
+    config_name: Optional[str] = "test",
+    out_file_name: Optional[str] = "ct_22_v3.json",
 ):
 
     if config_name == "train":
@@ -102,13 +101,10 @@ def create_JSON(
             output_text = (
                 f"The clinical trial fits on the patient's profile. Status code {label}"
             )
-            id_string = (
-                f"{str(config['year_of_topics'])}_{topic_nr}_{ct}"
-                if all_years
-                else f"{index}_{topic_nr}_{ct}"
-            )
-            item = {
+            id_string = f"{index}_{topic_nr}_{ct}"
+            item = { 
                 "id": id_string,
+                "year": config['year_of_topics'],
                 "instruction": "Hello. You are a helpful assistant for clinical trial recruitment."
                 "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
                 "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
