@@ -150,6 +150,6 @@ def create_dataset_sample(
     if nr_examples > 0:
         for idx, example in enumerate(df_examples["input"].values):
             instruction = data_sample["instruction"]
-            data_sample["instruction"][idx] = f"{instruction}\n\n{example}"
+            data_sample.loc[idx, "instruction"] = f"{instruction}\n\n{example}"
 
     data_sample.to_json(out_path, orient="records")
