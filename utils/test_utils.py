@@ -124,6 +124,7 @@ def test(
 
                 row_raw = [
                     ct_id,
+                    topic_year,
                     proba,
                     test_config.ft_model,
                     predicted_label,
