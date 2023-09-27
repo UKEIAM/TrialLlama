@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class train_config:
-    base_model: str = "Llama-2-7b-chat-hf"
+    base_model: str = "Llama-2-13b-chat-hf"
     enable_fsdp: bool = False
     low_cpu_fsdp: bool = False
     run_validation: bool = True
@@ -20,7 +20,7 @@ class train_config:
     use_fp16: bool = True
     mixed_precision: bool = True
     val_batch_size: int = 1
-    dataset: str = "ct_train_sample_v2"
+    dataset: str = "ct_train_sample_v3"
     dataset_version: str = "v3"
     dataset_size: int = 900
     peft_method: str = "lora"  # None , llama_adapter, prefix

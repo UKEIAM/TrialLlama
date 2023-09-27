@@ -4,12 +4,12 @@ from dataclasses import dataclass
 @dataclass
 class test_config:
     batch_size: int = 1
-    base_model: str = "Llama-2-7b-chat-hf"
-    ft_model: str = "llama-7b-chat-300"
+    base_model: str = "Llama-2-13b-chat-hf"
+    ft_model: str = "llama-13b-chat-300-v3"
     quantization: bool = True
-    dataset: str = "ct_testing_v2"
+    dataset: str = "ct_testing_sample_v3"
     dataset_version: str = "v3"
-    dataset_size: int = 1000
+    dataset_size: int = 300
     num_workers_dataloader: int = 1
     max_new_tokens: int = 200  # TODO: Model produces a lot of empty output, tested different max_new_tokens -> No effect
     seed: int = 42  # seed value for reproducibility
@@ -31,4 +31,3 @@ class test_config:
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers make use Flash Attention and Xformer memory-efficient kernels
     load_peft_model: bool = False
     debug: bool = False
-    device_id: int = 3

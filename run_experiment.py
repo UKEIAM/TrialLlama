@@ -22,7 +22,7 @@ def main(**kwargs):
     update_config((experiment_config), **kwargs)
 
     eval_output_path = os.path.join(
-        "out", "eval", f"eval_{experiment_config.ft_model}_qrels.txt"
+        "out", "eval", f"eval_{experiment_config.ft_model}_raw.txt"
     )
 
     qrels_2022_path = os.path.join(
@@ -76,8 +76,7 @@ def main(**kwargs):
             )
             mlflow.set_tag("ft-conducted", "TRUE")
             mlflow.log_metrics(results)
-            # TODO: Log output .txt artifact with responses!
-            mlflow.log_artifact()
+            mlflow.log_artifact(eval_output_path)
             clear_gpu_cache()
 
         if experiment_config.run_testing:

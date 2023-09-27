@@ -5,16 +5,18 @@ import matplotlib.pyplot as plt
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
 
-type = "train"
-
 path = base_dir
 out_path = base_dir
-if type == "train":
-    path = os.path.join(base_dir, "data", "ct_full_v3.json")
-elif type == "test":
-    path = os.path.join(base_dir, "data", "ct_testing_full_v3.json")
+path = os.path.join(base_dir, "data", "ct_train_v3.json")
 
 df = pd.read_json(path)
+
+
+def count_words(text):
+    # Split the text into words using whitespace as a separator and count them
+    words = text.split()
+    return len(words)
+
 
 # Assuming you have a DataFrame named df with a "class" column
 class_counts = df["output"].value_counts()
@@ -23,18 +25,10 @@ filtered_df = df[df["input"].str.contains("Exclusion Criteria")]
 
 class_counts_filtered = filtered_df["output"].value_counts()
 
-# Step 3: Define a function to count words
-def count_words(text):
-    # Split the text into words using whitespace as a separator and count them
-    words = text.split()
-    return len(words)
-
-
 # Step 4: Apply the function to your DataFrame column
 filtered_df["word_count"] = filtered_df["input"].apply(count_words)
 
 max_words = filtered_df["word_count"].max()
-
 
 mask = (
     filtered_df["word_count"] > 600
@@ -56,7 +50,7 @@ for i, count in enumerate(class_counts):
 
 # Save the plot as an image file (e.g., PNG)
 plt.savefig(
-    os.path.join(base_dir, "out", "eval", "img", f"class_distribution_{type}.png"),
+    os.path.join(base_dir, "out", "eval", "img", f"class_distribution_train.png"),
     bbox_inches="tight",
 )
 

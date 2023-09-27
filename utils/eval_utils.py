@@ -24,13 +24,9 @@ def calculate_metrics(
     run_name: str,
     logger,
 ):
-    model_df = pd.read_csv(
-        eval_output_path,
-        header=None,
-        delimiter="\t",
-        names=["TOPIC", "Q0", "NCT_ID", "PROBA", "LABEL"],
-    )
-    model_df.drop(columns=["PROBA"], inplace=True)
+    model_df = pd.read_json(eval_output_path)
+    required_cols = ["TOPIC", "Q0", "NCT_ID", "LABEL"]
+    model_df.drop(~required_cols, inplace=True)
     gold_df = pd.read_csv(
         gold_labels_file,
         header=None,
@@ -74,8 +70,8 @@ def calculate_metrics(
         annot=True,
         fmt="d",
         cmap="Blues",
-        xticklabels=["irrelevant", "uneligible", "eligible"],
-        yticklabels=["irrelevant", "uneligible", "eligible"],
+        xticklabels=["not relevant information", "not eligible", "eligible"],
+        yticklabels=["not relevant information", "not eligible", "eligible"],
     )
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
