@@ -84,6 +84,8 @@ def test(
                     response.append(tokenizer.decode(token))
                 response = "".join(response)
                 response = response.replace("</s>", "")
+                # TODO: Check how response looks like (does model return in asked for dictionary format?
+                # If yes, add "response" as key and add dictionary after it -> "response": str(Response text) : str('eligible'|'not eligible'|'no relevant information')}
                 if test_config.debug:
                     print(f"### Response: {response}")
 
