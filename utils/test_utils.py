@@ -91,6 +91,8 @@ def test(
                 topic_id = match.group(2)
                 ct_id = match.group(3)
 
+                topic_year = test_data_json[step]["topic_year"]
+
                 probas = []
                 if "not eligible" in response.lower():
                     for item in transition_scores[0]:
@@ -120,14 +122,16 @@ def test(
                         print(response)
                     continue
 
-                row_raw = [topic_id, ct_id, response]
-                row_trec = [topic_id, 0, ct_id, proba, test_config.ft_model]
-                row_out = [topic_id, 0, ct_id, proba, predicted_label]
+                row_raw = [
+                    ct_id,
+                    proba,
+                    test_config.ft_model,
+                    predicted_label,
+                    response,
+                ]
 
                 # TODO: For debugging purposes, since currently model returns 'nan' values as output tensor
                 raw_out.loc[step] = row_raw
-                trec_out.loc[step] = row_trec
-                df_out.loc[step] = row_out
 
         # trec_eval script requires a document ranking. For that reason we simply use score calculated by the averaged token probablities to create a doucment ranking
         trec_out["RANK"] = (
@@ -140,7 +144,7 @@ def test(
 
         # add_ranking_column(trec_out)
 
-        return raw_out, trec_out, df_out, empty_response_counter
+        return raw_out, empty_response_counter
 
 
 def get_max_length(model):
