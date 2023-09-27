@@ -35,16 +35,17 @@ def create_JSON(
     with open(config_file, "r") as file:
         config = yaml.safe_load(file)
 
+    counter = 0
     for topic_year in config["year_of_topics"]:
         source_data_directory = os.path.join(
             raw_ct_data_directory, str(config["year_of_data"])
         )
         required_data_directory = os.path.join(
-            raw_ct_data_directory, config["required_cts"]
+            raw_ct_data_directory, "required_cts"
         )
 
         topics_df = parse_XML_to_df(
-            os.path.join(source_data_directory, f"topics{config['year_of_topics']}.xml"),
+            os.path.join(source_data_directory, f"topics{topic_year}.xml"),
             ["number", "topic"],
         )
         topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
@@ -59,7 +60,6 @@ def create_JSON(
         # DEBUG
         # qrels = qrels[:100]
 
-        counter = 0
         for index, row in tqdm(qrels.iterrows()):
             topic_nr = row["topic"]
             try:
@@ -100,8 +100,8 @@ def create_JSON(
                     "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
                     "They are based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. "
                     "You should check the inclusion and exclusion criteria one-by-one. If at least one exclusion criterion is met, the patient is automaticall not eligible."
-                    "For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion."
-                    "Your answer should be in the following format: dict{list[str(Response text) : str('eligible'|'not eligible'|'no relevant information')]}\n",
+                    "For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion. Then give an answer why you think the patient is eligible not eligible or if the given clinical trial has no relevant information fo the patient."
+                    "Your answer should be in the following format: dict{str(Response text) : str('eligible'|'not eligible'|'no relevant information')}\n",
                     "input": f"Here is the example patient note:\n {cleaned_topic}\nHere is an example clinical trial\n: {ct_input}",
                     "output": category,
                 }
@@ -111,25 +111,25 @@ def create_JSON(
             else:
                 continue
 
-        """The below function is returning the full CT parsed into a JSON format + cleaned"""
-        out_directory_train = os.path.join(data_directory, f"ct_train_{version}")
-        out_directory_test = os.path.join(data_directory, f"ct_test_{version}")
+    """The below function is returning the full CT parsed into a JSON format + cleaned"""
+    out_directory_train = os.path.join(data_directory, f"ct_train_{version}.json")
+    out_directory_test = os.path.join(data_directory, f"ct_test_{version}.json")
 
 
-        df = pd.read_json(data_list)
-        # Step 1: Mix the samples
-        df = shuffle(df, random_state=42)  # Shuffle the rows randomly
-    
-        # Step 2: Create a test dataset of size 1000
-        test_dataset = df.sample(n=1000, random_state=42)  # Randomly select 1000 samples for testing
+    df = pd.DataFrame(data_list)
+    # Step 1: Mix the samples
+    df = shuffle(df, random_state=42)  # Shuffle the rows randomly
 
-        # Step 3: Remove the test dataset from the original DataFrame
-        train_dataset = df.drop(test_dataset.index)
+    # Step 2: Create a test dataset of size 1000
+    test_dataset = df.sample(n=1000, random_state=42)  # Randomly select 1000 samples for testing
 
-        train_dataset.to_json(out_directory_train, orient="records")
-        test_dataset.to_json(out_directory_test, orient="records")
+    # Step 3: Remove the test dataset from the original DataFrame
+    train_dataset = df.drop(test_dataset.index)
 
-        print(f"Saved dataset with {counter} examples")
+    train_dataset.to_json(out_directory_train, orient="records")
+    test_dataset.to_json(out_directory_test, orient="records")
+
+    print(f"Saved dataset Version {version} with {counter} examples")
 
 
 def clean_textblock(text):
