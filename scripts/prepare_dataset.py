@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 from tqdm import tqdm
 from pathlib import Path
 from typing import Optional
+from sklearn.utils import shuffle
 
 
 # from configs.config import train_config, eval_config
@@ -26,109 +27,109 @@ raw_ct_data_directory = os.path.join(home_directory, "data")
 
 data_list = []
 
-
 def create_JSON(
-    config_name: Optional[str] = "test",
-    out_file_name: Optional[str] = "ct_22_v3.json",
+    version: str = "v3",
 ):
 
-    if config_name == "train":
-        config_file = os.path.join(base_directory, "configs/train_data.yaml")
-        with open(config_file, "r") as file:
-            config = yaml.safe_load(file)
-    elif config_name == "test":
-        config_file = os.path.join(base_directory, "configs/test_data.yaml")
-        with open(config_file, "r") as file:
-            config = yaml.safe_load(file)
+    config_file = os.path.join(base_directory, "configs/ct_data.yaml")
+    with open(config_file, "r") as file:
+        config = yaml.safe_load(file)
 
-    source_data_directory = os.path.join(
-        raw_ct_data_directory, str(config["year_of_data"])
-    )
-    required_data_directory = os.path.join(
-        raw_ct_data_directory, f"{config['mode']}required_cts"
-    )
+    for topic_year in config["year_of_topics"]:
+        source_data_directory = os.path.join(
+            raw_ct_data_directory, str(config["year_of_data"])
+        )
+        required_data_directory = os.path.join(
+            raw_ct_data_directory, config["required_cts"]
+        )
 
-    topics_df = parse_XML_to_df(
-        os.path.join(source_data_directory, f"topics{config['year_of_topics']}.xml"),
-        ["number", "topic"],
-    )
-    topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
+        topics_df = parse_XML_to_df(
+            os.path.join(source_data_directory, f"topics{config['year_of_topics']}.xml"),
+            ["number", "topic"],
+        )
+        topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
 
-    qrel_path = os.path.join(
-        raw_ct_data_directory,
-        str(config["year_of_data"]),
-        config["qrels_path"],
-    )
-    qrels = read_qrel_txt(qrel_path)
+        qrel_path = os.path.join(
+            raw_ct_data_directory,
+            str(config["year_of_data"]),
+            f"{config['qrels_path']}{topic_year}.txt",
+        )
+        qrels = read_qrel_txt(qrel_path)
 
-    # DEBUG
-    # qrels = qrels[:100]
+        # DEBUG
+        # qrels = qrels[:100]
 
-    counter = 0
-    for index, row in tqdm(qrels.iterrows()):
-        topic_nr = row["topic"]
-        try:
-            topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[0]
-            cleaned_topic = clean_textblock(topic)
-        except KeyError as e:
-            continue
-        ct = row["clinical trial id"]
-        label = row["label"]
-        ct_path = os.path.join(required_data_directory, ct + ".xml")
-        if os.path.exists(ct_path):
-            clinical_trial_dict = parse_XML_to_json(ct_path)
-            ct_data = extract_required_data_from_clinical_trials(clinical_trial_dict)
-            ct_input = ct_data.copy()
-            for idx, item in enumerate(ct_data):
-                if "exclusion criteria" in item.lower():
-                    item_index = item.lower().find("exclusion criteria")
-                    index_gender = item.lower().find("gender")
-                    inclusion_crit = item[:item_index]
-                    exclusion_crit = item[item_index:index_gender]
-                    general_inclusion_crit = item[index_gender:]
-                    ct_input.pop(idx)
-                    ct_input.insert(idx, f"{inclusion_crit}\n{general_inclusion_crit}")
-                    ct_input.append(f"{exclusion_crit}")
-            ct_input = "\n".join([f"{item}" for item in ct_input])
-            if label == 0:
-                category = "no relevant information"
-                output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
-            elif label == 1:
-                category = "not eligible"
-                output_text = f"The patient at hand is not eligible for the clinical presented clinical trial. Status code {label}"
+        counter = 0
+        for index, row in tqdm(qrels.iterrows()):
+            topic_nr = row["topic"]
+            try:
+                topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[0]
+                cleaned_topic = clean_textblock(topic)
+            except KeyError as e:
+                continue
+            ct = row["clinical trial id"]
+            label = row["label"]
+            ct_path = os.path.join(required_data_directory, ct + ".xml")
+            if os.path.exists(ct_path):
+                clinical_trial_dict = parse_XML_to_json(ct_path)
+                ct_data = extract_required_data_from_clinical_trials(clinical_trial_dict)
+                ct_input = ct_data.copy()
+                for idx, item in enumerate(ct_data):
+                    if "exclusion criteria" in item.lower():
+                        item_index = item.lower().find("exclusion criteria")
+                        index_gender = item.lower().find("gender")
+                        inclusion_crit = item[:item_index]
+                        exclusion_crit = item[item_index:index_gender]
+                        general_inclusion_crit = item[index_gender:]
+                        ct_input.pop(idx)
+                        ct_input.insert(idx, f"{inclusion_crit}\n{general_inclusion_crit}")
+                        ct_input.append(f"{exclusion_crit}")
+                ct_input = "\n".join([f"{item}" for item in ct_input])
+                if label == 0:
+                    category = "no relevant information"
+                elif label == 1:
+                    category = "not eligible"
+                else:
+                    category = "eligible"
+                id_string = f"{index}_{topic_nr}_{ct}"
+                item = { 
+                    "id": id_string,
+                    "topic_year": topic_year,
+                    "instruction": "Hello. You are a helpful assistant for clinical trial recruitment."
+                    "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
+                    "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
+                    "They are based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. "
+                    "You should check the inclusion and exclusion criteria one-by-one. If at least one exclusion criterion is met, the patient is automaticall not eligible."
+                    "For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion."
+                    "Your answer should be in the following format: dict{list[str(Response text) : str('eligible'|'not eligible'|'no relevant information')]}\n",
+                    "input": f"Here is the example patient note:\n {cleaned_topic}\nHere is an example clinical trial\n: {ct_input}",
+                    "output": category,
+                }
+
+                data_list.append(item)
+                counter += 1
             else:
-                category = "eligible"
-            output_text = (
-                f"The clinical trial fits on the patient's profile. Status code {label}"
-            )
-            id_string = f"{index}_{topic_nr}_{ct}"
-            item = { 
-                "id": id_string,
-                "year": config['year_of_topics'],
-                "instruction": "Hello. You are a helpful assistant for clinical trial recruitment."
-                "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
-                "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
-                "They are based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. "
-                "You should check the inclusion and exclusion criteria one-by-one. If at least one exclusion criterion is met, the patient is automaticall not eligible."
-                "For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion."
-                "Your answer should be in the following format: dict{str(inclusion_criterion): list[str(relevance_explanation)} str('eligible'|'not eligible'|'no relevant information')]}\n",
-                "input": f"Here is the example patient note:\n {cleaned_topic}\nHere is an example clinical trial\n: {ct_input}",
-                "output": category,
-            }
+                continue
 
-            data_list.append(item)
-            counter += 1
-        else:
-            continue
+        """The below function is returning the full CT parsed into a JSON format + cleaned"""
+        out_directory_train = os.path.join(data_directory, f"ct_train_{version}")
+        out_directory_test = os.path.join(data_directory, f"ct_test_{version}")
 
-    """The below function is returning the full CT parsed into a JSON format + cleaned"""
-    out_directory = os.path.join(data_directory, out_file_name)
-    print(f"Saving dataset to {out_directory}...")
 
-    with open(out_directory, "w") as fp:
-        json.dump(data_list, fp, indent=4)
+        df = pd.read_json(data_list)
+        # Step 1: Mix the samples
+        df = shuffle(df, random_state=42)  # Shuffle the rows randomly
+    
+        # Step 2: Create a test dataset of size 1000
+        test_dataset = df.sample(n=1000, random_state=42)  # Randomly select 1000 samples for testing
 
-    print(f"Saved dataset with {counter} examples")
+        # Step 3: Remove the test dataset from the original DataFrame
+        train_dataset = df.drop(test_dataset.index)
+
+        train_dataset.to_json(out_directory_train, orient="records")
+        test_dataset.to_json(out_directory_test, orient="records")
+
+        print(f"Saved dataset with {counter} examples")
 
 
 def clean_textblock(text):
