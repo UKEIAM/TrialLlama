@@ -63,6 +63,9 @@ def create_dataset_sample(
         out_path = os.path.join(base_dir, "data", f"ct_testing_{version}.json")
 
     df = pd.read_json(path)
+    df_filtered = df[
+        df["input"].str.contains("Exclusion Criteria")
+    ]  # Only take items items into consideration with Inclusion and Exclusion Criteria
 
     """
         BALANCING: Since "IRRELEVANT" label is predominant in the dataset, we will truncate it in extracting a random

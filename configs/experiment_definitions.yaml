@@ -2,10 +2,10 @@ base_model:
 #  - "Llama-2-7b-chat-hf"
   - "Llama-2-13b-chat-hf"
 dataset_version:
-  - "v2"
+#  - "v2"
   - "v3"
 experiment_focus:
-  - "prompt-set"
+  - "dataset"
 dataset_size:
   - 100
 #  - 300

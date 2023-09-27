@@ -10,16 +10,18 @@ type = "train"
 path = base_dir
 out_path = base_dir
 if type == "train":
-    path = os.path.join(base_dir, "data", "ct_full_v2.json")
-    out_path = os.path.join(base_dir, "data", "ct_v2.json")
+    path = os.path.join(base_dir, "data", "ct_full_v3.json")
 elif type == "test":
-    path = os.path.join(base_dir, "data", "ct_testing_full_v2.json")
-    out_path = os.path.join(base_dir, "data", "ct_testing.json")
+    path = os.path.join(base_dir, "data", "ct_testing_full_v3.json")
 
 df = pd.read_json(path)
 
 # Assuming you have a DataFrame named df with a 'class' column
 class_counts = df["output"].value_counts()
+
+filtered_df = df[df["input"].str.contains("Exclusion Criteria")]
+
+class_counts_filtered = filtered_df["output"].value_counts()
 
 # Create a bar chart of the class distribution
 plt.figure(figsize=(8, 6))
