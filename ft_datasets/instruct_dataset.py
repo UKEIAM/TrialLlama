@@ -12,14 +12,12 @@ from torch.utils.data import Dataset
 
 
 PROMPT_DICT = {
-    "prompt_input": (
-        "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response:"
-    ),
+    "prompt_input": ("{instruction}\n\n{topic}\n\n{clinical_trial}\n\n{response}\n\n"),
 }
 
 
 class InstructionDataset(Dataset):
-    def __init__(self, dataset_config, tokenizer, partition="train", max_tokens=30):
+    def __init__(self, dataset_config, tokenizer, partition="train", max_tokens=1024):
         self.ann = json.load(open(dataset_config.data_path))
         if partition == "train":
             self.ann = self.ann

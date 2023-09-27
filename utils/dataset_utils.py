@@ -48,9 +48,10 @@ def get_preprocessed_dataset(
 
 
 def count_words(text):
-    # Split the text into words using whitespace as a separator and count them
-    words = text.split()
-    return len(words)
+    if isinstance(text, str):
+        return len(text.split())
+    else:
+        return 0
 
 
 def create_dataset_sample(
@@ -103,7 +104,10 @@ def create_dataset_sample(
         complex with information. Hence we reduce to 600 words for the input, to provide the model with best possible
         train data.
     """
-    df["word_count"] = df["input"].apply(count_words)
+    cols_to_count = ["topic", "clinical_trial"]
+    df["word_count"] = df[cols_to_count].apply(
+        lambda row: sum(row.map(count_words)), axis=1
+    )
 
     mask = (
         df["word_count"] > 600
@@ -144,6 +148,8 @@ def create_dataset_sample(
         sys.exit(1)
 
     if nr_examples > 0:
-        data_sample = pd.concat(df_examples, data_sample)
+        for idx, example in enumerate(df_examples["input"].values):
+            instruction = data_sample["instruction"]
+            data_sample["instruction"][idx] = f"{instruction}\n\n{example}"
 
     data_sample.to_json(out_path, orient="records")
