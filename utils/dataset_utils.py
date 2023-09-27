@@ -1,8 +1,8 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
-
-import torch
 import os
+import sys
+import torch
 
 import pandas as pd
 
@@ -13,18 +13,14 @@ from ft_datasets.instruct_dataset import InstructionDataset, TestingDataset
 
 
 DATASET_PREPROC = {
-    "ct_v1": partial(InstructionDataset),
-    "ct_v2": partial(InstructionDataset),
-    "ct_v3": partial(InstructionDataset),
-    "ct_v4": partial(InstructionDataset),
-    "ct_v5": partial(InstructionDataset),
-    "ct_v6": partial(InstructionDataset),
-    "ct_testing_v1": partial(TestingDataset),
-    "ct_testing_v2": partial(TestingDataset),
-    "ct_testing_v3": partial(TestingDataset),
-    "ct_testing_v4": partial(TestingDataset),
-    "ct_testing_v5": partial(TestingDataset),
-    "ct_testing_v6": partial(TestingDataset),
+    "ct_train_sample_v1": partial(InstructionDataset),
+    "ct_train_sample_v2": partial(InstructionDataset),
+    "ct_train_sample_v3": partial(InstructionDataset),
+    "ct_train_sample_v4": partial(InstructionDataset),
+    "ct_test_sample_v1": partial(TestingDataset),
+    "ct_test_sample_v2": partial(TestingDataset),
+    "ct_test_sample_v3": partial(TestingDataset),
+    "ct_test_sample_v4": partial(TestingDataset),
 }
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
@@ -62,23 +58,28 @@ def create_dataset_sample(
     version: str = "v2",
     type: str = "train",
     x_shot_examples: Optional[str] = "",
+    logger: Optional[object] = None,
 ) -> None:
     path = base_dir
     out_path = base_dir
     x_shot_examples_path = None
     if x_shot_examples == "few-shot":
-        x_shot_examples_path = os.path.join(base_dir, "data", "ct_few_shot.json")
+        x_shot_examples_path = os.path.join(
+            base_dir, "data", f"ct_few_shot_{version}.json"
+        )
     elif x_shot_examples == "one-shot":
-        x_shot_examples_path = os.path.join(base_dir, "data", "ct_one_shot.json")
+        x_shot_examples_path = os.path.join(
+            base_dir, "data", f"ct_one_shot_{version}.json"
+        )
+
+    # TODO: Refactor: Create a sample from ct_all_years and save it as "ct_all_years_testing"
+    # Derive train_dataset from "ct_all_years" but leave out ~1000 samples for test
     if type == "train":
-        path = os.path.join(base_dir, "data", f"ct_21_{version}.json")
-        out_path = os.path.join(base_dir, "data", f"ct_{version}.json")
+        path = os.path.join(base_dir, "data", f"ct_train_{version}.json")
+        out_path = os.path.join(base_dir, "data", f"ct_train_sample_{version}.json")
     elif type == "test":
-        path = os.path.join(base_dir, "data", f"ct_22_{version}.json")
-        out_path = os.path.join(base_dir, "data", f"ct_testing_{version}.json")
-    elif type == "all":
-        path = os.path.join(base_dir, "data", f"ct_all_years_{version}.json")
-        out_path = os.path.join(base_dir, "data", f"ct_all_years_{version}.json")
+        path = os.path.join(base_dir, "data", f"ct_test_{version}.json")
+        out_path = os.path.join(base_dir, "data", f"ct_test_sample_{version}.json")
 
     df = pd.read_json(path)
     df = df[
@@ -134,9 +135,14 @@ def create_dataset_sample(
 
     df = df[df[col_name] != max_label]
     balanced_df = pd.concat([df, trunc_max_label_df], ignore_index=True)
-    data_sample = balanced_df.sample(
-        n=(dataset_size - nr_examples), random_state=42, ignore_index=True
-    )
+    try:
+        data_sample = balanced_df.sample(
+            n=(dataset_size - nr_examples), random_state=42, ignore_index=True
+        )
+    except Exception as e:
+        logger.error(f"DATASET SAMPLE CREATION FAILED with error: {e}")
+        sys.exit(1)
+
     if nr_examples > 0:
         data_sample = pd.concat(df_examples, data_sample)
 

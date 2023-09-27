@@ -15,10 +15,6 @@ PROMPT_DICT = {
     "prompt_input": (
         "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response:"
     ),
-    "test_input": (
-        # TODO: Do I need to change "prompt_input?"
-        "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response:"
-    ),
 }
 
 

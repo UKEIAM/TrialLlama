@@ -20,7 +20,7 @@ class train_config:
     use_fp16: bool = True
     mixed_precision: bool = True
     val_batch_size: int = 1
-    dataset: str = "ct_v2"
+    dataset: str = "ct_train_sample_v2"
     dataset_version: str = "v3"
     dataset_size: int = 900
     peft_method: str = "lora"  # None , llama_adapter, prefix
