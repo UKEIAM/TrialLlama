@@ -9,7 +9,7 @@ class test_config:
     quantization: bool = True
     dataset: str = "ct_testing_sample_v3"
     dataset_version: str = "v3"
-    dataset_size: int = 300
+    dataset_size: int = 250
     num_workers_dataloader: int = 1
     max_new_tokens: int = 200  # TODO: Model produces a lot of empty output, tested different max_new_tokens -> No effect
     seed: int = 42  # seed value for reproducibility

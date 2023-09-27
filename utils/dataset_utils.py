@@ -84,7 +84,7 @@ def create_dataset_sample(
 
     df = pd.read_json(path)
     df = df[
-        df["input"].str.contains("Exclusion Criteria:")
+        df["clinical_trial"].str.contains("Exclusion Criteria:")
     ]  # Only take items  into consideration with Inclusion and Exclusion Criteria
     """
         Some randomly picked examples are prepared to create hand-crafted few-shot and one-shot learning examples.
@@ -110,7 +110,7 @@ def create_dataset_sample(
     )
 
     mask = (
-        df["word_count"] > 600
+        df["word_count"] > 500
     )  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
     df = df[~mask]
 

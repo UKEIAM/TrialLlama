@@ -11,7 +11,7 @@ class train_config:
     run_validation: bool = True
     batch_size_training: int = 4
     gradient_accumulation_steps: int = 1
-    num_epochs: int = 3
+    num_epochs: int = 4
     num_workers_dataloader: int = 1
     lr: float = 1e-4
     weight_decay: float = 0.0
@@ -37,6 +37,6 @@ class train_config:
     save_optimizer: bool = False  # will be used if using FSDP
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers, make use Flash Attention and Xformer memory-efficient kernels
     # max_words: int = 1900 # Since the input is so long, the output of the model while in eval mode is even longer. Hence, we need to restrict the preds output.
-    max_tokens: int = 2048  # Fixed
+    max_tokens: int = 2048  # Fixed: Training does not require that much tokens. Value is set high, since one-/few-shot learning requires prompt + example, which can exceed the token number
     debug: bool = False
     x_shot_examples: str = "few-shot"
