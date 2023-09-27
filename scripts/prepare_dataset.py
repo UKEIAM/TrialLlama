@@ -30,13 +30,14 @@ data_list = []
 def create_JSON(
     config_name: Optional[str] = "train",
     out_file_name: Optional[str] = "ct_full_v3.json",
+    all_years: Optional[str] = False,
 ):
 
     if config_name == "train":
         config_file = os.path.join(base_directory, "configs/train_data.yaml")
         with open(config_file, "r") as file:
             config = yaml.safe_load(file)
-    else:
+    elif config_name == "test":
         config_file = os.path.join(base_directory, "configs/test_data.yaml")
         with open(config_file, "r") as file:
             config = yaml.safe_load(file)
@@ -88,7 +89,7 @@ def create_JSON(
                     general_inclusion_crit = item[index_gender:]
                     ct_input.pop(idx)
                     ct_input.insert(idx, f"{inclusion_crit}\n{general_inclusion_crit}")
-                    ct_input.append(f"Exclusion Criteria: {exclusion_crit}")
+                    ct_input.append(f"{exclusion_crit}")
             ct_input = "\n".join([f"{item}" for item in ct_input])
             if label == 0:
                 category = "no relevant information"
@@ -101,8 +102,9 @@ def create_JSON(
             output_text = (
                 f"The clinical trial fits on the patient's profile. Status code {label}"
             )
-            item = {
-                "id": f"{index}_{topic_nr}_{ct}",
+            id_string = f"{str(config['year_of_topics'])}_{topic_nr}_{ct}" if all_years else f"{index}_{topic_nr}_{ct}"
+            item = { 
+                "id": id_string,
                 "instruction": "Hello. You are a helpful assistant for clinical trial recruitment."
                 "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
                 "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
@@ -160,6 +162,8 @@ def extract_data_info(element_type, elements):
                 textblock_element = value.get("textblock")
                 value = clean_textblock(textblock_element)
                 info.append(f"{value}\n")
+            elif key == "study_pop":
+                continue
             else:
                 info.append(f"{key.capitalize().replace('_', ' ')}: {value}\n")
         if element_type == "Summary":
