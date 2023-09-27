@@ -102,8 +102,12 @@ def create_JSON(
             output_text = (
                 f"The clinical trial fits on the patient's profile. Status code {label}"
             )
-            id_string = f"{str(config['year_of_topics'])}_{topic_nr}_{ct}" if all_years else f"{index}_{topic_nr}_{ct}"
-            item = { 
+            id_string = (
+                f"{str(config['year_of_topics'])}_{topic_nr}_{ct}"
+                if all_years
+                else f"{index}_{topic_nr}_{ct}"
+            )
+            item = {
                 "id": id_string,
                 "instruction": "Hello. You are a helpful assistant for clinical trial recruitment."
                 "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
@@ -115,21 +119,6 @@ def create_JSON(
                 "input": f"Here is the example patient note:\n {cleaned_topic}\nHere is an example clinical trial\n: {ct_input}",
                 "output": category,
             }
-            # item = {
-            #     "id": f"{index}_{topic_nr}_{ct}",
-            #     "instruction": "Hello. You are a helpful assistant for clinical trial recruitment."
-            #     "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
-            #     "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
-            #     "They are based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. "
-            #     "You should check the inclusion and exclusion criteria one-by-one. "
-            #     "You should check the inclusion criteria one-by-one, following the steps below: "
-            #     "1. For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion. You should explain in detail if there is relevant information. "
-            #     "2. Then, if there is relevant information, you must annotate a list of relevant sentence IDs of the patient note. If there is no relevant information, you must annotate an empty list. "
-            #     "3. Finally, annotate the patient eligibility for this specific inclusion criterion: the eligibility must be 'no relevant information' if there is no relevant information. Otherwise, the patient can only be 'included' or 'not included' if there are relevant sentences. 'included' means that the patient meets the inclusion criterion, and 'not included' means that the patient contradicts the inclusion criterion. "
-            #     "4. You should output only a JSON dict exactly formatted as: dict{str(inclusion_criterion): list[str(relevance_explanation), list[int(sentence_id)], str('included'|'not included'|'no relevant information')]}\n\n",
-            #     "input": f"Here is the example patient note: {cleaned_topic}\n\nHere is the clinical trial: {ct_data}",
-            #     "output": category,
-            # }
 
             data_list.append(item)
             counter += 1
@@ -151,8 +140,10 @@ def clean_textblock(text):
     cleaned_text = re.sub(r"\s+", " ", cleaned_text.strip())
     return cleaned_text
 
+
 def format_criteria(criteria_text):
-    return [criterion.strip() for criterion in criteria_text.strip().split('\n')]
+    return [criterion.strip() for criterion in criteria_text.strip().split("\n")]
+
 
 def extract_data_info(element_type, elements):
     info = []
@@ -182,7 +173,7 @@ def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> l
             result_dict.update(d)
         clinical_trial = result_dict
     for key, value in clinical_trial.items():
-        if key == "eligibility" and isinstance(value, dict):            
+        if key == "eligibility" and isinstance(value, dict):
             key = "Inclusion Criteria"
             info = extract_data_info(key, value)
             elements.append(f"{key}: {info}")

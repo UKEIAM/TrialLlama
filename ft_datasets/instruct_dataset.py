@@ -45,13 +45,6 @@ class InstructionDataset(Dataset):
         prompt = torch.tensor(self.tokenizer.encode(prompt), dtype=torch.int64)
         example = self.tokenizer.encode(example)
         example.append(self.tokenizer.eos_token_id)
-        while len(example) > self.max_tokens:
-            words = ann["input"].split()
-            ann["input"] = " ".join(words[:-1])
-            prompt = PROMPT_DICT["prompt_input"].format_map(ann)
-            example = prompt + ann["output"]
-            prompt = torch.tensor(self.tokenizer.encode(prompt), dtype=torch.int64)
-            example = self.tokenizer.encode(example)
         example = torch.tensor(example, dtype=torch.int64)
         padding = self.max_tokens - example.shape[0]
         if padding > 0:
@@ -98,21 +91,4 @@ class TestingDataset(Dataset):
             return_tensors="pt",
         )
 
-        while len(batch["input_ids"]) > self.max_tokens:
-            ann = self.ann[index]
-            words = ann["input"].split()
-            ann["input"] = " ".join(words[:-1])
-            prompt = PROMPT_DICT["prompt_input"].format_map(ann)
-
-            batch = self.tokenizer(
-                prompt,
-                padding="max_length",
-                truncation=True,
-                max_length=self.max_tokens,
-                return_tensors="pt",
-            )
-
         return batch
-        # return {
-        #     "input_ids": prompt
-        # }

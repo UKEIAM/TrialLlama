@@ -16,12 +16,32 @@ elif type == "test":
 
 df = pd.read_json(path)
 
-# Assuming you have a DataFrame named df with a 'class' column
+# Assuming you have a DataFrame named df with a "class" column
 class_counts = df["output"].value_counts()
 
 filtered_df = df[df["input"].str.contains("Exclusion Criteria")]
 
 class_counts_filtered = filtered_df["output"].value_counts()
+
+# Step 3: Define a function to count words
+def count_words(text):
+    # Split the text into words using whitespace as a separator and count them
+    words = text.split()
+    return len(words)
+
+
+# Step 4: Apply the function to your DataFrame column
+filtered_df["word_count"] = filtered_df["input"].apply(count_words)
+
+max_words = filtered_df["word_count"].max()
+
+
+mask = (
+    filtered_df["word_count"] > 600
+)  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
+df_reduced = filtered_df[~mask]
+class_counts_filtered_reduced = df_reduced["output"].value_counts()
+
 
 # Create a bar chart of the class distribution
 plt.figure(figsize=(8, 6))

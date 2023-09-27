@@ -39,4 +39,4 @@ class train_config:
     # max_words: int = 1900 # Since the input is so long, the output of the model while in eval mode is even longer. Hence, we need to restrict the preds output.
     max_tokens: int = 2048  # Fixed
     debug: bool = False
-    device_id: int = 0
+    x_shot_examples: str = "few-shot"

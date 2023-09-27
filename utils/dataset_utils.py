@@ -7,6 +7,7 @@ import os
 import pandas as pd
 
 from functools import partial
+from typing import Optional
 
 from ft_datasets.instruct_dataset import InstructionDataset, TestingDataset
 
@@ -50,22 +51,65 @@ def get_preprocessed_dataset(
     )
 
 
+def count_words(text):
+    # Split the text into words using whitespace as a separator and count them
+    words = text.split()
+    return len(words)
+
+
 def create_dataset_sample(
-    dataset_size: int = 300, version: str = "v2", type: str = "train"
+    dataset_size: int = 300,
+    version: str = "v2",
+    type: str = "train",
+    x_shot_examples: Optional[str] = "",
 ) -> None:
     path = base_dir
     out_path = base_dir
+    x_shot_examples_path = None
+    if x_shot_examples == "few-shot":
+        x_shot_examples_path = os.path.join(base_dir, "data", "ct_few_shot.json")
+    elif x_shot_examples == "one-shot":
+        x_shot_examples_path = os.path.join(base_dir, "data", "ct_one_shot.json")
     if type == "train":
-        path = os.path.join(base_dir, "data", f"ct_full_{version}.json")
+        path = os.path.join(base_dir, "data", f"ct_21_{version}.json")
         out_path = os.path.join(base_dir, "data", f"ct_{version}.json")
     elif type == "test":
-        path = os.path.join(base_dir, "data", f"ct_testing_full_{version}.json")
+        path = os.path.join(base_dir, "data", f"ct_22_{version}.json")
         out_path = os.path.join(base_dir, "data", f"ct_testing_{version}.json")
+    elif type == "all":
+        path = os.path.join(base_dir, "data", f"ct_all_years_{version}.json")
+        out_path = os.path.join(base_dir, "data", f"ct_all_years_{version}.json")
 
     df = pd.read_json(path)
-    df_filtered = df[
-        df["input"].str.contains("Exclusion Criteria")
-    ]  # Only take items items into consideration with Inclusion and Exclusion Criteria
+    df = df[
+        df["input"].str.contains("Exclusion Criteria:")
+    ]  # Only take items  into consideration with Inclusion and Exclusion Criteria
+    """
+        Some randomly picked examples are prepared to create hand-crafted few-shot and one-shot learning examples.
+        Those examples should be excluded while sampling and always added to the top of the retrieved data sample.
+    """
+    nr_examples = 0
+    if x_shot_examples != None:
+        df_examples = pd.read_json(x_shot_examples_path)
+        nr_examples = len(df_examples)
+        blacklist = [
+            (x, y) for x, y in zip(df_examples["id"].values, df_examples["year"].values)
+        ]
+        df = df[~df.set_index(["id", "year"]).index.isin(blacklist)]
+
+    """
+        Some examples are very long. Checking some random samples showed that those are often faulty or just unnecessary
+        complex with information. Hence we reduce to 600 words for the input, to provide the model with best possible
+        train data.
+    """
+    df["word_count"] = df["input"].apply(count_words)
+
+    mask = (
+        df["word_count"] > 600
+    )  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
+    df = df[~mask]
+
+    df = df.drop(columns=["word_count"])
 
     """
         BALANCING: Since "IRRELEVANT" label is predominant in the dataset, we will truncate it in extracting a random
@@ -79,6 +123,10 @@ def create_dataset_sample(
     max_label = value_counts.index[0]
     avg_item_size_for_truncation = int((value_counts[1] + value_counts[2]) / 2)
 
+    """
+        WARNING: Don't change random state. To enable few-shot learning first x samples are modified by hand to give the
+        model a starting point.
+    """
     max_label_df = df[df[col_name] == max_label]
     trunc_max_label_df = max_label_df.sample(
         n=avg_item_size_for_truncation, random_state=42, ignore_index=True
@@ -86,6 +134,10 @@ def create_dataset_sample(
 
     df = df[df[col_name] != max_label]
     balanced_df = pd.concat([df, trunc_max_label_df], ignore_index=True)
-    data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
+    data_sample = balanced_df.sample(
+        n=(dataset_size - nr_examples), random_state=42, ignore_index=True
+    )
+    if nr_examples > 0:
+        data_sample = pd.concat(df_examples, data_sample)
 
     data_sample.to_json(out_path, orient="records")
