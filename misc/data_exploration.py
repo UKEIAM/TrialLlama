@@ -27,7 +27,7 @@ filtered_df = df[df["clinical_trial"].str.contains("Exclusion Criteria")]
 class_counts_filtered = filtered_df["output"].value_counts()
 
 # Step 4: Apply the function to your DataFrame column
-cols_to_count = ["topic", "clinical_trial"]
+cols_to_count = ["instruction", "topic", "clinical_trial", "response"]
 filtered_df["word_count"] = filtered_df[cols_to_count].apply(
     lambda row: sum(row.map(count_words)), axis=1
 )
