@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
 type = "test"
+max_allowed_words = 600
 
 path = base_dir
 out_path = base_dir
@@ -35,7 +36,7 @@ filtered_df["word_count"] = filtered_df[cols_to_count].apply(
 max_words = filtered_df["word_count"].max()
 
 mask = (
-    filtered_df["word_count"] > 500
+    filtered_df["word_count"] > max_allowed_words
 )  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
 df_reduced = filtered_df[~mask]
 class_counts_filtered_reduced = df_reduced["output"].value_counts()
@@ -55,7 +56,13 @@ for i, count in enumerate(class_counts_filtered_reduced):
 
 # Save the plot as an image file (e.g., PNG)
 plt.savefig(
-    os.path.join(base_dir, "out", "eval", "img", f"class_distribution_{type}.png"),
+    os.path.join(
+        base_dir,
+        "out",
+        "eval",
+        "img",
+        f"class_distribution_{type}_{max_allowed_words}.png",
+    ),
     bbox_inches="tight",
 )
 

@@ -11,7 +11,6 @@ from typing import Optional
 
 from ft_datasets.instruct_dataset import InstructionDataset, TestingDataset
 
-
 DATASET_PREPROC = {
     "ct_train_sample_v1": partial(InstructionDataset),
     "ct_train_sample_v2": partial(InstructionDataset),
@@ -95,9 +94,10 @@ def create_dataset_sample(
         df_examples = pd.read_json(x_shot_examples_path)
         nr_examples = len(df_examples)
         blacklist = [
-            (x, y) for x, y in zip(df_examples["id"].values, df_examples["year"].values)
+            (x, y)
+            for x, y in zip(df_examples["id"].values, df_examples["topic_year"].values)
         ]
-        df = df[~df.set_index(["id", "year"]).index.isin(blacklist)]
+        df = df[~df.set_index(["id", "topic_year"]).index.isin(blacklist)]
 
     """
         Some examples are very long. Checking some random samples showed that those are often faulty or just unnecessary
@@ -110,16 +110,23 @@ def create_dataset_sample(
     )
 
     mask = (
-        df["word_count"] > 500
+        df["word_count"]
+        > 600  # Figured out trough experimentation. Only valid for v2 and v3
     )  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
     df = df[~mask]
 
     df = df.drop(columns=["word_count"])
 
+    if type == "test":
+        assert dataset_size <= df.shape[0]
+        data_sample = df.sample(n=dataset_size, random_state=42, ignore_index=True)
+        data_sample.to_json(out_path, orient="records")
+        return
+
     """
         BALANCING: Since "IRRELEVANT" label is predominant in the dataset, we will truncate it in extracting a random
         sample from it based on the average number of items in the two other classes.
-        That creates a more balanced, but not perfectly balanced dataset
+        That creates a more balanced, but not perfectly balanced dataset. Only applied on train data
      """
 
     col_name = "output"
@@ -139,17 +146,13 @@ def create_dataset_sample(
 
     df = df[df[col_name] != max_label]
     balanced_df = pd.concat([df, trunc_max_label_df], ignore_index=True)
-    try:
-        data_sample = balanced_df.sample(
-            n=(dataset_size - nr_examples), random_state=42, ignore_index=True
-        )
-    except Exception as e:
-        logger.error(f"DATASET SAMPLE CREATION FAILED with error: {e}")
-        sys.exit(1)
+
+    assert dataset_size <= balanced_df.shape[0]
+    data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
 
     if nr_examples > 0:
         for idx, example in enumerate(df_examples["input"].values):
-            instruction = data_sample["instruction"]
+            instruction = data_sample.loc[idx, "instruction"]
             data_sample.loc[idx, "instruction"] = f"{instruction}\n\n{example}"
 
     data_sample.to_json(out_path, orient="records")
