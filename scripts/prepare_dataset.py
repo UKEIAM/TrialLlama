@@ -84,7 +84,8 @@ def create_JSON(
                         ct_input.pop(idx)
                         ct_input.insert(idx, f"{inclusion_crit}\n{general_inclusion_crit}")
                         ct_input.append(f"{exclusion_crit}")
-                ct_input = "\n".join([f"{item}" for item in ct_input])
+                ct_input = "".join([f"{item}" for item in ct_input])
+                ct_input = clean_textblock(ct_input)
                 if label == 0:
                     category = "no relevant information"
                 elif label == 1:
