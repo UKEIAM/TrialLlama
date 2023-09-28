@@ -41,6 +41,8 @@ for param_set in param_combinations:
         "--base_model",
         base_model,
         "dataset_version",
+        x_shot_examples,
+        "x_shot_examples",
         dataset_version,
         "--num_epochs",
         str(num_epochs),

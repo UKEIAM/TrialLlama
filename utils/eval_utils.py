@@ -1,6 +1,6 @@
 # TODO: Here functions are defined to evaluate the resulting file of the model_testing
 import os
-import mlflow
+import re
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -17,6 +17,27 @@ from sklearn.metrics import (
 from sklearn.preprocessing import label_binarize
 
 # Load the model-output and gold-labels files
+def prepare_files(raw_df):
+    # TODO Prepare the trec_eval output file and save it as well as the output file required to run metrics
+    # Original columns: ["ID", "RESPONSE", "PROBA", "CLASS"]
+    id_pattern = r"^(\d+)_(\d+)_(\w+)$"
+    # TODO While copying raw_file to trec_eval, extract TOPIC_NO & NCT_ID from the ID string with pattern and add 0 for Q0 Column
+    match = re.match(id_pattern, raw_df["ID"])
+    eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "CLASS", "PROBA"])
+
+    trec_eval = pd.DataFrame(columns=["TOPIC_NO", "Q0", "ID", "SCORE", "RUN_NAME"])
+
+    trec_eval["RANK"] = (
+        trec_eval.groupby("TOPIC_NO")["SCORE"]
+        .rank(ascending=False, method="dense")
+        .astype(int)
+    )
+    rank = trec_eval.pop("RANK")
+    trec_eval.insert(3, "RANK", rank)
+
+    return eval_df
+
+
 def calculate_metrics(
     eval_output_path: str,
     gold_labels_file: str,
@@ -24,9 +45,9 @@ def calculate_metrics(
     run_name: str,
     logger,
 ):
-    model_df = pd.read_json(eval_output_path)
-    required_cols = ["TOPIC", "Q0", "NCT_ID", "LABEL"]
-    model_df.drop(~required_cols, inplace=True)
+    raw_df = pd.read_json(eval_output_path)
+    df = prepare_files(raw_df)
+
     gold_df = pd.read_csv(
         gold_labels_file,
         header=None,
@@ -35,7 +56,7 @@ def calculate_metrics(
     )
 
     # Merge the two dataframes on NCT_ID to filter for matching values
-    merged_df = model_df.merge(gold_df, on="NCT_ID", suffixes=("_pred", "_gold"))
+    merged_df = df.merge(gold_df, on=["TOPIC", "NCT_ID"], suffixes=("_pred", "_gold"))
 
     # Calculate Accuracy, F1 score, and AUC
     accuracy = accuracy_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])

@@ -16,7 +16,7 @@ class experiment_config:
     gold_labels_year: int = 2022
     gamma: float = 0.85
     run_training: bool = True
-    run_testing: bool = True
+    run_inference: bool = True
     run_eval: bool = True
     top_p: float = 1.0
     temperature: float = 1.0
@@ -24,4 +24,4 @@ class experiment_config:
     repetition_penalty: float = 1.0
     length_penalty: int = 1
     debug: bool = False
-    x_shot_examples: str = "one-shot"
+    x_shot_examples: str = "one"

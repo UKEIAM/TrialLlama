@@ -32,13 +32,7 @@ def test(
 
     returns a .txt file.
     """
-    raw_out = pd.DataFrame(columns=["TOPIC_NO", "ID", "RESPONSE"])
-    trec_out = pd.DataFrame(columns=["TOPIC_NO", "Q0", "ID", "SCORE", "RUN_NAME"])
-    df_out = pd.DataFrame(
-        columns=["TOPIC_NO", "Q0", "ID", "CLASS", "PROBA"]
-    )  # df_out is for internal evaluation purposes, where we can compare the output of the model with the qrels provided
-
-    id_pattern = r"^(\d+)_(\d+)_(\w+)$"
+    raw_out = pd.DataFrame(columns=["ID", "RESPONSE", "PROBA", "CLASS"])
     empty_response_counter = 0
 
     with MemoryTrace() as memtrace:
@@ -89,10 +83,6 @@ def test(
                 if test_config.debug:
                     print(f"### Response: {response}")
 
-                match = re.match(id_pattern, test_data_json[step]["id"])
-                topic_id = match.group(2)
-                ct_id = match.group(3)
-
                 topic_year = test_data_json[step]["topic_year"]
 
                 probas = []
@@ -125,27 +115,14 @@ def test(
                     continue
 
                 row_raw = [
-                    ct_id,
+                    test_data_json[step]["id"],
                     topic_year,
-                    proba,
-                    test_config.ft_model,
-                    predicted_label,
                     response,
+                    proba,
+                    predicted_label,
                 ]
 
-                # TODO: For debugging purposes, since currently model returns 'nan' values as output tensor
                 raw_out.loc[step] = row_raw
-
-        # trec_eval script requires a document ranking. For that reason we simply use score calculated by the averaged token probablities to create a doucment ranking
-        trec_out["RANK"] = (
-            trec_out.groupby("TOPIC_NO")["SCORE"]
-            .rank(ascending=False, method="dense")
-            .astype(int)
-        )
-        rank = trec_out.pop("RANK")
-        trec_out.insert(3, "RANK", rank)  # To be conform with the trec_eval format
-
-        # add_ranking_column(trec_out)
 
         return raw_out, empty_response_counter
 

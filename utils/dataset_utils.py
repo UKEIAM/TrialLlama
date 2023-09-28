@@ -55,10 +55,9 @@ def count_words(text):
 
 def create_dataset_sample(
     dataset_size: int = 300,
-    version: str = "v2",
+    version: str = "v3",
     type: str = "train",
-    x_shot_examples: Optional[str] = "",
-    logger: Optional[object] = None,
+    x_shot_examples: Optional[str] = None,
 ) -> None:
     path = base_dir
     out_path = base_dir

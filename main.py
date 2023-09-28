@@ -8,7 +8,7 @@ import mlflow.pytorch
 
 from utils.train_utils import clear_gpu_cache
 from finetuning import main as ft_main
-from testing import main as test_main
+from inference import main as test_main
 from utils.eval_utils import calculate_metrics
 from configs.experiments import experiment_config
 from utils.config_utils import update_config
@@ -56,6 +56,7 @@ def main(**kwargs):
                 "learning_rate": experiment_config.lr,
                 "dataset_version": experiment_config.dataset_version,
                 "dataset_size": experiment_config.dataset_size,
+                "x_shot_examples": experiment_config.x_shot_examples,
                 "dataset_size_testing": experiment_config.dataset_size_testing,
                 "qrels_year": experiment_config.gold_labels_year,
                 "max_tokens": experiment_config.max_tokens,
@@ -66,7 +67,7 @@ def main(**kwargs):
                 "length_penalty": experiment_config.length_penalty,
                 "repetition_penalty": experiment_config.repetition_penalty,
                 "run_training": experiment_config.run_training,
-                "run_testing": experiment_config.run_testing,
+                "run_inference": experiment_config.run_inference,
                 "run_eval": experiment_config.run_eval,
             }
         )
@@ -76,13 +77,13 @@ def main(**kwargs):
             results = ft_main(
                 logger=logger,
                 dataset_version=experiment_config.dataset_version,
-                dataset=f"ct_{experiment_config.dataset_version}",
+                dataset=f"ct_train_sample{experiment_config.dataset_version}",
                 dataset_size=experiment_config.dataset_size,
+                x_shot_example=experiment_config.x_shot_examples,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
-                gamma=experiment_config.gamma,  # TODO: Figure out what Gamma is doing
                 max_tokens=experiment_config.max_tokens,
             )
             mlflow.set_tag("ft-conducted", "TRUE")
@@ -91,12 +92,12 @@ def main(**kwargs):
             mlflow.log_artifact(x_shot_examples_path)
             clear_gpu_cache()
 
-        if experiment_config.run_testing:
+        if experiment_config.run_inference:
             print("Running testing...")
             results = test_main(
                 dataset_size=experiment_config.dataset_size_testing,
                 dataset_version=experiment_config.dataset_version,
-                dataset=f"ct_testing_{experiment_config.dataset_version}",
+                dataset=f"ct_test_sample_{experiment_config.dataset_version}",
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
                 load_peft_model=True,
