@@ -4,16 +4,14 @@ base_model:
 dataset_version:
 #  - "v2"
   - "v3"
-experiment_focus:
-  - "dataset"
 dataset_size:
   - 100
-#  - 300
-#  - 900
-#  - 1800
-#  - 5000 # TODO: due to balancing and length reduction, max. dataset samples currently is 11772 samples. There is more data in testing, but that would require further management to differenciate data.
-#  - 10000
-#  - 15000 # TODO: If more data required, transfer samples from TREC 2022 topics
+  - 300
+  - 900
+  - 1800
+  - 5000
+  - 10000
+  - 15000 # MAX AVAILABLE DATA
 num_epochs:
 #  -  2
 #  - 3

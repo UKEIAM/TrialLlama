@@ -25,7 +25,7 @@ class train_config:
     dataset_size: int = 900
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = True
-    ft_model: str = "ft-model"  # Name for the output ft-model
+    ft_model: str = "llama-2-13b-chat-hf-default"  # Name for the output ft-model
     freeze_layers: bool = False
     num_freeze_layers: int = 1
     quantization: bool = True

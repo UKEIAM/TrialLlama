@@ -33,7 +33,7 @@ for param_set in param_combinations:
     decimal_part_lr = str(lr).split(".")[1]
 
     # TODO: Rethink naming. What is the goal? How do I want to track experiments?
-    ft_model = f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}-{dataset_version}'
+    ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}"
 
     command = [
         "python",
@@ -56,8 +56,6 @@ for param_set in param_combinations:
         str(top_k),
         "--top_p",
         str(top_p),
-        "--experiment_focus",
-        experiment_focus,
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
     if os.path.exists(os.path.join("out", ft_model)):
