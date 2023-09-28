@@ -84,8 +84,7 @@ def create_JSON(
                         ct_input.pop(idx)
                         ct_input.insert(idx, f"{inclusion_crit}\n{general_inclusion_crit}")
                         ct_input.append(f"{exclusion_crit}")
-                ct_input = "".join([f"{item}" for item in ct_input])
-                ct_input = clean_textblock(ct_input)
+                ct_input = "\n".join([f"{item}" for item in ct_input])
                 if label == 0:
                     category = "no relevant information"
                 elif label == 1:
@@ -153,14 +152,14 @@ def extract_data_info(element_type, elements):
             if key == "criteria":
                 textblock_element = value.get("textblock")
                 value = clean_textblock(textblock_element)
-                info.append(f"{value}\n")
+                info.append(f"{value}")
             elif key == "study_pop":
                 continue
             else:
-                info.append(f"{key.capitalize().replace('_', ' ')}: {value}\n")
+                info.append(f"\n{key.capitalize().replace('_', ' ')}:{value}")
         if element_type == "Summary":
             value = clean_textblock(value)
-            info.append(f"{value}\n")
+            info.append(f"{value}")
     return "".join(info)
 
 
@@ -181,13 +180,13 @@ def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> l
         elif key == "brief_summary" and isinstance(value, dict):
             key = "Summary"
             info = extract_data_info(key, value)
-            elements.append(f"{key}:\n {info}\n")
+            elements.append(f"{key}: {info}")
         elif key == "brief_title":
             key = "Title"
-            elements.append(f"{key}: {value}\n")
+            elements.append(f"{key}: {value}")
         elif key == "intervention_type":
             key = "Intervention Type"
-            elements.append(f"{key}: {value}\n")
+            elements.append(f"{key}: {value}")
         elif isinstance(value, (list, dict)):
             elements.extend(extract_required_data_from_clinical_trials(value))
 
