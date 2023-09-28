@@ -24,4 +24,4 @@ class experiment_config:
     repetition_penalty: float = 1.0
     length_penalty: int = 1
     debug: bool = False
-    experiment_focus: str = "temperature"
+    x_shot_examples: str = "one-shot"

@@ -1,68 +1,140 @@
-import yaml
-import itertools
-import subprocess
+# TODO: Prepare experiment script
 import os
+import logging
+import fire
 
+import mlflow
+import mlflow.pytorch
+
+from utils.train_utils import clear_gpu_cache
+from finetuning import main as ft_main
+from testing import main as test_main
+from utils.eval_utils import calculate_metrics
+from configs.experiments import experiment_config
+from utils.config_utils import update_config
+from utils.logger_utils import setup_logger
 from utils.set_free_cuda_device import get_free_cuda_device
 
-# Load parameters from the YAML file
-with open("configs/experiment_definitions.yaml", "r") as yaml_file:
-    parameters = yaml.safe_load(yaml_file)
+base_directory = os.path.dirname(os.path.dirname((__file__)))
 
-# Generate all combinations of parameters
-param_combinations = list(itertools.product(*parameters.values()))
-# Loop through each combination and run your model script
-# Kind of something similar to Hydra :D
-# Get currently free cuda device
-get_free_cuda_device()
 
-for param_set in param_combinations:
-    # Unpack parameter set and add parameters and values to the command
-    (
-        base_model,
-        dataset_version,
-        experiment_focus,
-        dataset_size,
-        num_epochs,
-        lr,
-        temperature,
-        top_k,
-        top_p,
-    ) = param_set
+def main(**kwargs):
+    update_config((experiment_config), **kwargs)
 
-    decimal_part_lr = str(lr).split(".")[1]
+    eval_output_path = os.path.join(
+        "out", "eval", f"eval_{experiment_config.ft_model}_raw.txt"
+    )
 
-    # TODO: Rethink naming. What is the goal? How do I want to track experiments?
-    ft_model = f'{base_model.replace("-hf", "").replace("-2", "").lower()}-{dataset_size}-{dataset_version}'
+    qrels_2022_path = os.path.join(
+        "data",
+        f"trec.nist.gov_data_trials_qrels{experiment_config.gold_labels_year}.txt",
+    )
 
-    command = [
-        "python",
-        "run_experiment.py",
-        "--base_model",
-        base_model,
-        "dataset_version",
-        dataset_version,
-        "--num_epochs",
-        str(num_epochs),
-        "--dataset_size",
-        str(dataset_size),
-        "--ft_model",
-        str(ft_model),
-        "--lr",
-        str(lr),
-        "--temperature",
-        str(temperature),
-        "--top_k",
-        str(top_k),
-        "--top_p",
-        str(top_p),
-        "--experiment_focus",
-        experiment_focus,
-    ]
-    # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
-    if os.path.exists(os.path.join("out", ft_model)):
-        command.append("--run_training")
-        command.append(str(False))
+    if experiment_config.x_shot_examples == "few-shot":
+        x_shot_examples_path = os.path.join(
+            base_directory,
+            "data",
+            f"ct_few_shot_{experiment_config.dataset_version}.json",
+        )
+    elif experiment_config.x_shot_examples == "one-shot":
+        x_shot_examples_path = os.path.join(
+            base_directory,
+            "data",
+            f"ct_one_shot_{experiment_config.dataset_version}.json",
+        )
 
-    # Run the model script
-    subprocess.run(command)
+    mlflow.set_experiment(f"{experiment_config.ft_model}")
+    description = f"Fine-tuned model {experiment_config.ft_model} | batch-size of {experiment_config.batch_size} | number of epochs of {experiment_config.num_epochs} | lr of {experiment_config.lr} | qrels {experiment_config.gold_labels_year}"
+    with mlflow.start_run(
+        description=description,
+    ) as run:
+        logger = setup_logger(run_id=run.info.run_id)
+        mlflow.log_params(
+            {
+                "batch_size": experiment_config.batch_size,
+                "num_epochs": experiment_config.num_epochs,
+                "learning_rate": experiment_config.lr,
+                "dataset_version": experiment_config.dataset_version,
+                "dataset_size": experiment_config.dataset_size,
+                "dataset_size_testing": experiment_config.dataset_size_testing,
+                "qrels_year": experiment_config.gold_labels_year,
+                "max_tokens": experiment_config.max_tokens,
+                "max_new_tokens": experiment_config.max_new_tokens,
+                "temperature": experiment_config.temperature,
+                "top_k": experiment_config.top_k,
+                "top_p": experiment_config.top_p,
+                "length_penalty": experiment_config.length_penalty,
+                "repetition_penalty": experiment_config.repetition_penalty,
+                "run_training": experiment_config.run_training,
+                "run_testing": experiment_config.run_testing,
+                "run_eval": experiment_config.run_eval,
+            }
+        )
+
+        if experiment_config.run_training:
+            print("Running training...")
+            results = ft_main(
+                logger=logger,
+                dataset_version=experiment_config.dataset_version,
+                dataset=f"ct_{experiment_config.dataset_version}",
+                dataset_size=experiment_config.dataset_size,
+                lr=experiment_config.lr,
+                num_epochs=experiment_config.num_epochs,
+                model_name=experiment_config.base_model,
+                ft_model=experiment_config.ft_model,
+                gamma=experiment_config.gamma,  # TODO: Figure out what Gamma is doing
+                max_tokens=experiment_config.max_tokens,
+            )
+            mlflow.set_tag("ft-conducted", "TRUE")
+            mlflow.log_metrics(results)
+            mlflow.log_artifact(eval_output_path)
+            mlflow.log_artifact(x_shot_examples_path)
+            clear_gpu_cache()
+
+        if experiment_config.run_testing:
+            print("Running testing...")
+            results = test_main(
+                dataset_size=experiment_config.dataset_size_testing,
+                dataset_version=experiment_config.dataset_version,
+                dataset=f"ct_testing_{experiment_config.dataset_version}",
+                model_name=experiment_config.base_model,
+                ft_model=experiment_config.ft_model,
+                load_peft_model=True,
+                max_new_tokens=experiment_config.max_new_tokens,
+                temperature=experiment_config.temperature,
+                top_k=experiment_config.top_k,
+                top_p=experiment_config.top_p,
+                length_penalty=experiment_config.length_penalty,
+                repetition_penalty=experiment_config.repetition_penalty,
+                debug=experiment_config.debug,
+                logger=logger,
+            )
+            mlflow.log_metric("number_of_empty_responses", results)
+            clear_gpu_cache()
+
+        if experiment_config.run_eval:
+            print("Running evaluation...")
+            run_name = run.info.run_name
+            scores = calculate_metrics(
+                eval_output_path=eval_output_path,
+                gold_labels_file=qrels_2022_path,
+                ft_model_name=experiment_config.ft_model,
+                run_name=run_name,
+                logger=logger,
+            )
+            mlflow.log_metrics(scores)
+            clear_gpu_cache()
+
+        # Clean gpu_cache before next mlflow run
+        clear_gpu_cache()
+        print(f"Run with ID {run.info.run_id} finished successful")
+    # Set experiment ID
+    # Run experiments from experiment.yaml
+    # Train model on different parameters
+    # Run llama_testing.py with fine-tuned model variation
+    # Output file with predicted classes
+    # Use files to calculate metrics as accuracy, F1 and AUC, etc.
+
+
+if __name__ == "__main__":
+    fire.Fire(main)
