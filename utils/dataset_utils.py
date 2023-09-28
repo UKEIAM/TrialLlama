@@ -63,11 +63,11 @@ def create_dataset_sample(
     path = base_dir
     out_path = base_dir
     x_shot_examples_path = None
-    if x_shot_examples == "few-shot":
+    if x_shot_examples == "few":
         x_shot_examples_path = os.path.join(
             base_dir, "data", f"ct_few_shot_{version}.json"
         )
-    elif x_shot_examples == "one-shot":
+    elif x_shot_examples == "one":
         x_shot_examples_path = os.path.join(
             base_dir, "data", f"ct_one_shot_{version}.json"
         )

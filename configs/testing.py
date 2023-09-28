@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class test_config:
     batch_size: int = 1
     base_model: str = "Llama-2-13b-chat-hf"
-    ft_model: str = "llama-2-13b-chat-hf-300-v3-4"
+    ft_model: str = "llama-2-13b-chat-hf-300-v3-4-zero"
     quantization: bool = True
     dataset: str = "ct_testing_sample_v3"
     dataset_version: str = "v3"
