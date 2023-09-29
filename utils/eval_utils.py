@@ -19,7 +19,7 @@ from sklearn.preprocessing import label_binarize
 # Load the model-output and gold-labels files
 def prepare_files(raw_df):
     # TODO Prepare the trec_eval output file and save it as well as the output file required to run metrics
-    # Original columns: ["ID", "RESPONSE", "PROBA", "CLASS"]
+    # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA", "CLASS"]
     id_pattern = r"^(\d+)_(\d+)_(\w+)$"
     # TODO While copying raw_file to trec_eval, extract TOPIC_NO & NCT_ID from the ID string with pattern and add 0 for Q0 Column
     match = re.match(id_pattern, raw_df["ID"])

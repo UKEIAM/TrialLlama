@@ -10,7 +10,6 @@ from transformers import (
     LlamaTokenizer,
     default_data_collator,
 )
-from configs.training import train_config
 from configs.testing import test_config
 from utils.config_utils import (
     update_config,
@@ -69,9 +68,8 @@ def main(logger: Optional[object] = None, **kwargs):
         }
     )
 
-    max_tokens = get_max_length(
-        model
-    )  # In the case of running our inference batch evaluation, we have a batch_size of 1, so even with 24gb the max_tokens defined by the model (llama2 4096) is no problem
+    max_tokens = 3072  # Max tokens need to be set beneath the max_tokens the model might be able to ingest, since the response otherwise exceeds the number of max_tokens
+
     dataset_test = get_preprocessed_dataset(
         tokenizer,
         dataset_config,
@@ -108,8 +106,12 @@ def main(logger: Optional[object] = None, **kwargs):
     # Save out_file to run with TREC Eval script
     out_dir = os.path.join("out", "eval")
     os.makedirs(out_dir, exist_ok=True)
-
     out_path_raw = os.path.join(out_dir, f"eval_{test_config.ft_model}_raw.json")
+
+    if test_config.debug:
+        out_path_raw = os.path.join(
+            out_dir, f"eval_{test_config.ft_model}_raw_DEBUG.json"
+        )
 
     raw_out.to_json(out_path_raw, orient="records")
     print(f"Evaluation files successfully saved under {out_dir}")

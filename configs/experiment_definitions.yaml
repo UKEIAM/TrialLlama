@@ -2,16 +2,21 @@ base_model:
 #  - "Llama-2-7b-chat-hf"
   - "Llama-2-13b-chat-hf"
 dataset_version:
-#  - "v2"
+  - "v2"
   - "v3"
+#  - "v4"
+x_shot_example:
+  - "None"
+  - "one"
+  - "few"
 dataset_size:
-  - 100
-  - 300
-  - 900
-  - 1800
-  - 5000
-  - 10000
-  - 15000 # MAX AVAILABLE DATA
+#  - 100
+  - 300 # POC
+#  - 900
+#  - 15000 # MAX AVAILABLE DATA
+#  - 1800
+#  - 5000
+#  - 10000
 num_epochs:
 #  -  2
 #  - 3

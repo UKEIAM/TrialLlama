@@ -125,7 +125,8 @@ def create_dataset_sample(
     """
         BALANCING: Since "IRRELEVANT" label is predominant in the dataset, we will truncate it in extracting a random
         sample from it based on the average number of items in the two other classes.
-        That creates a more balanced, but not perfectly balanced dataset. Only applied on train data
+        That creates a more balanced, but not perfectly balanced dataset. Only applied on train data.
+        WARNING: Don't change random state value!
      """
 
     col_name = "output"
@@ -134,10 +135,6 @@ def create_dataset_sample(
     max_label = value_counts.index[0]
     avg_item_size_for_truncation = int((value_counts[1] + value_counts[2]) / 2)
 
-    """
-        WARNING: Don't change random state. To enable few-shot learning first x samples are modified by hand to give the
-        model a starting point.
-    """
     max_label_df = df[df[col_name] == max_label]
     trunc_max_label_df = max_label_df.sample(
         n=avg_item_size_for_truncation, random_state=42, ignore_index=True
@@ -149,6 +146,9 @@ def create_dataset_sample(
     assert dataset_size <= balanced_df.shape[0]
     data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
 
+    """
+        Adding the x-shot examples to the first x instructions
+    """
     if nr_examples > 0:
         for idx, example in enumerate(df_examples["input"].values):
             instruction = data_sample.loc[idx, "instruction"]
