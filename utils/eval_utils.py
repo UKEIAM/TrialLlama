@@ -17,7 +17,7 @@ from sklearn.metrics import (
 from sklearn.preprocessing import label_binarize
 
 # Load the model-output and gold-labels files
-def prepare_files(raw_eval_path, eval_path, trec_eval_path):
+def prepare_files(raw_eval_path, eval_path, trec_eval_path, run_name):
     # TODO Prepare the trec_eval output file and save it as well as the output file required to run metrics
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(raw_eval_path, orient="records")
@@ -27,37 +27,40 @@ def prepare_files(raw_eval_path, eval_path, trec_eval_path):
 
     trec_eval = pd.DataFrame(columns=["TOPIC_NO", "Q0", "ID", "SCORE", "RUN_NAME"])
 
-    for resp in raw_df.values:
-        match = re.match(id_pattern, resp["ID"])
-        resp = resp["RESPONSE"].lower()
+    for item in raw_df.iterrows():
+        match = re.match(id_pattern, item[1]["ID"])
+        resp = item[1]["RESPONSE"].lower()
         resp = "".join(resp.split())
 
-        if "noteligible" in resp.lower():
+        if "noteligible" in resp:
             pred_class = 1
-        elif "eligible" in resp.lower():
+        elif "eligible" in resp:
             pred_class = 2
-        elif "norelevantinformation" in resp.lower():
+        elif "norelevantinformation" in resp:
             pred_class = 0
 
-        eval_df = eval_df.append(
-            {
-                "TOPIC_NO": match.group(1),
-                "Q0": 0,
-                "NCT_ID": match.group(3),
-                "LABEL": pred_class,
-            },
-            ignore_index=True,
-        )
-        trec_eval = trec_eval.append(
-            {
-                "TOPIC_NO": match.group(1),
-                "Q0": 0,
-                "ID": match.group(3),
-                "SCORE": resp["PROBA"],
-                "RUN_NAME": "run_name",
-            },
-            ignore_index=True,
-        )
+        # Create a dictionary representing the new row
+        new_row_eval = {
+            "TOPIC_NO": match.group(1),
+            "Q0": 0,
+            "NCT_ID": match.group(3),
+            "LABEL": pred_class,
+        }
+        new_row_trec = {
+            "TOPIC_NO": match.group(1),
+            "Q0": 0,
+            "ID": match.group(3),
+            "SCORE": item[1]["PROBA"],
+            "RUN_NAME": run_name,
+        }
+
+        # Convert the new row into a DataFrame
+        new_row_eval_df = pd.DataFrame([new_row_eval])
+        new_row_trec_df = pd.DataFrame([new_row_trec])
+
+        # Concatenate the new row DataFrame with the original eval_df
+        eval_df = pd.concat([eval_df, new_row_eval_df], ignore_index=True)
+        trec_eval = pd.concat([trec_eval, new_row_trec_df], ignore_index=True)
 
     trec_eval["RANK"] = (
         trec_eval.groupby("TOPIC_NO")["SCORE"]
@@ -86,11 +89,13 @@ def calculate_metrics(
         gold_labels_file,
         header=None,
         delimiter=" ",
-        names=["TOPIC", "Q0", "NCT_ID", "LABEL"],
+        names=["TOPIC_NO", "Q0", "NCT_ID", "LABEL"],
     )
 
     # Merge the two dataframes on NCT_ID to filter for matching values
-    merged_df = df.merge(gold_df, on=["TOPIC", "NCT_ID"], suffixes=("_pred", "_gold"))
+    merged_df = df.merge(
+        gold_df, on=["TOPIC_NO", "NCT_ID"], suffixes=("_pred", "_gold")
+    )
 
     # Calculate Accuracy, F1 score, and AUC
     accuracy = accuracy_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])

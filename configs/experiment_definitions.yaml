@@ -6,6 +6,9 @@ dataset_version:
   - "v2"
   - "v3"
 #  - "v4"
+test_dataset_version:
+  - "v2"
+  - "v3"
 x_shot_example:
   - "None"
   - "one"

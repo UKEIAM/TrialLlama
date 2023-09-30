@@ -94,7 +94,6 @@ def test(
 
                 if "" in response.lower():
                     empty_response_counter += 1
-                    continue
 
                 row_raw = [
                     test_data_json[step]["id"],
@@ -102,7 +101,8 @@ def test(
                     response,
                     proba,
                 ]
-
+                if test_config.debug:
+                    print(f"{row_raw}")
                 raw_out.loc[step] = row_raw
 
         return raw_out, empty_response_counter

@@ -47,13 +47,19 @@ def main(**kwargs):
         logger = setup_logger(run_id=run.info.run_id)
         run_name = run.info.run_name
         raw_eval_output_path = os.path.join(
-            "out", "eval", f"eval_{experiment_config.ft_model}_{run_name}_raw.json"
+            "out",
+            "eval",
+            f"eval_{experiment_config.ft_model}_{run_name}_{experiment_config.test_dataset_version}_raw.json",
         )
         eval_output_path = os.path.join(
-            "out", "eval", f"eval_{experiment_config.ft_model}_{run_name}.json"
+            "out",
+            "eval",
+            f"eval_{experiment_config.ft_model}_{run_name}_{experiment_config.test_dataset_version}.json",
         )
         trec_eval_output_path = os.path.join(
-            "out", "eval", f"eval_{experiment_config.ft_model}_{run_name}_trec.txt"
+            "out",
+            "eval",
+            f"eval_{experiment_config.ft_model}_{run_name}_{experiment_config.test_dataset_version}_trec.txt",
         )
         mlflow.log_params(
             {
@@ -61,9 +67,10 @@ def main(**kwargs):
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,
                 "dataset_version": experiment_config.dataset_version,
+                "test_dataset_version": experiment_config.test_dataset_version,
                 "dataset_size": experiment_config.dataset_size,
-                "x_shot_examples": experiment_config.x_shot_examples,
                 "dataset_size_testing": experiment_config.dataset_size_testing,
+                "x_shot_examples": experiment_config.x_shot_examples,
                 "qrels_year": experiment_config.gold_labels_year,
                 "max_tokens": experiment_config.max_tokens,
                 "max_new_tokens": experiment_config.max_new_tokens,
@@ -94,8 +101,6 @@ def main(**kwargs):
             )
             mlflow.set_tag("ft_conducted", "TRUE")
             mlflow.log_metrics(results)
-            mlflow.log_artifact(raw_eval_output_path)
-            mlflow.log_artifact(x_shot_examples_path)
             clear_gpu_cache()
 
         if experiment_config.run_inference:
@@ -114,16 +119,19 @@ def main(**kwargs):
                 length_penalty=experiment_config.length_penalty,
                 repetition_penalty=experiment_config.repetition_penalty,
                 debug=experiment_config.debug,
-                eval_output_path=eval_output_path,
+                eval_output_path=raw_eval_output_path,
                 logger=logger,
             )
             mlflow.set_tag("inference_conducted", "TRUE")
             mlflow.log_metric("number_of_empty_responses", results)
+            mlflow.log_artifact(raw_eval_output_path)
             clear_gpu_cache()
 
         if experiment_config.run_eval:
             print("Running evaluation...")
-            prepare_files(raw_eval_output_path, eval_output_path, trec_eval_output_path)
+            prepare_files(
+                raw_eval_output_path, eval_output_path, trec_eval_output_path, run_name
+            )
             scores = calculate_metrics(
                 eval_output_path=eval_output_path,
                 gold_labels_file=qrels_2022_path,
@@ -137,7 +145,7 @@ def main(**kwargs):
 
         # Clean gpu_cache before next mlflow run
         clear_gpu_cache()
-        print(f"Run with ID {run.info.run_id} finished successful")
+        logger.debug(f"Run with ID {run.info.run_id} finished successful")
     # Set experiment ID
     # Run experiments from experiment.yaml
     # Train model on different parameters
