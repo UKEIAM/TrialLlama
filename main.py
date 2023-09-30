@@ -107,8 +107,8 @@ def main(**kwargs):
             print("Running testing...")
             results = test_main(
                 dataset_size=experiment_config.dataset_size_testing,
-                dataset_version=experiment_config.dataset_version,
-                dataset=f"ct_test_sample_{experiment_config.dataset_version}",
+                dataset_version=experiment_config.test_dataset_version,
+                dataset=f"ct_test_sample_{experiment_config.test_dataset_version}",
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
                 load_peft_model=True,
