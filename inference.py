@@ -23,7 +23,9 @@ from utils.test_utils import test, get_max_length
 from typing import Optional
 
 
-def main(logger: Optional[object] = None, **kwargs):
+def main(
+    eval_output_path: Optional[str] = None, logger: Optional[object] = None, **kwargs
+):
     # Update the configuration for the training and sharding process
     update_config((test_config), **kwargs)
 
@@ -106,15 +108,16 @@ def main(logger: Optional[object] = None, **kwargs):
     # Save out_file to run with TREC Eval script
     out_dir = os.path.join("out", "eval")
     os.makedirs(out_dir, exist_ok=True)
-    out_path_raw = os.path.join(out_dir, f"eval_{test_config.ft_model}_raw.json")
 
+    if eval_output_path is None:
+        eval_output_path = f"eval_{test_config.ft_model}_raw.json"
     if test_config.debug:
-        out_path_raw = os.path.join(
-            out_dir, f"eval_{test_config.ft_model}_raw_DEBUG.json"
-        )
+        eval_output_path = f"eval_{test_config.ft_model}_raw_DEBUG.json"
+
+    out_path_raw = os.path.join(out_dir, eval_output_path)
 
     raw_out.to_json(out_path_raw, orient="records")
-    print(f"Evaluation files successfully saved under {out_dir}")
+    print(f"Evaluation file successfully saved under {out_dir}")
 
     return erc
 

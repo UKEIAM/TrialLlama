@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/851685537640478319/b7f0d0261417404ead631b0b72ba1350/artifacts
+deleted_time: 1696085901836
+end_time: 1696038055140
+entry_point_name: ''
+experiment_id: '851685537640478319'
+lifecycle_stage: deleted
+run_id: b7f0d0261417404ead631b0b72ba1350
+run_name: bouncy-quail-688
+run_uuid: b7f0d0261417404ead631b0b72ba1350
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696029583402
+status: 4
+tags: []
+user_id: 1kkraus

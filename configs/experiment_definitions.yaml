@@ -2,6 +2,7 @@ base_model:
 #  - "Llama-2-7b-chat-hf"
   - "Llama-2-13b-chat-hf"
 dataset_version:
+#  - "v1"
   - "v2"
   - "v3"
 #  - "v4"
@@ -12,7 +13,7 @@ x_shot_example:
 dataset_size:
 #  - 100
   - 300 # POC
-#  - 900
+#  - 900 #
 #  - 15000 # MAX AVAILABLE DATA
 #  - 1800
 #  - 5000

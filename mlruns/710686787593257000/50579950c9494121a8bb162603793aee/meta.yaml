@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/710686787593257000/50579950c9494121a8bb162603793aee/artifacts
+end_time: 1696083170879
+entry_point_name: ''
+experiment_id: '710686787593257000'
+lifecycle_stage: active
+run_id: 50579950c9494121a8bb162603793aee
+run_name: able-rat-270
+run_uuid: 50579950c9494121a8bb162603793aee
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696082683969
+status: 3
+tags: []
+user_id: 1kkraus

@@ -1,0 +1,6 @@
+artifact_location: file:///ltstorage/home/1kkraus/master_thesis/mlruns/241077240439633825
+creation_time: 1695995485714
+experiment_id: '241077240439633825'
+last_update_time: 1695995485714
+lifecycle_stage: active
+name: llama-2-13b-chat-hf-300-v2-4-None

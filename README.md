@@ -43,6 +43,11 @@ Run `python utils/merge_lora_weights.py --base_model BASE_MODEL_NAME --peft_mode
 
 
 ## Data structure
+### Keys
+The official TREC goldlabels are defined as follows:
+0 = not relevant (no relevant information)
+1 = not eligible
+2 = eligible
 ### Extracted keys from XML files
 Since the Clinical Trials XML files are very big, we need to reduce it, since we have uper bounds in token size due to the model as well as the computation resources. Hence in the `data_preparation.py` script, we recursively go trough the XML file and extract following keys:
 - `brief_title`

@@ -17,15 +17,47 @@ from sklearn.metrics import (
 from sklearn.preprocessing import label_binarize
 
 # Load the model-output and gold-labels files
-def prepare_files(raw_df):
+def prepare_files(raw_eval_path, eval_path, trec_eval_path):
     # TODO Prepare the trec_eval output file and save it as well as the output file required to run metrics
-    # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA", "CLASS"]
+    # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
+    raw_df = pd.read_json(raw_eval_path, orient="records")
     id_pattern = r"^(\d+)_(\d+)_(\w+)$"
-    # TODO While copying raw_file to trec_eval, extract TOPIC_NO & NCT_ID from the ID string with pattern and add 0 for Q0 Column
-    match = re.match(id_pattern, raw_df["ID"])
-    eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "CLASS", "PROBA"])
+
+    eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL"])
 
     trec_eval = pd.DataFrame(columns=["TOPIC_NO", "Q0", "ID", "SCORE", "RUN_NAME"])
+
+    for resp in raw_df.values:
+        match = re.match(id_pattern, resp["ID"])
+        resp = resp["RESPONSE"].lower()
+        resp = "".join(resp.split())
+
+        if "noteligible" in resp.lower():
+            pred_class = 1
+        elif "eligible" in resp.lower():
+            pred_class = 2
+        elif "norelevantinformation" in resp.lower():
+            pred_class = 0
+
+        eval_df = eval_df.append(
+            {
+                "TOPIC_NO": match.group(1),
+                "Q0": 0,
+                "NCT_ID": match.group(3),
+                "LABEL": pred_class,
+            },
+            ignore_index=True,
+        )
+        trec_eval = trec_eval.append(
+            {
+                "TOPIC_NO": match.group(1),
+                "Q0": 0,
+                "ID": match.group(3),
+                "SCORE": resp["PROBA"],
+                "RUN_NAME": "run_name",
+            },
+            ignore_index=True,
+        )
 
     trec_eval["RANK"] = (
         trec_eval.groupby("TOPIC_NO")["SCORE"]
@@ -35,7 +67,10 @@ def prepare_files(raw_df):
     rank = trec_eval.pop("RANK")
     trec_eval.insert(3, "RANK", rank)
 
-    return eval_df
+    eval_df.to_json(eval_path, orient="records")
+    trec_eval.to_csv(trec_eval_path, sep="\t", header=False, index=False)
+
+    # return eval_df
 
 
 def calculate_metrics(
@@ -45,8 +80,7 @@ def calculate_metrics(
     run_name: str,
     logger,
 ):
-    raw_df = pd.read_json(eval_output_path)
-    df = prepare_files(raw_df)
+    df = pd.read_json(eval_output_path)
 
     gold_df = pd.read_csv(
         gold_labels_file,
@@ -68,7 +102,7 @@ def calculate_metrics(
     )
     f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro")
     try:
-        y_true = label_binarize(merged_df["LABEL_gold"], classes=[0, 1, 2])
+        y_true = label_binarize(merged_df["LABEL_gold"], labeles=[0, 1, 2])
         y_pred = merged_df[["LABEL_pred"]]
         auc = roc_auc_score(
             y_true,
@@ -84,15 +118,14 @@ def calculate_metrics(
     # Create a confusion matrix
     conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
 
-    # Plot the confusion matrix TODO: Not working  yet
     plt.figure(figsize=(8, 6))
     sns.heatmap(
         conf_matrix,
         annot=True,
         fmt="d",
         cmap="Blues",
-        xticklabels=["not relevant information", "not eligible", "eligible"],
-        yticklabels=["not relevant information", "not eligible", "eligible"],
+        xticklabels=["no relevant information", "not eligible", "eligible"],
+        yticklabels=["no relevant information", "not eligible", "eligible"],
     )
     plt.xlabel("Predicted")
     plt.ylabel("Actual")

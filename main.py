@@ -9,7 +9,7 @@ import mlflow.pytorch
 from utils.train_utils import clear_gpu_cache
 from finetuning import main as ft_main
 from inference import main as test_main
-from utils.eval_utils import calculate_metrics
+from utils.eval_utils import calculate_metrics, prepare_files
 from configs.experiments import experiment_config
 from utils.config_utils import update_config
 from utils.logger_utils import setup_logger
@@ -20,10 +20,6 @@ base_directory = os.path.dirname(os.path.dirname((__file__)))
 
 def main(**kwargs):
     update_config((experiment_config), **kwargs)
-
-    eval_output_path = os.path.join(
-        "out", "eval", f"eval_{experiment_config.ft_model}_raw.txt"
-    )
 
     qrels_2022_path = os.path.join(
         "data",
@@ -49,6 +45,16 @@ def main(**kwargs):
         description=description,
     ) as run:
         logger = setup_logger(run_id=run.info.run_id)
+        run_name = run.info.run_name
+        raw_eval_output_path = os.path.join(
+            "out", "eval", f"eval_{experiment_config.ft_model}_{run_name}_raw.json"
+        )
+        eval_output_path = os.path.join(
+            "out", "eval", f"eval_{experiment_config.ft_model}_{run_name}.json"
+        )
+        trec_eval_output_path = os.path.join(
+            "out", "eval", f"eval_{experiment_config.ft_model}_{run_name}_trec.txt"
+        )
         mlflow.log_params(
             {
                 "batch_size": experiment_config.batch_size,
@@ -77,7 +83,7 @@ def main(**kwargs):
             results = ft_main(
                 logger=logger,
                 dataset_version=experiment_config.dataset_version,
-                dataset=f"ct_train_sample{experiment_config.dataset_version}",
+                dataset=f"ct_train_sample_{experiment_config.dataset_version}",
                 dataset_size=experiment_config.dataset_size,
                 x_shot_example=experiment_config.x_shot_examples,
                 lr=experiment_config.lr,
@@ -86,9 +92,9 @@ def main(**kwargs):
                 ft_model=experiment_config.ft_model,
                 max_tokens=experiment_config.max_tokens,
             )
-            mlflow.set_tag("ft-conducted", "TRUE")
+            mlflow.set_tag("ft_conducted", "TRUE")
             mlflow.log_metrics(results)
-            mlflow.log_artifact(eval_output_path)
+            mlflow.log_artifact(raw_eval_output_path)
             mlflow.log_artifact(x_shot_examples_path)
             clear_gpu_cache()
 
@@ -108,14 +114,16 @@ def main(**kwargs):
                 length_penalty=experiment_config.length_penalty,
                 repetition_penalty=experiment_config.repetition_penalty,
                 debug=experiment_config.debug,
+                eval_output_path=eval_output_path,
                 logger=logger,
             )
+            mlflow.set_tag("inference_conducted", "TRUE")
             mlflow.log_metric("number_of_empty_responses", results)
             clear_gpu_cache()
 
         if experiment_config.run_eval:
             print("Running evaluation...")
-            run_name = run.info.run_name
+            prepare_files(raw_eval_output_path, eval_output_path, trec_eval_output_path)
             scores = calculate_metrics(
                 eval_output_path=eval_output_path,
                 gold_labels_file=qrels_2022_path,
@@ -123,6 +131,7 @@ def main(**kwargs):
                 run_name=run_name,
                 logger=logger,
             )
+            mlflow.set_tag("evaluation_conducted", "TRUE")
             mlflow.log_metrics(scores)
             clear_gpu_cache()
 

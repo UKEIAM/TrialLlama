@@ -32,7 +32,7 @@ def test(
 
     returns a .txt file.
     """
-    raw_out = pd.DataFrame(columns=["ID", "TOPIC_YEAR", "RESPONSE", "PROBA", "CLASS"])
+    raw_out = pd.DataFrame(columns=["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"])
     empty_response_counter = 0
 
     with MemoryTrace() as memtrace:
@@ -76,7 +76,7 @@ def test(
                 response = []
                 for token in generated_tokens[0]:
                     response.append(tokenizer.decode(token))
-                response = "".join(response)
+                response = " ".join(response)
                 response = response.replace("</s>", "")
 
                 if test_config.debug:
@@ -88,53 +88,20 @@ def test(
                 # If yes, add "response" as key and add dictionary after it -> "response": str(Response text) : str('eligible'|'not eligible'|'no relevant information')}
                 # Probabilites could be an issue, since currently they are calculated for the whole response, but it should be only for the tokens containing the class
                 probas = []
-                if not test_config.debug:
-                    if (
-                        "not eligible" in response.lower()
-                        or "noteligible" in response.lower()
-                    ):
-                        for item in transition_scores[0]:
-                            probas.append(np.exp(item.cpu().numpy()))
-                        proba = sum(probas) / len(probas)
-                        predicted_label = 1
-                    elif "eligible" in response.lower():
-                        for item in transition_scores[0]:
-                            probas.append(np.exp(item.cpu().numpy()))
-                        proba = sum(probas) / len(probas)
-                        predicted_label = 2
-                    elif (
-                        "no relevant information" in response.lower()
-                        or "norelevantinformation" in response.lower()
-                    ):
-                        for item in transition_scores[0]:
-                            probas.append(np.exp(item.cpu().numpy()))
-                        proba = sum(probas) / len(probas)
-                        predicted_label = 0
-                    elif "" in response.lower():
-                        empty_response_counter += 1
-                        continue
-                    else:
-                        print("Response gibberish. Continuing to next example.")
-                        if test_config.debug:
-                            print(response)
-                        continue
+                for item in transition_scores[0]:
+                    probas.append(np.exp(item.cpu().numpy()))
+                proba = sum(probas) / len(probas)
 
-                if not test_config.debug:
-                    row_raw = [
-                        test_data_json[step]["id"],
-                        topic_year,
-                        response,
-                        proba,
-                        predicted_label,
-                    ]
-                else:
-                    row_raw = [
-                        test_data_json[step]["id"],
-                        topic_year,
-                        response,
-                        0,
-                        0,
-                    ]
+                if "" in response.lower():
+                    empty_response_counter += 1
+                    continue
+
+                row_raw = [
+                    test_data_json[step]["id"],
+                    topic_year,
+                    response,
+                    proba,
+                ]
 
                 raw_out.loc[step] = row_raw
 

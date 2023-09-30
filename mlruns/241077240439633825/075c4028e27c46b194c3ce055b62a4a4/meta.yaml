@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/241077240439633825/075c4028e27c46b194c3ce055b62a4a4/artifacts
+end_time: 1695995519405
+entry_point_name: ''
+experiment_id: '241077240439633825'
+lifecycle_stage: active
+run_id: 075c4028e27c46b194c3ce055b62a4a4
+run_name: useful-panda-555
+run_uuid: 075c4028e27c46b194c3ce055b62a4a4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695995485923
+status: 4
+tags: []
+user_id: 1kkraus

@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/667721386163206981/0e4823febe7246619c88db287f5df548/artifacts
+deleted_time: 1696085904780
+end_time: 1696029577301
+entry_point_name: ''
+experiment_id: '667721386163206981'
+lifecycle_stage: deleted
+run_id: 0e4823febe7246619c88db287f5df548
+run_name: efficient-quail-21
+run_uuid: 0e4823febe7246619c88db287f5df548
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696021104606
+status: 4
+tags: []
+user_id: 1kkraus
