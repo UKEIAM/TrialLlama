@@ -18,8 +18,6 @@ from torch.utils.data import DistributedSampler
 from transformers import (
     LlamaForCausalLM,
     LlamaTokenizer,
-    AutoModelForCausalLM,
-    AutoTokenizer,
     LlamaConfig,
     default_data_collator,
 )
@@ -95,7 +93,7 @@ def main(logger: Optional[object] = None, **kwargs):
                 "please install latest nightly."
             )
         if rank == 0:
-            model = AutoModelForCausalLM.from_pretrained(
+            model = LlamaForCausalLM.from_pretrained(
                 model_path,
                 load_in_8bit=True if train_config.quantization else None,
                 device_map="auto" if train_config.quantization else None,
@@ -103,10 +101,10 @@ def main(logger: Optional[object] = None, **kwargs):
         else:
             llama_config = LlamaConfig.from_pretrained(model_path)
             with torch.device("meta"):
-                model = AutoModelForCausalLM(llama_config)
+                model = LlamaForCausalLM(llama_config)
 
     else:
-        model = AutoModelForCausalLM.from_pretrained(
+        model = LlamaForCausalLM.from_pretrained(
             model_path,
             load_in_8bit=True if train_config.quantization else None,
             device_map="auto" if train_config.quantization else None,
@@ -137,7 +135,7 @@ def main(logger: Optional[object] = None, **kwargs):
         model.to(torch.bfloat16)
 
     # Load the tokenizer and add special tokens
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
+    tokenizer = LlamaTokenizer.from_pretrained(model_path)
     tokenizer.add_special_tokens(
         {
             "pad_token": "<PAD>",
