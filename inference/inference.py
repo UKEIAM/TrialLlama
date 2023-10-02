@@ -16,7 +16,7 @@ from model_utils import load_model, load_peft_model, load_llama_from_config
 
 
 def main(
-    model_name: str = "/workspaces/mtb_ai_kevin_kraus/out/poc_1_llama-2-7b-hf",
+    model_name: str = "/workspaces/mtb_ai_kevin_kraus/out/",
     peft_model: str = None,
     quantization: bool = False,
     max_new_tokens=100,  # The maximum numbers of tokens to generate

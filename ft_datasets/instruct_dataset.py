@@ -12,20 +12,12 @@ from torch.utils.data import Dataset
 
 
 PROMPT_DICT = {
-    "prompt_input": (
-        "Below is an instruction that describes a task, paired with an input that provides further context."
-        "Write a response that appropriately completes the request.\n\n"
-        "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response:"
-    ),
-    "test_input": (
-        # TODO: Do I need to change "prompt_input?"
-        "### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response:"
-    ),
+    "prompt_input": ("{instruction}\n\n{topic}\n\n{clinical_trial}\n\n{response}\n\n"),
 }
 
 
 class InstructionDataset(Dataset):
-    def __init__(self, dataset_config, tokenizer, partition="train", max_tokens=30):
+    def __init__(self, dataset_config, tokenizer, partition="train", max_tokens=1024):
         self.ann = json.load(open(dataset_config.data_path))
         if partition == "train":
             self.ann = self.ann
@@ -47,13 +39,6 @@ class InstructionDataset(Dataset):
         prompt = torch.tensor(self.tokenizer.encode(prompt), dtype=torch.int64)
         example = self.tokenizer.encode(example)
         example.append(self.tokenizer.eos_token_id)
-        while len(example) > self.max_tokens:
-            words = ann["input"].split()
-            ann["input"] = " ".join(words[:-1])
-            prompt = PROMPT_DICT["prompt_input"].format_map(ann)
-            example = prompt + ann["output"]
-            prompt = torch.tensor(self.tokenizer.encode(prompt), dtype=torch.int64)
-            example = self.tokenizer.encode(example)
         example = torch.tensor(example, dtype=torch.int64)
         padding = self.max_tokens - example.shape[0]
         if padding > 0:
@@ -77,35 +62,16 @@ class InstructionDataset(Dataset):
 class TestingDataset(Dataset):
     def __init__(self, dataset_config, tokenizer, partition="train", max_tokens=30):
         self.ann = json.load(open(dataset_config.data_path))
-        if partition == "train":
-            self.ann = self.ann
-        else:
-            self.ann = self.ann[:200]
+        self.ann = self.ann
 
         self.max_tokens = max_tokens
         self.tokenizer = tokenizer
-       
 
     def __len__(self):
         return len(self.ann)
 
     def __getitem__(self, index):
-        # IGNORE_INDEX = -100  # The default setting in CrossEntropyLoss
         # TODO: Funny, the approach used for tokenization in the training phase, is not working if you call model.generate(**batch). CUDA fails somehow
-        # ann = self.ann[index]
-        # prompt = PROMPT_DICT["prompt_input"].format_map(ann)
-        # prompt = torch.tensor(self.tokenizer.encode(prompt), dtype=torch.int64)
-        # while len(prompt) > self.max_tokens:
-        #     words = ann["input"].split()
-        #     ann["input"] = " ".join(words[:-1])
-        #     prompt = PROMPT_DICT["prompt_input"].format_map(ann)
-        #     prompt = torch.tensor(self.tokenizer.encode(prompt), dtype=torch.int64)
-        #     prompt = self.tokenizer.encode(prompt)
-        # prompt = torch.tensor(prompt, dtype=torch.int64)
-        # padding = self.max_tokens - prompt.shape[0]
-        # if padding > 0:
-        #     prompt = torch.cat((prompt, torch.zeros(padding, dtype=torch.int64) - 1))
-        
         ann = self.ann[index]
         prompt = PROMPT_DICT["prompt_input"].format_map(ann)
         batch = self.tokenizer(
@@ -116,21 +82,4 @@ class TestingDataset(Dataset):
             return_tensors="pt",
         )
 
-        while len(batch["input_ids"]) > self.max_tokens:
-            ann = self.ann[index]
-            words = ann["input"].split()
-            ann["input"] = " ".join(words[:-1])
-            prompt = PROMPT_DICT["prompt_input"].format_map(ann)
-
-            batch = self.tokenizer(
-            prompt,
-            padding="max_length",
-            truncation=True,
-            max_length=self.max_tokens,
-            return_tensors="pt",
-        )
-
         return batch
-        # return {
-        #     "input_ids": prompt
-        # }

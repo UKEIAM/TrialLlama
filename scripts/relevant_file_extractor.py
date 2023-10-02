@@ -35,47 +35,43 @@ def read_qrel_txt(qrel_path: str):
 """Function takes a DataFrame as input and searches for all listed Clinical Trial IDs within the data, since most of the trials are not required for the fine-tune dataset"""
 
 
-def main(config_name: str = "train") -> None:
+def main() -> None:
 
-    if config_name == "train":
-        config_file = os.path.join(base_directory, "configs/train_data.yaml")
-        with open(config_file, "r") as file:
-            config = yaml.safe_load(file)
-    else:
-        config_file = os.path.join(base_directory, "configs/test_data.yaml")
-        with open(config_file, "r") as file:
-            config = yaml.safe_load(file)
+    
+    config_file = os.path.join(base_directory, "configs/ct_data.yaml")
+    with open(config_file, "r") as file:
+        config = yaml.safe_load(file)
+    
+    for topic_year in config["year_of_topics"]:
 
-    source_data_dir = os.path.join(data_directory, str(config["year_of_data"]))
+        source_data_dir = os.path.join(data_directory, topic_year)
 
-    qrel_path = os.path.join(
-        data_directory,
-        str(config["year_of_data"]),
-        config["qrels_path"],
-    )
-
-    target_dir = os.path.join(data_directory, f"{config['mode']}required_cts")
-
-    qrels = read_qrel_txt(qrel_path)
-
-    if not os.path.exists(target_dir):
-        os.makedirs(target_dir)
-
-    for filename in tqdm(qrels["clinical trial id"]):
-        source_dir = search_target_directory(
-            filename, source_data_dir, str(config["year_of_data"])
+        qrel_path = os.path.join(
+            data_directory,
+            topic_year,
+            config["qrels_path"],
         )
-        full_filename = filename + ".xml"
-        source_file = os.path.join(source_dir, full_filename)
-        target_file = os.path.join(target_dir)
 
-        if os.path.exists(source_file):
-            shutil.copy2(source_file, target_file)
-            if debug:
-                print(f"Copied {full_filename} to {target_dir}")
-        else:
-            print(f"File {filename} not found in {source_dir}")
-    print("-----FINISHED EXTRACTION-----")
+        target_dir = os.path.join(data_directory, f"required_cts")
+
+        qrels = read_qrel_txt(qrel_path)
+
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+
+        for filename in tqdm(qrels["clinical trial id"]):
+            source_dir = search_target_directory(filename, source_data_dir, topic_year)
+            full_filename = filename + ".xml"
+            source_file = os.path.join(source_dir, full_filename)
+            target_file = os.path.join(target_dir)
+
+            if os.path.exists(source_file):
+                shutil.copy2(source_file, target_file)
+                if debug:
+                    print(f"Copied {full_filename} to {target_dir}")
+            else:
+                print(f"File {filename} not found in {source_dir}")
+        print("-----FINISHED EXTRACTION-----")
 
 
 def search_target_directory(filename, source_data_dir, year_of_data):

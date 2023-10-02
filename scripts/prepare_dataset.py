@@ -13,6 +13,8 @@ import xml.etree.ElementTree as ET
 from tqdm import tqdm
 from pathlib import Path
 from typing import Optional
+from sklearn.utils import shuffle
+
 
 # from configs.config import train_config, eval_config
 
@@ -23,155 +25,188 @@ data_directory = os.path.join(base_directory, "data")
 home_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 raw_ct_data_directory = os.path.join(home_directory, "data")
 
-train_list = []
+data_list = []
 
 
 def create_JSON(
-    config_name: Optional[str] = "train",
-    out_file_name: Optional[str] = "clinical_trials.json",
-    samples: Optional[int | str] = 5000,
-    only_criteria: Optional[bool] = True,
+    version: str = "v3",
 ):
 
-    if config_name == "train":
-        config_file = os.path.join(base_directory, "configs/train_data.yaml")
-        with open(config_file, "r") as file:
-            config = yaml.safe_load(file)
-    else:
-        config_file = os.path.join(base_directory, "configs/test_data.yaml")
-        with open(config_file, "r") as file:
-            config = yaml.safe_load(file)
-
-    source_data_directory = os.path.join(raw_ct_data_directory, str(config["year_of_data"]))
-    required_data_directory = os.path.join(
-        raw_ct_data_directory, f"{config['mode']}required_cts"
-    )
-
-    topics_df = parse_XML_to_df(
-        os.path.join(source_data_directory, f"topics{config['year_of_topics']}.xml"),
-        ["number", "topic"],
-    )
-    topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
-
-    qrel_path = os.path.join(
-        raw_ct_data_directory,
-        str(config["year_of_data"]),
-        config["qrels_path"],
-    )
-    qrels = read_qrel_txt(qrel_path)
-    if samples != "all":
-        qrels = qrels[:samples]
+    config_file = os.path.join(base_directory, "configs/ct_data.yaml")
+    with open(config_file, "r") as file:
+        config = yaml.safe_load(file)
 
     counter = 0
-    for index, row in tqdm(qrels.iterrows()):
-        topic_nr = row["topic"]
-        try:
-            topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[0]
-            cleaned_topic = clean_textblock(topic)
-        except KeyError as e:
-            continue
-        ct = row["clinical trial id"]
-        label = row["label"]
-        ct_path = os.path.join(required_data_directory, ct + ".xml")
+    for topic_year in config["year_of_topics"]:
+        source_data_directory = os.path.join(
+            raw_ct_data_directory, str(config["year_of_data"])
+        )
+        required_data_directory = os.path.join(raw_ct_data_directory, "required_cts")
 
-        if os.path.exists(ct_path):
-            clinical_trial_dict = parse_XML_to_json(ct_path)
-            if only_criteria:
-                clinical_trial_dict = extract_criteria_from_clinical_trials(
+        topics_df = parse_XML_to_df(
+            os.path.join(source_data_directory, f"topics{topic_year}.xml"),
+            ["number", "topic"],
+        )
+        topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
+
+        qrel_path = os.path.join(
+            raw_ct_data_directory,
+            str(config["year_of_data"]),
+            f"{config['qrels_path']}{topic_year}.txt",
+        )
+        qrels = read_qrel_txt(qrel_path)
+
+        # DEBUG
+        # qrels = qrels[:100]
+
+        for index, row in tqdm(qrels.iterrows()):
+            topic_nr = row["topic"]
+            try:
+                topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[
+                    0
+                ]
+                cleaned_topic = clean_textblock(topic)
+            except KeyError as e:
+                continue
+            ct = row["clinical trial id"]
+            label = row["label"]
+            ct_path = os.path.join(required_data_directory, ct + ".xml")
+            if os.path.exists(ct_path):
+                clinical_trial_dict = parse_XML_to_json(ct_path)
+                ct_data = extract_required_data_from_clinical_trials(
                     clinical_trial_dict
                 )
-            ct_textblock = extract_textblocks_from_clinical_trials(clinical_trial_dict)
-            cleaned_ct_textblocks = []
-            for textblock in ct_textblock:
-                cleaned_textblock = clean_textblock(textblock)
-                cleaned_ct_textblocks.append(cleaned_textblock)
-            if label == 0:
-                category = "IRRELEVANT"
-                output_text = f"The clinical trial is not relevant for the patient at hand. Status code {label}"
-            elif label == 1:
-                category = "UNELIGIBLE"
-                output_text = f"The patient at hand is not eligible for the clinical presented clinical trial. Status code {label}"
-            else:
-                category = "ELIGIBLE"
-                output_text = f"The clinical trial fits on the patient's profile. Status code {label}"
+                ct_input = ct_data.copy()
+                for idx, item in enumerate(ct_data):
+                    if "exclusion criteria" in item.lower():
+                        item_index = item.lower().find("exclusion criteria")
+                        index_gender = item.lower().find("gender")
+                        inclusion_crit = item[:item_index]
+                        exclusion_crit = item[item_index:index_gender]
+                        general_inclusion_crit = item[index_gender:]
+                        ct_input.pop(idx)
+                        ct_input.insert(
+                            idx, f"{inclusion_crit}\n{general_inclusion_crit}"
+                        )
+                        ct_input.append(f"{exclusion_crit}")
+                ct_input = "\n".join([f"{item}" for item in ct_input])
+                if label == 0:
+                    category = "no relevant information"
+                elif label == 1:
+                    category = "not eligible"
+                else:
+                    category = "eligible"
+                id_string = f"{index}_{topic_nr}_{ct}"
+                item = {
+                    "id": id_string,
+                    "topic_year": topic_year,
+                    "instruction": "Hello. You are a helpful assistant for clinical trial recruitment."
+                    "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
+                    "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
+                    "They are based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. "
+                    "The factors that disallow someone to participate in a clinical study are called exclusion criteria, wich consist of similar characteristics as inclusion criteria. For the patient to be eligible for a clinical trial, all inclusion criteria have to be matched and none of the exclusion criteria. "
+                    "You should check the inclusion and exclusion criteria one-by-one. If at least one exclusion criterion is met, the patient is automatically 'not eligible'. "
+                    "For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion. Then give an answer why you think the patient is 'eligible', 'not eligible' or if the given clinical trial has 'no relevant information' for the patient."
+                    "Your answer should be in the following format: dict{list[Explanation: str(relevance_explanation), Conclusion: str('eligible'|'not eligible'|'no relevant information')]}\n",
+                    "topic": f"Here is the patient note\n{cleaned_topic}",
+                    "clinical_trial": f"Here is the clinical trial\n{ct_input}",
+                    "response": "Plain JSON output without intend:\n",
+                    "output": category,
+                }
 
-            item = {
-                "id": f"{index}_{topic_nr}_{ct}",  # ID has following format __index_topicID_ClinicalTrialID__
-                "instruction": "Categorize the Patient Description provided into one of the 3 categories based on the Clinical Trial Description provided:\nIRRELEVANT\nUNELIGIBLE\nELIGIBLE\nOnly use one of the three provided categories as response.",
-                "input": f"PATIENT DESCRIPTION: {cleaned_topic}\n\nCLINICAL TRIAL DESCRIPTION: {cleaned_ct_textblocks}",
-                "output": category,
-            }
-            
-            train_list.append(item)
-            counter += 1
-        else:
-            continue
+                data_list.append(item)
+                counter += 1
+            else:
+                continue
 
     """The below function is returning the full CT parsed into a JSON format + cleaned"""
-    # cleaned_list = clean_textblock_data_recursively(train_list)
-    out_directory = os.path.join(data_directory, out_file_name)
-    print(f"Saving dataset to {out_directory}...")
+    out_directory_train = os.path.join(data_directory, f"ct_train_{version}.json")
+    out_directory_test = os.path.join(data_directory, f"ct_test_{version}.json")
 
-    with open(out_directory, "w") as fp:
-        json.dump(train_list, fp, indent=4)
+    df = pd.DataFrame(data_list)
+    # Step 1: Mix the samples
+    df = shuffle(df, random_state=42)  # Shuffle the rows randomly
 
-    print(f"Saved dataset with {counter} examples")
+    # Step 2: Create a test dataset of size 1000
+    test_dataset = df.sample(
+        n=1000, random_state=42
+    )  # Randomly select 1000 samples for testing
+
+    # Step 3: Remove the test dataset from the original DataFrame
+    train_dataset = df.drop(test_dataset.index)
+
+    train_dataset.to_json(out_directory_train, orient="records")
+    test_dataset.to_json(out_directory_test, orient="records")
+
+    print(f"Saved dataset Version {version} with {counter} examples")
 
 
 def clean_textblock(text):
-    # pattern = r'[^\x00-\x7F]'
-    # cleaned_text = re.sub(pattern, "", text)
     cleaned_text = text.replace(r'\\"', r"'")
-    # cleaned_text = re.sub(r'[@#$*_{}\[\]"\'\|\\~`]', ' ', cleaned_text)
     cleaned_text = re.sub(r"\s+", " ", cleaned_text.strip())
     return cleaned_text
 
 
-def clean_textblock_data_recursively(json_obj: list | dict) -> dict:
-    """Recursive function to find nested 'textblock' elements and clean the string from unnessecary chars and whitespaces"""
-    if isinstance(json_obj, dict):
-        cleaned_dict = {}
-        for key, value in json_obj.items():
-            if isinstance(value, dict) or isinstance(value, list):
-                cleaned_dict[key] = clean_textblock_data_recursively(value)
-            elif key in ["patient_description", "textblock"]:
-                cleaned_dict[key] = clean_textblock(value)
+def format_criteria(criteria_text):
+    return [criterion.strip() for criterion in criteria_text.strip().split("\n")]
+
+
+def extract_data_info(element_type, elements):
+    info = []
+    for key, value in elements.items():
+        if element_type == "Inclusion Criteria":
+            if key == "criteria":
+                textblock_element = value.get("textblock")
+                value = clean_textblock(textblock_element)
+                info.append(f"{value}")
+            elif key == "study_pop":
+                continue
             else:
-                cleaned_dict[key] = value
-        return cleaned_dict
-    elif isinstance(json_obj, list):
-        cleaned_list = []
-        for item in json_obj:
-            cleaned_list.append(clean_textblock_data_recursively(item))
-        return cleaned_list
-    else:
-        return json_obj
+                info.append(f"\n{key.capitalize().replace('_', ' ')}:{value}")
+        if element_type == "Summary":
+            value = clean_textblock(value)
+            info.append(f"{value}")
+    return "".join(info)
 
 
-def extract_textblocks_from_clinical_trials(clinical_trial: list | dict) -> list:
-    """Extracts 'textblock' elements from the 'clinical_trials' section"""
-    textblocks = []
+def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> list:
+    """Extracts all eligibility information from the 'clinical_trials' section"""
+    elements = []
+
     if isinstance(clinical_trial, list):
         result_dict = {}
         for d in clinical_trial:
             result_dict.update(d)
         clinical_trial = result_dict
     for key, value in clinical_trial.items():
-        if key == "textblock":
-            textblocks.append(value)
-        elif isinstance(value, dict):
-            textblocks.extend(extract_textblocks_from_clinical_trials(value))
-    return textblocks
+        if key == "eligibility" and isinstance(value, dict):
+            key = "Inclusion Criteria"
+            info = extract_data_info(key, value)
+            elements.append(f"{key}: {info}")
+        elif key == "brief_summary" and isinstance(value, dict):
+            key = "Summary"
+            info = extract_data_info(key, value)
+            elements.append(f"{key}: {info}")
+        elif key == "brief_title":
+            key = "Title"
+            elements.append(f"{key}: {value}")
+        elif key == "intervention_type":
+            key = "Intervention Type"
+            elements.append(f"{key}: {value}")
+        elif isinstance(value, (list, dict)):
+            elements.extend(extract_required_data_from_clinical_trials(value))
+
+    return elements
 
 
-def extract_criteria_from_clinical_trials(clinical_trial: dict) -> list:
-    criteria = []
-    for key, value in clinical_trial.items():
-        if key == "criteria":
-            criteria.append(value)
-        elif isinstance(value, dict):
-            criteria.extend(extract_criteria_from_clinical_trials(value))
-    return criteria
+# def extract_criteria_from_clinical_trials(clinical_trial: dict) -> list:
+#     criteria = []
+#     for key, value in clinical_trial.items():
+#         if key == "criteria":
+#             criteria.append(value)
+#         elif isinstance(value, dict):
+#             criteria.extend(extract_criteria_from_clinical_trials(value))
+#     return criteria
 
 
 def read_qrel_txt(qrel_path: str) -> pd.DataFrame:
@@ -235,4 +270,3 @@ if __name__ == "__main__":
     from jsonargparse import CLI
 
     CLI(create_JSON)
-

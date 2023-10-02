@@ -18,8 +18,6 @@ from torch.utils.data import DistributedSampler
 from transformers import (
     LlamaForCausalLM,
     LlamaTokenizer,
-    AutoModelForCausalLM,
-    AutoTokenizer,
     LlamaConfig,
     default_data_collator,
 )
@@ -46,11 +44,11 @@ from utils.train_utils import (
     get_policies,
     get_max_length,
 )
-
 from utils.merge_lora_weights import merge_weights
+from typing import Optional
 
 
-def main(**kwargs):
+def main(logger: Optional[object] = None, **kwargs):
     # Update the configuration for the training and sharding process
     update_config((train_config, fsdp_config), **kwargs)
     # when calling "import torch" pytorch calls torch.cuda.is_available(), muting all os.environ calls. Hence, it has to be called before
@@ -60,7 +58,12 @@ def main(**kwargs):
     torch.manual_seed(train_config.seed)
 
     model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
-    create_dataset_sample(dataset_size=train_config.dataset_size, type="train")
+    create_dataset_sample(
+        dataset_size=train_config.dataset_size,
+        version=train_config.dataset_version,
+        type="train",
+        x_shot_examples=train_config.x_shot_examples,
+    )
 
     if train_config.enable_fsdp:
         setup()
@@ -90,7 +93,7 @@ def main(**kwargs):
                 "please install latest nightly."
             )
         if rank == 0:
-            model = AutoModelForCausalLM.from_pretrained(
+            model = LlamaForCausalLM.from_pretrained(
                 model_path,
                 load_in_8bit=True if train_config.quantization else None,
                 device_map="auto" if train_config.quantization else None,
@@ -98,10 +101,10 @@ def main(**kwargs):
         else:
             llama_config = LlamaConfig.from_pretrained(model_path)
             with torch.device("meta"):
-                model = AutoModelForCausalLM(llama_config)
+                model = LlamaForCausalLM(llama_config)
 
     else:
-        model = AutoModelForCausalLM.from_pretrained(
+        model = LlamaForCausalLM.from_pretrained(
             model_path,
             load_in_8bit=True if train_config.quantization else None,
             device_map="auto" if train_config.quantization else None,
@@ -132,12 +135,8 @@ def main(**kwargs):
         model.to(torch.bfloat16)
 
     # Load the tokenizer and add special tokens
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-    tokenizer.add_special_tokens(
-        {
-            "pad_token": "<PAD>",
-        }
-    )
+    tokenizer = LlamaTokenizer.from_pretrained(model_path)
+    tokenizer.pad_token = tokenizer.eos_token
     # TODO: Evaluate if this approach suits better for my use-case. Originated from News Classification with LLM by Kshitiz Sahay
     # tokenizer.pad_token = tokenizer.eos_token
 
@@ -149,7 +148,6 @@ def main(**kwargs):
     # setting up FSDP if enable_fsdp is enabled
     if train_config.enable_fsdp:
         if not train_config.use_peft and train_config.freeze_layers:
-
             freeze_transformer_layers(train_config.num_freeze_layers)
 
         mixed_precision_policy, wrapping_policy = get_policies(fsdp_config, rank)
@@ -273,6 +271,7 @@ def main(**kwargs):
         fsdp_config if train_config.enable_fsdp else None,
         local_rank if train_config.enable_fsdp else None,
         rank if train_config.enable_fsdp else None,
+        logger=logger,
     )
     for key, value in results.items():
         if type(value) == torch.Tensor:

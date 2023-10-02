@@ -10,27 +10,37 @@ def get_free_cuda_device():
         nvidia_smi_output = subprocess.check_output(
             [
                 "nvidia-smi",
-                "--query-gpu=index,utilization.gpu",
+                "--query-gpu=index,utilization.gpu,memory.total,memory.used,temperature.gpu,name",
                 "--format=csv,noheader,nounits",
             ]
         )
 
         # Split the output into lines
         lines = nvidia_smi_output.decode("utf-8").strip().split("\n")
-        print(lines)
+        gpu_info = [line.strip().split(", ") for line in lines]
 
-        # Parse the GPU utilization data
-        gpu_utilization = [line.strip().split(", ") for line in lines]
-        print(gpu_utilization)
+        # Initialize variables to keep track of the least busy GPU
+        least_busy_gpu_index = None
+        least_busy_utilization = 100  # Initialize with a high value
 
-        # Find the first available GPU (lowest utilization)
-        free_gpu = min(gpu_utilization, key=lambda x: float(x[1]))
-        print(free_gpu)
+        for info in gpu_info:
+            index, utilization, total_memory, used_memory, temperature, name = info
+            utilization = float(utilization)
+            used_memory = int(used_memory)
 
-        # Set an environment variable with the free GPU index
-        os.environ["CUDA_VISIBLE_DEVICES"] = free_gpu[0]
+            # Check if the GPU is running a process
+            if utilization == 0 and used_memory < 10:
+                least_busy_gpu_index = index
+                break
 
-        return int(free_gpu[0])
+            # Check if the GPU has lower utilization and lower memory usage
+            if utilization < least_busy_utilization:
+                least_busy_gpu_index = index
+                least_busy_utilization = utilization
+
+        os.environ["CUDA_VISIBLE_DEVICES"] = least_busy_gpu_index
+
+        return least_busy_gpu_index
     except Exception as e:
         print(f"Error: {e}")
         return None
