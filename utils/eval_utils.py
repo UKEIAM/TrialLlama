@@ -164,8 +164,8 @@ def calculate_metrics(
         "recall": recall,
         "f1": f1,
         "auc": auc,
-        "p@5": p_at_5,
-        "p@10": p_at_10,
+        "p_at_5": p_at_5,
+        "p_at_10": p_at_10,
     }
 
 
