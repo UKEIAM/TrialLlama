@@ -21,10 +21,7 @@ base_directory = os.path.dirname(os.path.dirname((__file__)))
 def main(**kwargs):
     update_config((experiment_config), **kwargs)
 
-    qrels_2022_path = os.path.join(
-        "data",
-        f"trec.nist.gov_data_trials_qrels{experiment_config.gold_labels_year}.txt",
-    )
+    qrels_dir = os.path.join(base_directory, "data", "gold_labels")
 
     if experiment_config.x_shot_examples == "few-shot":
         x_shot_examples_path = os.path.join(
@@ -55,11 +52,6 @@ def main(**kwargs):
             "out",
             "eval",
             f"eval_{experiment_config.ft_model}_{run_name}_{experiment_config.test_dataset_version}.json",
-        )
-        trec_eval_output_path = os.path.join(
-            "out",
-            "eval",
-            f"eval_{experiment_config.ft_model}_{run_name}_{experiment_config.test_dataset_version}_trec.txt",
         )
         mlflow.log_params(
             {
@@ -129,12 +121,10 @@ def main(**kwargs):
 
         if experiment_config.run_eval:
             print("Running evaluation...")
-            prepare_files(
-                raw_eval_output_path, eval_output_path, trec_eval_output_path, run_name
-            )
+            eval_output_path = prepare_files(raw_eval_output_path, run_name)
             scores = calculate_metrics(
                 eval_output_path=eval_output_path,
-                gold_labels_file=qrels_2022_path,
+                gold_labels_dir=qrels_dir,
                 ft_model_name=experiment_config.ft_model,
                 run_name=run_name,
                 logger=logger,

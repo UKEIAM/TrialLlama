@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/912820073179918981/574c7e7c02f843bf9e7fbf0f30747201/artifacts
+deleted_time: 1696125022227
+end_time: null
+entry_point_name: ''
+experiment_id: '912820073179918981'
+lifecycle_stage: deleted
+run_id: 574c7e7c02f843bf9e7fbf0f30747201
+run_name: gentle-boar-144
+run_uuid: 574c7e7c02f843bf9e7fbf0f30747201
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696123315598
+status: 1
+tags: []
+user_id: 1kkraus

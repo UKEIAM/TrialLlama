@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/438653890049377122/47ed00ecf8c1409f920aa69e8978eaaf/artifacts
+deleted_time: 1696125036298
+end_time: 1695641175381
+entry_point_name: ''
+experiment_id: '438653890049377122'
+lifecycle_stage: deleted
+run_id: 47ed00ecf8c1409f920aa69e8978eaaf
+run_name: bald-skunk-960
+run_uuid: 47ed00ecf8c1409f920aa69e8978eaaf
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695640929267
+status: 3
+tags: []
+user_id: 1kkraus

@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/438653890049377122/360c1dbd122e48b6accba1375a380a61/artifacts
+deleted_time: 1696125036298
+end_time: 1695671245207
+entry_point_name: ''
+experiment_id: '438653890049377122'
+lifecycle_stage: deleted
+run_id: 360c1dbd122e48b6accba1375a380a61
+run_name: lyrical-shrimp-388
+run_uuid: 360c1dbd122e48b6accba1375a380a61
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695670373727
+status: 3
+tags: []
+user_id: 1kkraus

@@ -1,0 +1,7 @@
+artifact_location: file:///ltstorage/home/1kkraus/master_thesis/mlruns/912820073179918981
+creation_time: 1696089954635
+experiment_id: '912820073179918981'
+last_update_time: 1696125022227
+lifecycle_stage: deleted
+name: llama-2-13b-chat-hf-300-v2-4-None
+tags: {}

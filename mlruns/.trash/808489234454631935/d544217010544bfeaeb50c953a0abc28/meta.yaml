@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/808489234454631935/d544217010544bfeaeb50c953a0abc28/artifacts
+deleted_time: 1696125018636
+end_time: 1696107538923
+entry_point_name: ''
+experiment_id: '808489234454631935'
+lifecycle_stage: deleted
+run_id: d544217010544bfeaeb50c953a0abc28
+run_name: traveling-hawk-855
+run_uuid: d544217010544bfeaeb50c953a0abc28
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696098752366
+status: 4
+tags: []
+user_id: 1kkraus

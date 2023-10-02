@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/438653890049377122/4e6ded9a4b5b4c3c964b748116c188b9/artifacts
+deleted_time: 1696125036298
+end_time: 1695641432493
+entry_point_name: ''
+experiment_id: '438653890049377122'
+lifecycle_stage: deleted
+run_id: 4e6ded9a4b5b4c3c964b748116c188b9
+run_name: gaudy-swan-718
+run_uuid: 4e6ded9a4b5b4c3c964b748116c188b9
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695641182651
+status: 3
+tags: []
+user_id: 1kkraus

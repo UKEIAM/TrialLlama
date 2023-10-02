@@ -76,6 +76,7 @@ def test(
                 response = []
                 for token in generated_tokens[0]:
                     response.append(tokenizer.decode(token))
+                # TODO: Sentences are wrongly build together -> spaces etc.
                 response = " ".join(response)
                 response = response.replace("</s>", "")
 

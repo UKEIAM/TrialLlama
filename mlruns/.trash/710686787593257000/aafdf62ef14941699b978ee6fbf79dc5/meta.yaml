@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/710686787593257000/aafdf62ef14941699b978ee6fbf79dc5/artifacts
+deleted_time: 1696125024630
+end_time: 1696021098438
+entry_point_name: ''
+experiment_id: '710686787593257000'
+lifecycle_stage: deleted
+run_id: aafdf62ef14941699b978ee6fbf79dc5
+run_name: handsome-colt-388
+run_uuid: aafdf62ef14941699b978ee6fbf79dc5
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696012625582
+status: 4
+tags: []
+user_id: 1kkraus

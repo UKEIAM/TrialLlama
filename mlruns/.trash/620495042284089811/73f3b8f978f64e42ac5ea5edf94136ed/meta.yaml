@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/620495042284089811/73f3b8f978f64e42ac5ea5edf94136ed/artifacts
+deleted_time: 1696125041992
+end_time: 1695638885130
+entry_point_name: ''
+experiment_id: '620495042284089811'
+lifecycle_stage: deleted
+run_id: 73f3b8f978f64e42ac5ea5edf94136ed
+run_name: rogue-newt-813
+run_uuid: 73f3b8f978f64e42ac5ea5edf94136ed
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695638620415
+status: 3
+tags: []
+user_id: 1kkraus

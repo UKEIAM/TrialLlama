@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/438653890049377122/7f1bec907c5e4e95be54fb9f75c9d189/artifacts
+deleted_time: 1696125036298
+end_time: 1695669452181
+entry_point_name: ''
+experiment_id: '438653890049377122'
+lifecycle_stage: deleted
+run_id: 7f1bec907c5e4e95be54fb9f75c9d189
+run_name: vaunted-asp-1
+run_uuid: 7f1bec907c5e4e95be54fb9f75c9d189
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695663643195
+status: 3
+tags: []
+user_id: 1kkraus

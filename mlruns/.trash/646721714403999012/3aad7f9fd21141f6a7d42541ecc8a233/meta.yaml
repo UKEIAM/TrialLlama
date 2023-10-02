@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/646721714403999012/3aad7f9fd21141f6a7d42541ecc8a233/artifacts
+deleted_time: 1696125015265
+end_time: 1696123308524
+entry_point_name: ''
+experiment_id: '646721714403999012'
+lifecycle_stage: deleted
+run_id: 3aad7f9fd21141f6a7d42541ecc8a233
+run_name: dazzling-cat-252
+run_uuid: 3aad7f9fd21141f6a7d42541ecc8a233
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696122901174
+status: 4
+tags: []
+user_id: 1kkraus

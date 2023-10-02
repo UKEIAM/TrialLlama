@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/912820073179918981/682d4f8757764a398607699d17d2dde4/artifacts
+deleted_time: 1696125022227
+end_time: 1696122383620
+entry_point_name: ''
+experiment_id: '912820073179918981'
+lifecycle_stage: deleted
+run_id: 682d4f8757764a398607699d17d2dde4
+run_name: youthful-gull-27
+run_uuid: 682d4f8757764a398607699d17d2dde4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696121927302
+status: 4
+tags: []
+user_id: 1kkraus

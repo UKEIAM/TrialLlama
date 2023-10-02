@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/332091936723911205/153703a7bca44bb98b0bea0899fd8ba6/artifacts
+deleted_time: 1696125026859
+end_time: 1695995558633
+entry_point_name: ''
+experiment_id: '332091936723911205'
+lifecycle_stage: deleted
+run_id: 153703a7bca44bb98b0bea0899fd8ba6
+run_name: rebellious-quail-349
+run_uuid: 153703a7bca44bb98b0bea0899fd8ba6
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695995523679
+status: 4
+tags: []
+user_id: 1kkraus

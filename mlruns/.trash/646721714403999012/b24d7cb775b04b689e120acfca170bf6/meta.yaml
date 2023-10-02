@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/646721714403999012/b24d7cb775b04b689e120acfca170bf6/artifacts
+deleted_time: 1696125015265
+end_time: 1696116356585
+entry_point_name: ''
+experiment_id: '646721714403999012'
+lifecycle_stage: deleted
+run_id: b24d7cb775b04b689e120acfca170bf6
+run_name: intrigued-bat-157
+run_uuid: b24d7cb775b04b689e120acfca170bf6
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696107545874
+status: 4
+tags: []
+user_id: 1kkraus

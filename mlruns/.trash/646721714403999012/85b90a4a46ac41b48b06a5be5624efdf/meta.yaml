@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/646721714403999012/85b90a4a46ac41b48b06a5be5624efdf/artifacts
+deleted_time: 1696125015265
+end_time: 1696121921030
+entry_point_name: ''
+experiment_id: '646721714403999012'
+lifecycle_stage: deleted
+run_id: 85b90a4a46ac41b48b06a5be5624efdf
+run_name: incongruous-duck-995
+run_uuid: 85b90a4a46ac41b48b06a5be5624efdf
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696120002938
+status: 4
+tags: []
+user_id: 1kkraus

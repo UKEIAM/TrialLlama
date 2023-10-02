@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/438653890049377122/bd8b7d8cec3d4ad88016fa0881869736/artifacts
+deleted_time: 1696125036298
+end_time: 1695643171755
+entry_point_name: ''
+experiment_id: '438653890049377122'
+lifecycle_stage: deleted
+run_id: bd8b7d8cec3d4ad88016fa0881869736
+run_name: adaptable-conch-880
+run_uuid: bd8b7d8cec3d4ad88016fa0881869736
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695642899294
+status: 3
+tags: []
+user_id: 1kkraus

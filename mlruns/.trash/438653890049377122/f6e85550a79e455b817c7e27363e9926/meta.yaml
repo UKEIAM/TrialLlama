@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/438653890049377122/f6e85550a79e455b817c7e27363e9926/artifacts
+deleted_time: 1696125036298
+end_time: 1695684073685
+entry_point_name: ''
+experiment_id: '438653890049377122'
+lifecycle_stage: deleted
+run_id: f6e85550a79e455b817c7e27363e9926
+run_name: thoughtful-flea-292
+run_uuid: f6e85550a79e455b817c7e27363e9926
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695682767519
+status: 3
+tags: []
+user_id: 1kkraus

@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/438653890049377122/72aec92beeb74a32a26e90563c39d2be/artifacts
+deleted_time: 1696125036298
+end_time: 1695650621191
+entry_point_name: ''
+experiment_id: '438653890049377122'
+lifecycle_stage: deleted
+run_id: 72aec92beeb74a32a26e90563c39d2be
+run_name: redolent-mouse-960
+run_uuid: 72aec92beeb74a32a26e90563c39d2be
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1695645220083
+status: 4
+tags: []
+user_id: 1kkraus
