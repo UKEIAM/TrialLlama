@@ -1,7 +1,0 @@
-artifact_location: file:///ltstorage/home/1kkraus/master_thesis/mlruns/146301243177023692
-creation_time: 1695629489474
-experiment_id: '146301243177023692'
-last_update_time: 1695634588018
-lifecycle_stage: deleted
-name: llama-7b-chat-300_temperature
-tags: {}

@@ -3,7 +3,7 @@ import logging
 import datetime
 
 # Set the logging level to capture errors and above
-def setup_logger(run_id):
+def setup_logger(run_id, run_name):
     logging.basicConfig(level=logging.ERROR)
 
     # Define a custom logging format
@@ -21,7 +21,7 @@ def setup_logger(run_id):
 
     # Create a file handler to save log messages to a file
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    log_filename = os.path.join(log_folder, f"error_{timestamp}_{run_id}.log'")
+    log_filename = os.path.join(log_folder, f"{run_name}_{run_id}.log'")
     file_handler = logging.FileHandler(log_filename)
     file_handler.setFormatter(formatter)
 

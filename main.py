@@ -24,12 +24,13 @@ def main(**kwargs):
     qrels_dir = os.path.join(base_dir, "data", "gold_labels")
 
     mlflow.set_experiment(f"{experiment_config.ft_model}")
+    mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
     description = f"Fine-tuned model {experiment_config.ft_model} | qrels {experiment_config.gold_labels_year}"
     with mlflow.start_run(
         description=description,
     ) as run:
-        logger = setup_logger(run_id=run.info.run_id)
         run_name = run.info.run_name
+        logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         raw_eval_output_path = os.path.join(
             base_dir,
             "out",
@@ -117,7 +118,7 @@ def main(**kwargs):
             clear_gpu_cache()
 
         # Clean gpu_cache before next mlflow run
-        clear_gpu_cache()
+        print("Run completed successfully")
         logger.debug(f"Run with ID {run.info.run_id} finished successful")
     # Set experiment ID
     # Run experiments from experiment.yaml

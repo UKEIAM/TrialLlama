@@ -1,7 +1,0 @@
-2023-09-25 09:50:32,106 - utils.logger_utils - ERROR - Model eval Output Error: probability tensor contains either `inf`, `nan` or element < 0 | Sample Identifier 14424_21_NCT00001184
-2023-09-25 09:50:33,639 - utils.logger_utils - ERROR - Model eval Output Error: probability tensor contains either `inf`, `nan` or element < 0 | Sample Identifier 9916_14_NCT04804111
-2023-09-25 09:50:38,693 - utils.logger_utils - ERROR - Model eval Output Error: probability tensor contains either `inf`, `nan` or element < 0 | Sample Identifier 18046_25_NCT04806282
-2023-09-25 09:50:46,438 - utils.logger_utils - ERROR - Model eval Output Error: probability tensor contains either `inf`, `nan` or element < 0 | Sample Identifier 21199_30_NCT02951585
-2023-09-25 09:52:14,341 - utils.logger_utils - ERROR - Model eval Output Error: probability tensor contains either `inf`, `nan` or element < 0 | Sample Identifier 22596_32_NCT02386436
-2023-09-25 09:53:06,987 - utils.logger_utils - ERROR - Model eval Output Error: probability tensor contains either `inf`, `nan` or element < 0 | Sample Identifier 33451_48_NCT02461992
-2023-09-25 09:53:16,191 - utils.logger_utils - ERROR - Model eval Output Error: probability tensor contains either `inf`, `nan` or element < 0 | Sample Identifier 5968_9_NCT01554163

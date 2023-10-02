@@ -136,11 +136,7 @@ def main(logger: Optional[object] = None, **kwargs):
 
     # Load the tokenizer and add special tokens
     tokenizer = LlamaTokenizer.from_pretrained(model_path)
-    tokenizer.add_special_tokens(
-        {
-            "pad_token": "<PAD>",
-        }
-    )
+    tokenizer.pad_token = tokenizer.eos_token
     # TODO: Evaluate if this approach suits better for my use-case. Originated from News Classification with LLM by Kshitiz Sahay
     # tokenizer.pad_token = tokenizer.eos_token
 
