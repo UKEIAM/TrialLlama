@@ -23,8 +23,8 @@ dataset_size:
 #  - 10000
 num_epochs:
 #  -  2
-  - 3
-#  - 4 # Default
+#  - 3
+  - 4 # Default
 #  - 5
 lr:
 #  - 0.001
