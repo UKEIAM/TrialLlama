@@ -15,26 +15,13 @@ from utils.config_utils import update_config
 from utils.logger_utils import setup_logger
 from utils.set_free_cuda_device import get_free_cuda_device
 
-base_directory = os.path.dirname(os.path.dirname((__file__)))
+base_dir = os.path.dirname((__file__))
 
 
 def main(**kwargs):
     update_config((experiment_config), **kwargs)
 
-    qrels_dir = os.path.join(base_directory, "data", "gold_labels")
-
-    if experiment_config.x_shot_examples == "few-shot":
-        x_shot_examples_path = os.path.join(
-            base_directory,
-            "data",
-            f"ct_few_shot_{experiment_config.dataset_version}.json",
-        )
-    elif experiment_config.x_shot_examples == "one-shot":
-        x_shot_examples_path = os.path.join(
-            base_directory,
-            "data",
-            f"ct_one_shot_{experiment_config.dataset_version}.json",
-        )
+    qrels_dir = os.path.join(base_dir, "data", "gold_labels")
 
     mlflow.set_experiment(f"{experiment_config.ft_model}")
     description = f"Fine-tuned model {experiment_config.ft_model} | qrels {experiment_config.gold_labels_year}"
@@ -44,14 +31,10 @@ def main(**kwargs):
         logger = setup_logger(run_id=run.info.run_id)
         run_name = run.info.run_name
         raw_eval_output_path = os.path.join(
+            base_dir,
             "out",
             "eval",
             f"eval_{experiment_config.ft_model}_{run_name}_{experiment_config.test_dataset_version}_raw.json",
-        )
-        eval_output_path = os.path.join(
-            "out",
-            "eval",
-            f"eval_{experiment_config.ft_model}_{run_name}_{experiment_config.test_dataset_version}.json",
         )
         mlflow.log_params(
             {
@@ -84,7 +67,7 @@ def main(**kwargs):
                 dataset_version=experiment_config.dataset_version,
                 dataset=f"ct_train_sample_{experiment_config.dataset_version}",
                 dataset_size=experiment_config.dataset_size,
-                x_shot_example=experiment_config.x_shot_examples,
+                x_shot_examples=experiment_config.x_shot_examples,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
                 model_name=experiment_config.base_model,

@@ -73,21 +73,33 @@ def test(
                     else batch["input_ids"].shape[1]
                 )
                 generated_tokens = outputs.sequences[:, input_length:]
-                response = []
-                for token in generated_tokens[0]:
-                    response.append(tokenizer.decode(token))
-                # TODO: Sentences are wrongly build together -> spaces etc.
-                response = " ".join(response)
-                response = response.replace("</s>", "")
 
+                resp_sentences = []
+                current_word = ""
+                special_symbol_map = {
+                    "<0x0A>": "\n",  # Replace <0x0A> with a newline character
+                    # Add more mappings as needed
+                }
+                for token in generated_tokens[0]:
+                    token = tokenizer.decode(token)
+                    # Check if the token starts with a space, indicating a subword token
+                    if token in special_symbol_map:
+                        token = special_symbol_map[token]
+                    if token.startswith(" "):
+                        current_word += token
+                    else:
+                        if current_word:
+                            # Add the current word to the list of sentences
+                            resp_sentences.append(current_word)
+                        current_word = token
+                # Add the last word if it exists
+                if current_word:
+                    resp_sentences.append(current_word)
+                response = " ".join(resp_sentences)
                 if test_config.debug:
                     print(f"{response}")
 
                 topic_year = test_data_json[step]["topic_year"]
-                # TODO: Check how response looks like (does model return in asked for dictionary format?
-                # TODO: Adjust probability calculation for only relevant tokens!
-                # If yes, add "response" as key and add dictionary after it -> "response": str(Response text) : str('eligible'|'not eligible'|'no relevant information')}
-                # Probabilites could be an issue, since currently they are calculated for the whole response, but it should be only for the tokens containing the class
                 probas = []
                 for item in transition_scores[0]:
                     probas.append(np.exp(item.cpu().numpy()))
@@ -102,8 +114,6 @@ def test(
                     response,
                     proba,
                 ]
-                if test_config.debug:
-                    print(f"{row_raw}")
                 raw_out.loc[step] = row_raw
 
         return raw_out, empty_response_counter
