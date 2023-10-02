@@ -125,6 +125,8 @@ def calculate_metrics(
     f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro")
     p_at_5 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 5)
     p_at_10 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 10)
+    p_at_50 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 50)
+
     try:
         y_true = label_binarize(merged_df["LABEL_gold"], classes=[0, 1, 2])
         y_pred = merged_df[["LABEL_pred"]]
@@ -166,6 +168,7 @@ def calculate_metrics(
         "auc": auc,
         "p_at_5": p_at_5,
         "p_at_10": p_at_10,
+        "p_at_50": p_at_50,
     }
 
 
