@@ -1,0 +1,8 @@
+[
+  {
+  "id" : "24977_53_NCT00573573",
+  "topic_year" : 2021,
+  "input" : "Here is an example patient note: Patient is a 34-year-old woman from Jordan who comes to clinic with some general and non-specific bones and joints pain. She is married and has 3 children. Her past medical and drug history are unremarkable. Her BMI is 23, BP: 120/75, HR: 75/min. Her laboratory study is remarkable for Vit D: 14ng/ml and otherwise healthy. (Ca: 9.2mg/dl, Phosphorus: 3.2mg/dl, PTH: 28pg/ml)\nHere is an example clinical trial: Title: Energy Specific Far Infrared Radiation Treatment for Hyperparathyroidism\nSummary: A study to determine the possibility of using far infrared radiation to treat Hyperparathyroidism.\nIntervention Type: Radiation\nInclusion Criteria: Inclusion Criteria: - Persons with parathyroid disease \nGender: All\nMinimum age: N/A\nMaximum age: N/A\nHealthy volunteers: No\nExclusion Criteria: - None\nHere is an example of the plain JSON output without intend: {[Explanation: 'The woman described by the patient description is healthy and has no parathyroid disease, therefore not relevant for the clinical trial', Conclusion: 'no relevant information']}",
+  "output" : "no relevant information"
+  }
+]
