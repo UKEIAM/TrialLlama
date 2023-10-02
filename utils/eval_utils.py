@@ -74,15 +74,11 @@ def prepare_files(raw_eval_path, run_name):
     rank = trec_eval.pop("RANK")
     trec_eval.insert(3, "RANK", rank)
 
-    original_string = (
-        "eval_llama-2-13b-chat-hf-300-v2-4-one_languid-stoat-38_v3_raw.json"
-    )
-
     # Remove "_raw" from the original string
-    eval_path = original_string.replace("_raw", "")
+    eval_path = raw_eval_path.replace("_raw", "")
 
     # Replace "_raw" with "_trec" in the original string
-    trec_eval_path = original_string.replace("_raw", "_trec")
+    trec_eval_path = raw_eval_path.replace("_raw", "_trec")
 
     eval_df.to_json(eval_path, orient="records")
     trec_eval.to_csv(f"{trec_eval_path}", sep="\t", header=False, index=False)
