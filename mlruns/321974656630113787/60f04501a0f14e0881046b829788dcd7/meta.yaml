@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/321974656630113787/60f04501a0f14e0881046b829788dcd7/artifacts
+end_time: 1696281406548
+entry_point_name: ''
+experiment_id: '321974656630113787'
+lifecycle_stage: active
+run_id: 60f04501a0f14e0881046b829788dcd7
+run_name: adventurous-gnat-524
+run_uuid: 60f04501a0f14e0881046b829788dcd7
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696278217492
+status: 3
+tags: []
+user_id: 1kkraus

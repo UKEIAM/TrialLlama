@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/491983772447047347/58d52a4883644574b6085b2eb01f9030/artifacts
+end_time: 1696270697520
+entry_point_name: ''
+experiment_id: '491983772447047347'
+lifecycle_stage: active
+run_id: 58d52a4883644574b6085b2eb01f9030
+run_name: bittersweet-toad-206
+run_uuid: 58d52a4883644574b6085b2eb01f9030
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696270528167
+status: 4
+tags: []
+user_id: 1kkraus

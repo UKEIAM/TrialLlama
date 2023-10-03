@@ -1,0 +1,122 @@
+[
+  {
+    "ID" : "3318_7_NCT04525833",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "O",
+    "PROBA" : 0.4863957874
+  },
+  {
+    "ID" : "20306_42_NCT03552055",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "(not eligible)",
+    "PROBA" : 0.761324212
+  },
+  {
+    "ID" : "1062_2_NCT02355925",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "[eligible]",
+    "PROBA" : 0.7279533669
+  },
+  {
+    "ID" : "26921_57_NCT03740685",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "\nno relevant information",
+    "PROBA" : 0.6708873153
+  },
+  {
+    "ID" : "30310_43_NCT03839615",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "{eligible: true}",
+    "PROBA" : 0.7829813953
+  },
+  {
+    "ID" : "14899_21_NCT03537807",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "  eligible",
+    "PROBA" : 0.7259078931
+  },
+  {
+    "ID" : "14329_20_NCT03906539",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "\neligible",
+    "PROBA" : 0.7036817074
+  },
+  {
+    "ID" : "5254_12_NCT00629902",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "\neligible",
+    "PROBA" : 0.7149444371
+  },
+  {
+    "ID" : "4505_10_NCT01415427",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "O",
+    "PROBA" : 0.8552720249
+  },
+  {
+    "ID" : "8486_18_NCT04198064",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "O",
+    "PROBA" : 0.507897228
+  },
+  {
+    "ID" : "12791_27_NCT04244383",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "_no_relevant_information",
+    "PROBA" : 0.6596060637
+  },
+  {
+    "ID" : "3393_5_NCT03450252",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "O",
+    "PROBA" : 0.6096315235
+  },
+  {
+    "ID" : "24655_52_NCT01886027",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "O",
+    "PROBA" : 0.7354783118
+  },
+  {
+    "ID" : "15055_21_NCT04446325",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "Since there is no information provided about the patient's mobility in the patient note, the inclusion criterion \"mobility reduction\" cannot be assessed to determine the patient's eligibility for the clinical trial. Additionally, the patient's diagnosis of ALS does meet the inclusion criterion of \"patients with amyotrophic lateral sclerosis defined by revised El Escorial score criteria\". Hence, the patient is not eligible for the clinical trial since none of the inclusion criteria are met. The answer is therefore \"not eligible\".",
+    "PROBA" : 0.7981684227
+  },
+  {
+    "ID" : "27566_40_NCT00913978",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "O",
+    "PROBA" : 0.5288539156
+  },
+  {
+    "ID" : "18492_39_NCT01330667",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "O",
+    "PROBA" : 0.6822243929
+  },
+  {
+    "ID" : "24026_51_NCT00335023",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "{ \"not eligible\" : \"no relevant information\" }",
+    "PROBA" : 0.7893082758
+  },
+  {
+    "ID" : "21374_30_NCT04136431",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "   eligible",
+    "PROBA" : 0.7614780694
+  },
+  {
+    "ID" : "30306_43_NCT03818555",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : ".eligible",
+    "PROBA" : 0.6815153791
+  },
+  {
+    "ID" : "1756_3_NCT01684605",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "| relevance_explanation: The patient is not eligible.",
+    "PROBA" : 0.6457997077
+  }
+]
