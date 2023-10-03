@@ -98,7 +98,7 @@ def prepare_files(
     for year, sub_df in sub_dataframes.items():
         trec_eval_path = eval_output_path.replace("eval/", "eval/trec_eval/")
         os.makedirs(os.path.dirname(trec_eval_path), exist_ok=True)
-        trec_eval_path = trec_eval_path.replace(".json", f"_trec_{year}.json")
+        trec_eval_path = trec_eval_path.replace(".json", f"_trec_{int(year)}.json")
         sub_df.to_csv(f"{trec_eval_path}", sep="\t", header=False, index=False)
 
     """
