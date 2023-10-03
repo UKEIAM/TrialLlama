@@ -31,11 +31,11 @@ def main(**kwargs):
     ) as run:
         run_name = run.info.run_name
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
-        raw_eval_output_path = os.path.join(
+        eval_output_path = os.path.join(
             base_dir,
             "out",
             "eval",
-            f"eval_{experiment_config.ft_model}_{run_name}_{experiment_config.test_dataset_version}_raw.json",
+            f"eval_{experiment_config.ft_model}_{run_name}_{experiment_config.test_dataset_version}.json",
         )
         mlflow.log_params(
             {
@@ -95,19 +95,21 @@ def main(**kwargs):
                 length_penalty=experiment_config.length_penalty,
                 repetition_penalty=experiment_config.repetition_penalty,
                 debug=experiment_config.debug,
-                eval_output_path=raw_eval_output_path,
+                eval_output_path=eval_output_path,
                 logger=logger,
             )
             mlflow.set_tag("inference_conducted", "TRUE")
             mlflow.log_metric("number_of_empty_responses", results)
-            mlflow.log_artifact(raw_eval_output_path)
+            mlflow.log_artifact(eval_output_path)
             clear_gpu_cache()
 
         if experiment_config.run_eval:
             print("Running evaluation...")
-            eval_output_path = prepare_files(raw_eval_output_path, run_name)
+            eval_df = prepare_files(
+                eval_output_path=eval_output_path, run_name=run_name, logger=logger
+            )
             scores = calculate_metrics(
-                eval_output_path=eval_output_path,
+                eval_df=eval_df,
                 gold_labels_dir=qrels_dir,
                 ft_model_name=experiment_config.ft_model,
                 run_name=run_name,
