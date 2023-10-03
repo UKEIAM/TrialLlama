@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/204126705558815585/9e0ba97ae5f84a89a611fd077935c027/artifacts
+end_time: 1696297491656
+entry_point_name: ''
+experiment_id: '204126705558815585'
+lifecycle_stage: active
+run_id: 9e0ba97ae5f84a89a611fd077935c027
+run_name: rebellious-mare-835
+run_uuid: 9e0ba97ae5f84a89a611fd077935c027
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696297235014
+status: 3
+tags: []
+user_id: 1kkraus

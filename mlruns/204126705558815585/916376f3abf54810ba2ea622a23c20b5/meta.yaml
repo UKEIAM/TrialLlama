@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/204126705558815585/916376f3abf54810ba2ea622a23c20b5/artifacts
+end_time: 1696297228383
+entry_point_name: ''
+experiment_id: '204126705558815585'
+lifecycle_stage: active
+run_id: 916376f3abf54810ba2ea622a23c20b5
+run_name: tasteful-owl-673
+run_uuid: 916376f3abf54810ba2ea622a23c20b5
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696297128062
+status: 3
+tags: []
+user_id: 1kkraus
