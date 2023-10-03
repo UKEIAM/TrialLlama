@@ -46,11 +46,11 @@ def prepare_files(
         # Create a dictionary representing the new row
         try:
             new_row_eval = {
-                "TOPIC_NO": match.group(2),
+                "TOPIC_NO": int(match.group(2)),
                 "Q0": 0,
                 "NCT_ID": match.group(3),
-                "LABEL": pred_class,
-                "TOPIC_YEAR": item[1]["TOPIC_YEAR"],
+                "LABEL": int(pred_class),
+                "TOPIC_YEAR": int(item[1]["TOPIC_YEAR"]),
             }
             new_row_trec = {
                 "TOPIC_NO": match.group(2),
@@ -130,6 +130,13 @@ def calculate_metrics(
         gold_dfs = pd.concat([gold_dfs, gold_df], ignore_index=True)
 
     # Merge the two dataframes on NCT_ID to filter for matching values
+    """
+         Very funny bug: all dtypes of eval_df are object. Such are gold_dfs. Nevertheless, merging on TOPIC_NO,
+         merged_df becomes empty. If removing TOPIC_NO, merge works fine.
+         If df is saved to json and the imported with pd.read_json(), dtypes of most columns is int64. Merge works with
+         TOPIC_NO included. So transforming the dtype object to int64 in the eval_df, fixes the problem as well.
+    """
+    eval_df["LABEL"] = eval_df["LABEL"].astype(int)
     gold_dfs["LABEL"] = gold_dfs["LABEL"].astype(int)
     merged_df = eval_df.merge(
         gold_dfs, on=["TOPIC_NO", "NCT_ID", "TOPIC_YEAR"], suffixes=("_pred", "_gold")
@@ -177,6 +184,7 @@ def calculate_metrics(
         cmap="Blues",
         xticklabels=["no relevant information", "not eligible", "eligible"],
         yticklabels=["no relevant information", "not eligible", "eligible"],
+        annot_kws={"fontsize": 12},
     )
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
