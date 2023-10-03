@@ -181,10 +181,9 @@ def calculate_metrics(
         conf_matrix,
         annot=True,
         fmt="d",
-        cmap="Blues",
+        # cmap="Blues",
         xticklabels=["no relevant information", "not eligible", "eligible"],
         yticklabels=["no relevant information", "not eligible", "eligible"],
-        annot_kws={"fontsize": 12},
     )
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
