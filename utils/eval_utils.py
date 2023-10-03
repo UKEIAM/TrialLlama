@@ -19,15 +19,17 @@ from sklearn.preprocessing import label_binarize
 from typing import Optional
 
 # Load the model-output and gold-labels files
-def prepare_files(raw_eval_path, run_name):
+def prepare_files(
+    eval_output_path, run_name, logger: Optional[object] = None
+) -> pd.DataFrame:
     # TODO Prepare the trec_eval output file and save it as well as the output file required to run metrics
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
-    raw_df = pd.read_json(raw_eval_path, orient="records")
+    raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+)_(\w+)$"
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
 
-    trec_eval = pd.DataFrame(columns=["TOPIC_NO", "Q0", "ID", "SCORE", "RUN_NAME"])
+    trec_eval = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "SCORE", "RUN_NAME"])
 
     for item in raw_df.iterrows():
         match = re.match(id_pattern, item[1]["ID"])
@@ -42,20 +44,26 @@ def prepare_files(raw_eval_path, run_name):
             pred_class = 0
 
         # Create a dictionary representing the new row
-        new_row_eval = {
-            "TOPIC_NO": match.group(2),
-            "Q0": 0,
-            "NCT_ID": match.group(3),
-            "LABEL": pred_class,
-            "TOPIC_YEAR": item[1]["TOPIC_YEAR"],
-        }
-        new_row_trec = {
-            "TOPIC_NO": match.group(2),
-            "Q0": 0,
-            "ID": match.group(3),
-            "SCORE": item[1]["PROBA"],
-            "RUN_NAME": run_name,
-        }
+        try:
+            new_row_eval = {
+                "TOPIC_NO": int(match.group(2)),
+                "Q0": 0,
+                "NCT_ID": match.group(3),
+                "LABEL": int(pred_class),
+                "TOPIC_YEAR": int(item[1]["TOPIC_YEAR"]),
+            }
+            new_row_trec = {
+                "TOPIC_NO": match.group(2),
+                "Q0": 0,
+                "NCT_ID": match.group(3),
+                "SCORE": item[1]["PROBA"],
+                "RUN_NAME": run_name,
+                "TOPIC_YEAR": item[1]["TOPIC_YEAR"],
+            }
+        except UnboundLocalError as e:
+            if logger != None:
+                logger.error(f"Response: {resp} -> {e}")
+            continue
 
         # Convert the new row into a DataFrame
         new_row_eval_df = pd.DataFrame([new_row_eval])
@@ -74,27 +82,40 @@ def prepare_files(raw_eval_path, run_name):
     rank = trec_eval.pop("RANK")
     trec_eval.insert(3, "RANK", rank)
 
-    # Remove "_raw" from the original string
-    eval_path = raw_eval_path.replace("_raw", "")
+    """
+        As trec_eval operates by year, we need to split our mixed test data by the topic year and save the resulting
+        files separately.
+    """
+    unique_years = trec_eval["TOPIC_YEAR"].unique()
+    sub_dataframes = {}
+    for year in unique_years:
+        sub_df = trec_eval[
+            trec_eval["TOPIC_YEAR"] == year
+        ].copy()  # Create a copy to avoid modifying the original DataFrame
+        sub_df.drop(columns=["TOPIC_YEAR"], inplace=True)  # Drop the 'YEAR' column
+        sub_dataframes[year] = sub_df
 
-    # Replace "_raw" with "_trec" in the original string
-    trec_eval_path = raw_eval_path.replace("_raw", "_trec")
+    for year, sub_df in sub_dataframes.items():
+        trec_eval_path = eval_output_path.replace("eval/", "eval/trec_eval/")
+        os.makedirs(os.path.dirname(trec_eval_path), exist_ok=True)
+        trec_eval_path = trec_eval_path.replace(".json", f"_trec_{year}.json")
+        sub_df.to_csv(f"{trec_eval_path}", sep="\t", header=False, index=False)
 
-    eval_df.to_json(eval_path, orient="records")
-    trec_eval.to_csv(f"{trec_eval_path}", sep="\t", header=False, index=False)
+    """
+        The dataframe required for metrics calculation is only saved during runtime and not permanently.
+    """
 
-    return eval_path
+    return eval_df
 
 
 def calculate_metrics(
-    eval_output_path: str,
+    eval_df: pd.DataFrame,
     gold_labels_dir: str,
     ft_model_name: str,
     run_name: str,
     logger: Optional[object] = None,
 ):
     year_pattern = r"(\d{4})\.txt$"
-    df = pd.read_json(eval_output_path)
     gold_dfs = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
     for filename in os.listdir(gold_labels_dir):
         gold_df = pd.read_csv(
@@ -109,11 +130,22 @@ def calculate_metrics(
         gold_dfs = pd.concat([gold_dfs, gold_df], ignore_index=True)
 
     # Merge the two dataframes on NCT_ID to filter for matching values
+    """
+         Very funny bug: all dtypes of eval_df are object. Such are gold_dfs. Nevertheless, merging on TOPIC_NO,
+         merged_df becomes empty. If removing TOPIC_NO, merge works fine.
+         If df is saved to json and the imported with pd.read_json(), dtypes of most columns is int64. Merge works with
+         TOPIC_NO included. So transforming the dtype object to int64 in the eval_df, fixes the problem as well.
+    """
+    eval_df["LABEL"] = eval_df["LABEL"].astype(int)
     gold_dfs["LABEL"] = gold_dfs["LABEL"].astype(int)
-    merged_df = df.merge(
+    merged_df = eval_df.merge(
         gold_dfs, on=["TOPIC_NO", "NCT_ID", "TOPIC_YEAR"], suffixes=("_pred", "_gold")
     )
-
+    try:
+        assert len(merged_df) == len(eval_df)
+    except AssertionError as e:
+        if logger != None:
+            logger.error(e)
     # Calculate Accuracy, F1 score, and AUC
     accuracy = accuracy_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     precision = precision_score(
@@ -149,7 +181,7 @@ def calculate_metrics(
         conf_matrix,
         annot=True,
         fmt="d",
-        cmap="Blues",
+        # cmap="Blues",
         xticklabels=["no relevant information", "not eligible", "eligible"],
         yticklabels=["no relevant information", "not eligible", "eligible"],
     )

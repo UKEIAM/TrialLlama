@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/204126705558815585/39bc7367d15e4c62a4ba4df45260fb2e/artifacts
+end_time: 1696297595159
+entry_point_name: ''
+experiment_id: '204126705558815585'
+lifecycle_stage: active
+run_id: 39bc7367d15e4c62a4ba4df45260fb2e
+run_name: polite-bug-861
+run_uuid: 39bc7367d15e4c62a4ba4df45260fb2e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696297497714
+status: 3
+tags: []
+user_id: 1kkraus

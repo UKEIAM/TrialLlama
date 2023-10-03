@@ -34,7 +34,7 @@ for param_set in param_combinations:
     decimal_part_lr = str(lr).split(".")[1]
 
     # TODO: Rethink naming. What is the goal? How do I want to track experiments?
-    ft_model = f"{base_model.lower()}-{dataset_size}-v2-{num_epochs}-{x_shot_examples}"
+    ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-{x_shot_examples}"
 
     command = [
         "python",

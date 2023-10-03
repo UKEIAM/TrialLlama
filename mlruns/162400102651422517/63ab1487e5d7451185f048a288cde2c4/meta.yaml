@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/162400102651422517/63ab1487e5d7451185f048a288cde2c4/artifacts
+end_time: 1696258993113
+entry_point_name: ''
+experiment_id: '162400102651422517'
+lifecycle_stage: active
+run_id: 63ab1487e5d7451185f048a288cde2c4
+run_name: unequaled-flea-975
+run_uuid: 63ab1487e5d7451185f048a288cde2c4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696255816687
+status: 3
+tags: []
+user_id: 1kkraus

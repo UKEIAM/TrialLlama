@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/217435712751707478/20a1a0aefbe14df185392b2cfb5c1cdb/artifacts
+end_time: 1696270521266
+entry_point_name: ''
+experiment_id: '217435712751707478'
+lifecycle_stage: active
+run_id: 20a1a0aefbe14df185392b2cfb5c1cdb
+run_name: chill-stork-275
+run_uuid: 20a1a0aefbe14df185392b2cfb5c1cdb
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696270420803
+status: 3
+tags: []
+user_id: 1kkraus

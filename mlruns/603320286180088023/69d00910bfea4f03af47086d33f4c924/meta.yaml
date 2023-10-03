@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/603320286180088023/69d00910bfea4f03af47086d33f4c924/artifacts
+end_time: 1696274994735
+entry_point_name: ''
+experiment_id: '603320286180088023'
+lifecycle_stage: active
+run_id: 69d00910bfea4f03af47086d33f4c924
+run_name: dapper-ox-959
+run_uuid: 69d00910bfea4f03af47086d33f4c924
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696271815231
+status: 3
+tags: []
+user_id: 1kkraus

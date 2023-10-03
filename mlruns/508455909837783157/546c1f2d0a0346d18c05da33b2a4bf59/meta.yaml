@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/508455909837783157/546c1f2d0a0346d18c05da33b2a4bf59/artifacts
+end_time: 1696259587632
+entry_point_name: ''
+experiment_id: '508455909837783157'
+lifecycle_stage: active
+run_id: 546c1f2d0a0346d18c05da33b2a4bf59
+run_name: suave-snail-139
+run_uuid: 546c1f2d0a0346d18c05da33b2a4bf59
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696259497502
+status: 4
+tags: []
+user_id: 1kkraus

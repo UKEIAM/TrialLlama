@@ -74,32 +74,9 @@ def test(
                 )
                 generated_tokens = outputs.sequences[:, input_length:]
 
-                resp_sentences = []
-                current_word = ""
-                special_symbol_map = {
-                    "<0x0A>": "\n",  # Replace <0x0A> with a newline character
-                    # Add more mappings as needed
-                }
-                # for token in generated_tokens[0]:
-                #     token = tokenizer.decode(token)
-                #     # Check if the token starts with a space, indicating a subword token
-                #     if token in special_symbol_map:
-                #         token = special_symbol_map[token]
-                #     if token.startswith(" "):
-                #         current_word += token
-                #     else:
-                #         if current_word:
-                #             # Add the current word to the list of sentences
-                #             resp_sentences.append(current_word)
-                #         current_word = token
-                # Add the last word if it exists
-                # if current_word:
-                #     resp_sentences.append(current_word)
                 response = tokenizer.decode(
                     generated_tokens[0], skip_special_tokens=True
                 )
-                # response = " ".join(resp_sentences)
-                # response = response.replace("</s>", "")
 
                 if test_config.debug:
                     print(f"{response}")
@@ -110,7 +87,7 @@ def test(
                     probas.append(np.exp(item.cpu().numpy()))
                 proba = sum(probas) / len(probas)
 
-                if "" in response.lower():
+                if "" == response:
                     empty_response_counter += 1
 
                 row_raw = [

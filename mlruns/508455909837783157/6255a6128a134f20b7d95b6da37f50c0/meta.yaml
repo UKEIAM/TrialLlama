@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/508455909837783157/6255a6128a134f20b7d95b6da37f50c0/artifacts
+end_time: 1696255809830
+entry_point_name: ''
+experiment_id: '508455909837783157'
+lifecycle_stage: active
+run_id: 6255a6128a134f20b7d95b6da37f50c0
+run_name: hilarious-frog-141
+run_uuid: 6255a6128a134f20b7d95b6da37f50c0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696252684674
+status: 3
+tags: []
+user_id: 1kkraus
