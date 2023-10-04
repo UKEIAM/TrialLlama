@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/868802461027540589/34652ec168354db5b4164a6706ca3d07/artifacts
+deleted_time: 1696397615813
+end_time: 1696396654140
+entry_point_name: ''
+experiment_id: '868802461027540589'
+lifecycle_stage: deleted
+run_id: 34652ec168354db5b4164a6706ca3d07
+run_name: smiling-swan-84
+run_uuid: 34652ec168354db5b4164a6706ca3d07
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696396066021
+status: 3
+tags: []
+user_id: 1kkraus
