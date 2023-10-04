@@ -22,7 +22,9 @@ class train_config:
     val_batch_size: int = 1
     dataset: str = "ct_train_sample_v2"
     dataset_version: str = "v2"
-    dataset_size: int = 900
+    dataset_size: int = (
+        None  # If number is given, all available data after balancing is used
+    )
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = True
     ft_model: str = "llama-2-13b-chat-hf-default"  # Name for the output ft-model

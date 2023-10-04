@@ -54,7 +54,7 @@ def count_words(text):
 
 
 def create_dataset_sample(
-    dataset_size: int = 300,
+    dataset_size: Optional[int] = None,
     version: str = "v3",
     type: str = "train",
 ) -> None:
@@ -120,6 +120,8 @@ def create_dataset_sample(
     df = df[df[col_name] != max_label]
     balanced_df = pd.concat([df, trunc_max_label_df], ignore_index=True)
 
+    if dataset_size == None:
+        dataset_size = len(balanced_df)
     assert dataset_size <= balanced_df.shape[0]
     data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
 
