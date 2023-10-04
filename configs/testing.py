@@ -5,10 +5,10 @@ from dataclasses import dataclass
 class test_config:
     batch_size: int = 1
     base_model: str = "Llama-2-13b-chat-hf"
-    ft_model: str = "llama-2-13b-chat-hf-300-v3-4-zero"
+    ft_model: str = "llama-2-13b-chat-hf-default"
     quantization: bool = True
     dataset: str = "ct_test_sample_v3"
-    dataset_version: str = "v3"
+    dataset_version: str = "v1"
     dataset_size: int = 250
     num_workers_dataloader: int = 1
     max_new_tokens: int = 1024

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
 type = "test"
-max_allowed_words = 600
+max_allowed_words = 1000
 
 path = base_dir
 out_path = base_dir

@@ -20,8 +20,8 @@ class train_config:
     use_fp16: bool = True
     mixed_precision: bool = True
     val_batch_size: int = 1
-    dataset: str = "ct_train_sample_v3"
-    dataset_version: str = "v3"
+    dataset: str = "ct_train_sample_v2"
+    dataset_version: str = "v2"
     dataset_size: int = 900
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = True
@@ -39,4 +39,3 @@ class train_config:
     # max_words: int = 1900 # Since the input is so long, the output of the model while in eval mode is even longer. Hence, we need to restrict the preds output.
     max_tokens: int = 2048  # Fixed: Training does not require that much tokens. Value is set high, since one-/few-shot learning requires prompt + example, which can exceed the token number
     debug: bool = False
-    x_shot_examples: str = "few"

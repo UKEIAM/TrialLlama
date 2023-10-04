@@ -57,19 +57,9 @@ def create_dataset_sample(
     dataset_size: int = 300,
     version: str = "v3",
     type: str = "train",
-    x_shot_examples: Optional[str] = None,
 ) -> None:
     path = base_dir
     out_path = base_dir
-    x_shot_examples_path = None
-    if x_shot_examples == "few":
-        x_shot_examples_path = os.path.join(
-            base_dir, "data", f"ct_few_shot_{version}.json"
-        )
-    elif x_shot_examples == "one":
-        x_shot_examples_path = os.path.join(
-            base_dir, "data", f"ct_one_shot_{version}.json"
-        )
 
     # TODO: Refactor: Create a sample from ct_all_years and save it as "ct_all_years_testing"
     # Derive train_dataset from "ct_all_years" but leave out ~1000 samples for test
@@ -84,33 +74,20 @@ def create_dataset_sample(
     df = df[
         df["clinical_trial"].str.contains("Exclusion Criteria:")
     ]  # Only take items  into consideration with Inclusion and Exclusion Criteria
-    """
-        Some randomly picked examples are prepared to create hand-crafted few-shot and one-shot learning examples.
-        Those examples should be excluded while sampling and always added to the top of the retrieved data sample.
-    """
-    nr_examples = 0
-    if x_shot_examples != None:
-        df_examples = pd.read_json(x_shot_examples_path)
-        nr_examples = len(df_examples)
-        blacklist = [
-            (x, y)
-            for x, y in zip(df_examples["id"].values, df_examples["topic_year"].values)
-        ]
-        df = df[~df.set_index(["id", "topic_year"]).index.isin(blacklist)]
 
     """
         Some examples are very long. Checking some random samples showed that those are often faulty or just unnecessary
-        complex with information. Hence we reduce to 600 words for the input, to provide the model with best possible
+        complex with information. Hence we reduce to 800 words for the input, to provide the model with best possible
         train data.
     """
-    cols_to_count = ["topic", "clinical_trial"]
+    cols_to_count = ["instruction", "topic", "clinical_trial", "response"]
     df["word_count"] = df[cols_to_count].apply(
         lambda row: sum(row.map(count_words)), axis=1
     )
 
     mask = (
         df["word_count"]
-        > 600  # Figured out trough experimentation. Only valid for v2 and v3
+        > 1000  # Max tokens of 2048 are somewhat about 1115 words and since a lot of CTs are longer, we go for the save solution.
     )  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
     df = df[~mask]
 
@@ -145,13 +122,5 @@ def create_dataset_sample(
 
     assert dataset_size <= balanced_df.shape[0]
     data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
-
-    """
-        Adding the x-shot examples to the first x instructions
-    """
-    if nr_examples > 0:
-        for idx, example in enumerate(df_examples["input"].values):
-            instruction = data_sample.loc[idx, "instruction"]
-            data_sample.loc[idx, "instruction"] = f"{instruction}\n\n{example}"
 
     data_sample.to_json(out_path, orient="records")

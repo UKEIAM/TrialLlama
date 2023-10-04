@@ -25,4 +25,3 @@ class experiment_config:
     repetition_penalty: float = 1.0
     length_penalty: int = 1
     debug: bool = True
-    x_shot_examples: str = "one"
