@@ -29,7 +29,7 @@ data_list = []
 
 
 def create_JSON(
-    version: str = "v3",
+    version: str = "v2",
 ):
 
     config_file = os.path.join(base_directory, "configs/ct_data.yaml")
@@ -100,18 +100,17 @@ def create_JSON(
                 item = {
                     "id": id_string,
                     "topic_year": topic_year,
-                    "instruction": "Hello. You are a helpful assistant for clinical trial recruitment."
+                    "instruction": "Hello. You are a helpful assistant for clinical trial recruitment. "
                     "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
                     "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
                     "They are based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. "
                     "The factors that disallow someone to participate in a clinical study are called exclusion criteria, wich consist of similar characteristics as inclusion criteria. For the patient to be eligible for a clinical trial, all inclusion criteria have to be matched and none of the exclusion criteria. "
-                    "You should check the inclusion and exclusion criteria one-by-one. If at least one exclusion criterion is met, the patient is automatically 'not eligible'. "
-                    "For each inclusion criterion, first think step-by-step to explain if and how the patient note is relevant to the criterion. Then give an answer why you think the patient is 'eligible', 'not eligible' or if the given clinical trial has 'no relevant information' for the patient."
-                    "Your answer should be in the following format: dict{list[Explanation: str(relevance_explanation), Conclusion: str('eligible'|'not eligible'|'no relevant information')]}\n",
+                    "Please consider all inclusion and exclusion criteria and the general summary. Then classify the given patient in one of the following classes: 'eligible', 'not eligible', 'no releveant information'. "
+                    "Your answer should be in the following format: str('eligible'|'not eligible'|'no relevant information')\n",
                     "topic": f"Here is the patient note\n{cleaned_topic}",
                     "clinical_trial": f"Here is the clinical trial\n{ct_input}",
-                    "response": "Plain JSON output without intend:\n",
-                    "output": category,
+                    "response": "Response:\n",
+                    "output": f"{category}",
                 }
 
                 data_list.append(item)
