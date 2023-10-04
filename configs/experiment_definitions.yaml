@@ -10,13 +10,15 @@ test_dataset_version:
   - "v2"
 #  - "v3"
 dataset_size:
-  - 100 # POC
+#  - 100 # POC
 #  - 300
-#  - 900
-#  - 15000 # MAX AVAILABLE DATA
+  - 900
 #  - 1800
+  - 3000
 #  - 5000
 #  - 10000
+#  - 15000
+#  - 21000
 num_epochs:
 #  -  2
 #  - 3
