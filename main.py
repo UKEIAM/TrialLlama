@@ -25,10 +25,7 @@ def main(**kwargs):
 
     mlflow.set_experiment(f"{experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
-    description = f"Fine-tuned model {experiment_config.ft_model} | qrels {experiment_config.gold_labels_year}"
-    with mlflow.start_run(
-        description=description,
-    ) as run:
+    with mlflow.start_run() as run:
         run_name = run.info.run_name
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         eval_output_path = os.path.join(
@@ -46,7 +43,6 @@ def main(**kwargs):
                 "test_dataset_version": experiment_config.test_dataset_version,
                 "dataset_size": experiment_config.dataset_size,
                 "dataset_size_testing": experiment_config.dataset_size_testing,
-                "qrels_year": experiment_config.gold_labels_year,
                 "max_tokens": experiment_config.max_tokens,
                 "max_new_tokens": experiment_config.max_new_tokens,
                 "temperature": experiment_config.temperature,

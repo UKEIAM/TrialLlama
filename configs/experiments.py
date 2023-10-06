@@ -14,7 +14,6 @@ class experiment_config:
     batch_size: int = 4
     num_epochs: int = 3
     ft_model: str = "llama-2-13b-chat-hf-300-default"
-    gold_labels_year: int = 2022
     gamma: float = 0.85
     run_training: bool = True
     run_inference: bool = True
