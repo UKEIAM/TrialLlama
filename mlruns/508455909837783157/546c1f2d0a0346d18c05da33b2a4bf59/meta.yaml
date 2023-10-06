@@ -1,4 +1,4 @@
-artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/508455909837783157/546c1f2d0a0346d18c05da33b2a4bf59/artifacts
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/508455909837783157/546c1f2d0a0346d18c05da33b2a4bf59/artifacts
 end_time: 1696259587632
 entry_point_name: ''
 experiment_id: '508455909837783157'

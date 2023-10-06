@@ -98,7 +98,10 @@ def main(**kwargs):
             )
             mlflow.set_tag("inference_conducted", "TRUE")
             mlflow.log_metric("number_of_empty_responses", results)
-            mlflow.log_artifact(eval_output_path)
+            artifact_uri = os.path.join(
+                base_dir, "mlruns", run.info.experiment_id, run.info.run_id, "artifacts"
+            )
+            mlflow.log_artifact(local_path=eval_output_path, artifact_path=artifact_uri)
             clear_gpu_cache()
 
         if experiment_config.run_eval:
