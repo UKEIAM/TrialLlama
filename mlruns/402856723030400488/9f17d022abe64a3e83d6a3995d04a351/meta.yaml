@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/402856723030400488/9f17d022abe64a3e83d6a3995d04a351/artifacts
+end_time: 1696495981577
+entry_point_name: ''
+experiment_id: '402856723030400488'
+lifecycle_stage: active
+run_id: 9f17d022abe64a3e83d6a3995d04a351
+run_name: indecisive-wasp-70
+run_uuid: 9f17d022abe64a3e83d6a3995d04a351
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696495869255
+status: 3
+tags: []
+user_id: 1kkraus

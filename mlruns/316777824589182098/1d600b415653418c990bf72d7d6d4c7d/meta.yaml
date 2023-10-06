@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/316777824589182098/1d600b415653418c990bf72d7d6d4c7d/artifacts
+end_time: 1696495863384
+entry_point_name: ''
+experiment_id: '316777824589182098'
+lifecycle_stage: active
+run_id: 1d600b415653418c990bf72d7d6d4c7d
+run_name: exultant-finch-433
+run_uuid: 1d600b415653418c990bf72d7d6d4c7d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696421234230
+status: 3
+tags: []
+user_id: 1kkraus

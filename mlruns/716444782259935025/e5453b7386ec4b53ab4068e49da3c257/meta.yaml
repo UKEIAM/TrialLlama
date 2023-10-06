@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/716444782259935025/e5453b7386ec4b53ab4068e49da3c257/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '716444782259935025'
+lifecycle_stage: active
+run_id: e5453b7386ec4b53ab4068e49da3c257
+run_name: upset-auk-919
+run_uuid: e5453b7386ec4b53ab4068e49da3c257
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696409142575
+status: 1
+tags: []
+user_id: 1kkraus
