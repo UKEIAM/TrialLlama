@@ -29,8 +29,10 @@ data_list = []
 
 
 def create_JSON(
-    versions: list = ["v1", "v2", "v3", "v4", "v5", "v6"],
+    versions=None,
 ):
+    if versions is None:
+        versions = ["v1", "v2", "v3", "v4", "v5", "v6"]
     for ver in versions:
         version = ver
 
@@ -43,7 +45,9 @@ def create_JSON(
             source_data_directory = os.path.join(
                 raw_ct_data_directory, str(config["year_of_data"])
             )
-            required_data_directory = os.path.join(raw_ct_data_directory, "required_cts")
+            required_data_directory = os.path.join(
+                raw_ct_data_directory, "required_cts"
+            )
 
             topics_df = parse_XML_to_df(
                 os.path.join(source_data_directory, f"topics{topic_year}.xml"),
@@ -64,9 +68,9 @@ def create_JSON(
             for index, row in tqdm(qrels.iterrows()):
                 topic_nr = row["topic"]
                 try:
-                    topic = topics_df[topics_df["number"] == str(topic_nr)]["topic"].values[
-                        0
-                    ]
+                    topic = topics_df[topics_df["number"] == str(topic_nr)][
+                        "topic"
+                    ].values[0]
                     cleaned_topic = clean_textblock(topic)
                 except KeyError as e:
                     continue
