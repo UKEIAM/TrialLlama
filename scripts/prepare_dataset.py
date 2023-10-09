@@ -100,16 +100,10 @@ def create_JSON(
                 item = {
                     "id": id_string,
                     "topic_year": topic_year,
-                    "instruction": "Hello. You are a helpful assistant for clinical trial recruitment. "
-                    "Your task is to compare a given patient note and the inclusion criteria of a clinical trial to determine the patient's eligibility. "
-                    "The factors that allow someone to participate in a clinical study are called inclusion criteria. "
-                    "They are based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. "
-                    "The factors that disallow someone to participate in a clinical study are called exclusion criteria, wich consist of similar characteristics as inclusion criteria. For the patient to be eligible for a clinical trial, all inclusion criteria have to be matched and none of the exclusion criteria. "
-                    "Please consider all inclusion and exclusion criteria and the general summary. Then classify the given patient in one of the following classes: 'eligible', 'not eligible', 'no releveant information'. "
-                    "Your answer should be in the following format: str('eligible'|'not eligible'|'no relevant information')\n",
-                    "topic": f"Here is the patient note\n{cleaned_topic}",
-                    "clinical_trial": f"Here is the clinical trial\n{ct_input}",
-                    "response": "Response:\n",
+                    "instruction": config[version]["instruction"],
+                    "topic": f"Here is the patient note:\n{cleaned_topic}",
+                    "clinical_trial": f"Here is the clinical trial:\n{ct_input}",
+                    "response": config[version]["response"],
                     "output": f"{category}",
                 }
 

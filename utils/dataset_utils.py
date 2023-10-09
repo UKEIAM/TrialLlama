@@ -55,7 +55,7 @@ def count_words(text):
 
 def create_dataset_sample(
     dataset_size: Optional[int] = None,
-    version: str = "v3",
+    version: str = "v2",
     type: str = "train",
 ) -> None:
     path = base_dir
