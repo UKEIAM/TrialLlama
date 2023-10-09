@@ -25,8 +25,6 @@ data_directory = os.path.join(base_directory, "data")
 home_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 raw_ct_data_directory = os.path.join(home_directory, "data")
 
-data_list = []
-
 
 def create_JSON(
     versions=None,
@@ -35,6 +33,8 @@ def create_JSON(
         versions = ["v1", "v2", "v3", "v4", "v5", "v6"]
     for ver in versions:
         version = ver
+        test_samples = 1000
+        data_list = []
 
         config_file = os.path.join(base_directory, "configs/ct_data.yaml")
         with open(config_file, "r") as file:
@@ -64,6 +64,7 @@ def create_JSON(
 
             # DEBUG
             # qrels = qrels[:100]
+            # test_samples = int(qrels*0,10)
 
             for index, row in tqdm(qrels.iterrows()):
                 topic_nr = row["topic"]
@@ -128,7 +129,7 @@ def create_JSON(
 
         # Step 2: Create a test dataset of size 1000
         test_dataset = df.sample(
-            n=1000, random_state=42
+            n=test_samples, random_state=42
         )  # Randomly select 1000 samples for testing
 
         # Step 3: Remove the test dataset from the original DataFrame
