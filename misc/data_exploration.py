@@ -1,15 +1,16 @@
 import os
+import re
 
 import pandas as pd
 import matplotlib.pyplot as plt
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
-type = "test"
+type = "train"
 max_allowed_words = 1000
 
 path = base_dir
 out_path = base_dir
-path = os.path.join(base_dir, "data", f"ct_{type}_v3.json")
+path = os.path.join(base_dir, "data", f"ct_{type}_v4.json")
 
 df = pd.read_json(path)
 
@@ -42,6 +43,36 @@ df_reduced = filtered_df[~mask]
 class_counts_filtered_reduced = df_reduced["output"].value_counts()
 
 print(class_counts_filtered_reduced)
+
+# CURATED DATASET: Reduce amount of data in returning only x examples per patient topic
+desired_label_count = 1
+df_reduced["topic_id"] = df_reduced["id"].str.split("_").str[1]
+balanced_df = pd.DataFrame(columns=df_reduced.columns)
+
+for unique_id in df_reduced["topic_id"].unique():
+    # Get all rows with the current unique ID
+    id_subset = df_reduced[df_reduced["topic_id"] == unique_id]
+
+    # Separate the rows by label
+    label_groups = [
+        id_subset[id_subset["output"] == label]
+        for label in id_subset["output"].unique()
+    ]
+
+    # Balance each label group to have the desired_label_count
+    balanced_label_groups = [
+        group.sample(n=desired_label_count, random_state=42, replace=True)
+        if len(group) < desired_label_count
+        else group.sample(n=desired_label_count, random_state=42)
+        for group in label_groups
+    ]
+
+    # Concatenate the balanced label groups and add them to the balanced_df
+    for df_item in balanced_label_groups:
+        balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
+
+grouped_df = balanced_df.groupby("topic_id")["output"].value_counts()
+balanced_df.drop(["topic_id"], axis=1, inplace=True)
 
 # Create a bar chart of the class distribution
 plt.figure(figsize=(8, 6))

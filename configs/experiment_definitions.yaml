@@ -16,6 +16,9 @@ test_dataset_version:
   - "v5"
   - "v6"
 dataset_size:
+  - 1
+  - 2
+  - 3
 #  - 100 # POC
   - 300
 #  - 900

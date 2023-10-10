@@ -103,26 +103,71 @@ def create_dataset_sample(
         BALANCING: Since "IRRELEVANT" label is predominant in the dataset, we will truncate it in extracting a random
         sample from it based on the average number of items in the two other classes.
         That creates a more balanced, but not perfectly balanced dataset. Only applied on train data.
-        WARNING: Don't change random state value!
-     """
+        WARNING: Don"t change random state value!
+ """
+    # col_name = "output"
+    # value_counts = df[col_name].value_counts()
+    #
+    # max_label = value_counts.index[0]
+    # avg_item_size_for_truncation = int((value_counts[1] + value_counts[2]) / 2)
+    #
+    # max_label_df = df[df[col_name] == max_label]
+    # trunc_max_label_df = max_label_df.sample(
+    #     n=avg_item_size_for_truncation, random_state=42, ignore_index=True
+    # )
+    #
+    # df = df[df[col_name] != max_label]
+    # balanced_df = pd.concat([df, trunc_max_label_df], ignore_index=True)
+    #
+    # if dataset_size == None:
+    #     dataset_size = len(balanced_df)
+    # assert dataset_size <= balanced_df.shape[0]
+    # data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
 
-    col_name = "output"
-    value_counts = df[col_name].value_counts()
+    # CURATED DATASET: Reduce amount of data in returning only x examples per patient topic
+    df["topic_id"] = df["id"].str.split("_").str[1]
+    balanced_df = pd.DataFrame(columns=df.columns)
 
-    max_label = value_counts.index[0]
-    avg_item_size_for_truncation = int((value_counts[1] + value_counts[2]) / 2)
+    for unique_id in df["topic_id"].unique():
+        # Get all rows with the current unique ID
+        id_subset = df[df["topic_id"] == unique_id]
+        if dataset_size == None or dataset_size > 3:
+            desired_label_count = dataset_size
+        else:
+            desired_label_count = (
+                id_subset.groupby("topic_id")["output"].value_counts().sort_values()[0]
+            )
+        # Separate the rows by label
+        label_groups = [
+            id_subset[id_subset["output"] == label]
+            for label in id_subset["output"].unique()
+        ]
 
-    max_label_df = df[df[col_name] == max_label]
-    trunc_max_label_df = max_label_df.sample(
-        n=avg_item_size_for_truncation, random_state=42, ignore_index=True
-    )
+        # Balance each label group to have the desired_label_count
+        balanced_label_groups = [
+            group.sample(n=desired_label_count, random_state=42, replace=True)
+            if len(group) < desired_label_count
+            else group.sample(n=desired_label_count, random_state=42)
+            for group in label_groups
+        ]
 
-    df = df[df[col_name] != max_label]
-    balanced_df = pd.concat([df, trunc_max_label_df], ignore_index=True)
+        # Concatenate the balanced label groups and add them to the balanced_df
+        for df_item in balanced_label_groups:
+            balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
+
+    balanced_df.drop(["topic_id"], axis=1, inplace=True)
+
+    samples = balanced_df.shape[0]
 
     if dataset_size == None:
-        dataset_size = len(balanced_df)
-    assert dataset_size <= balanced_df.shape[0]
-    data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
+        samples = len(balanced_df)
+    elif dataset_size > 3:
+        try:
+            assert dataset_size <= balanced_df.shape[0]
+            samples = dataset_size
+        except AssertionError:
+            print(
+                "WARNING: Balanced dataset smaller than desired dataset size. Returning balanced dataset."
+            )
 
-    data_sample.to_json(out_path, orient="records")
+    data_sample = balanced_df.sample(n=samples, random_state=42, ignore_index=True)
