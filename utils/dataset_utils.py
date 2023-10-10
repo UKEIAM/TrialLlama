@@ -171,3 +171,4 @@ def create_dataset_sample(
             samples = balanced_df.shape[0]
 
     data_sample = balanced_df.sample(n=samples, random_state=42, ignore_index=True)
+    data_sample.to_json(out_path, orient="records")
