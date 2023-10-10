@@ -17,10 +17,10 @@ test_dataset_version:
   - "v6"
 dataset_size:
   - 1
-  - 2
-  - 3
-#  - 100 # POC
-  - 300
+#  - 2
+#  - 3
+  - 100 # POC
+#  - 300
 #  - 900
 #  - 1800
 #  - 3000
