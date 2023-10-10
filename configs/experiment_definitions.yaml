@@ -27,7 +27,7 @@ dataset_size:
 #  - 5000
 #  - 10000
 #  - 15000
-#  - None # If no dataset_size parameter is given, all available samples after balancing are taken -> 22077
+#  - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 15426
 num_epochs:
 #  -  2
 #  - 3

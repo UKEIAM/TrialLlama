@@ -127,16 +127,18 @@ def create_dataset_sample(
     # CURATED DATASET: Reduce amount of data in returning only x examples per patient topic
     df["topic_id"] = df["id"].str.split("_").str[1]
     balanced_df = pd.DataFrame(columns=df.columns)
+    if dataset_size is None:
+        dataset_size = len(df)
 
     for unique_id in df["topic_id"].unique():
         # Get all rows with the current unique ID
         id_subset = df[df["topic_id"] == unique_id]
-        if dataset_size == None or dataset_size > 3:
-            desired_label_count = dataset_size
-        else:
+        if dataset_size > 3:
             desired_label_count = (
                 id_subset.groupby("topic_id")["output"].value_counts().sort_values()[0]
             )
+        else:
+            desired_label_count = dataset_size
         # Separate the rows by label
         label_groups = [
             id_subset[id_subset["output"] == label]
@@ -158,10 +160,7 @@ def create_dataset_sample(
     balanced_df.drop(["topic_id"], axis=1, inplace=True)
 
     samples = balanced_df.shape[0]
-
-    if dataset_size == None:
-        samples = len(balanced_df)
-    elif dataset_size > 3:
+    if dataset_size > 3:
         try:
             assert dataset_size <= balanced_df.shape[0]
             samples = dataset_size
@@ -169,5 +168,6 @@ def create_dataset_sample(
             print(
                 "WARNING: Balanced dataset smaller than desired dataset size. Returning balanced dataset."
             )
+            samples = balanced_df.shape[0]
 
     data_sample = balanced_df.sample(n=samples, random_state=42, ignore_index=True)
