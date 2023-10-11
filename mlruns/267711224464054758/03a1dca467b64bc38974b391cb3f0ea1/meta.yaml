@@ -1,0 +1,15 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/267711224464054758/03a1dca467b64bc38974b391cb3f0ea1/artifacts
+end_time: 1697021246253
+entry_point_name: ''
+experiment_id: '267711224464054758'
+lifecycle_stage: active
+run_id: 03a1dca467b64bc38974b391cb3f0ea1
+run_name: delightful-hound-997
+run_uuid: 03a1dca467b64bc38974b391cb3f0ea1
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697021143228
+status: 3
+tags: []
+user_id: 1kkraus
