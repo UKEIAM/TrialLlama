@@ -45,7 +45,7 @@ class ct_train_sample_v6:
 
 
 @dataclass
-class ct_train_sample_v67:
+class ct_train_sample_v7:
     dataset: str = "ct_train_sample_v7"
     train_split: str = "train"
     test_split: str = "val"
