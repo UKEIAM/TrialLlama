@@ -46,7 +46,6 @@ def main(**kwargs):
                 "test_dataset_version": experiment_config.test_dataset_version,
                 "dataset_size": experiment_config.dataset_size,
                 "dataset_size_testing": experiment_config.dataset_size_testing,
-                "qrels_year": experiment_config.gold_labels_year,
                 "max_tokens": experiment_config.max_tokens,
                 "max_new_tokens": experiment_config.max_new_tokens,
                 "temperature": experiment_config.temperature,
