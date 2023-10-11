@@ -61,6 +61,7 @@ def count_words(text):
 
 def create_dataset_sample(
     dataset_size: Optional[int] = None,
+    add_example: Optional[bool] = False,
     version: str = "v2",
     type: str = "train",
 ) -> None:

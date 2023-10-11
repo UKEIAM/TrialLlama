@@ -31,3 +31,4 @@ class test_config:
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers make use Flash Attention and Xformer memory-efficient kernels
     load_peft_model: bool = True
     debug: bool = False
+    load_base_model: bool = False

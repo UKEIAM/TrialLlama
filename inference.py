@@ -53,6 +53,14 @@ def main(
             base_model,
             ft_model_path,
         )
+    elif test_config.load_base_model:
+        model = LlamaForCausalLM.from_pretrained(
+            os.path.join("checkpints", "meta-llama", "Llama-2-13b-chat-hf"),
+            return_dict=True,
+            load_in_8bit=test_config.quantization,
+            device_map="auto",
+            low_cpu_mem_usage=True,
+        )
     else:
         model = LlamaForCausalLM.from_pretrained(
             os.path.join("out", test_config.ft_model),
