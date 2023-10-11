@@ -14,7 +14,8 @@ param_combinations = list(itertools.product(*parameters.values()))
 # Loop through each combination and run your model script
 # Kind of something similar to Hydra :D
 # Get currently free cuda device
-get_free_cuda_device()
+# TODO: setting free cuda device is not working in certain cases e.g. when all devices are currently busy (even only partly)
+# get_free_cuda_device()
 
 for param_set in param_combinations:
     # Unpack parameter set and add parameters and values to the command

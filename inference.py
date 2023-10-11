@@ -110,11 +110,7 @@ def main(
     os.makedirs(out_dir, exist_ok=True)
 
     if eval_output_path is None:
-        eval_output_path = os.path.join(
-            out_dir, f"eval_{test_config.ft_model}_raw.json"
-        )
-    # if test_config.debug:
-    #     eval_output_path = f"eval_{test_config.ft_model}_raw_DEBUG.json"
+        eval_output_path = os.path.join(out_dir, f"eval_{test_config.ft_model}.json")
 
     raw_out.to_json(eval_output_path, orient="records")
     print(f"Evaluation file successfully saved under {out_dir}")

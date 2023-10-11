@@ -3,22 +3,22 @@ base_model:
   - "Llama-2-13b-chat-hf"
 dataset_version:
 #  - "v1
-  - "v2"
+#  - "v2"
 #  - "v3"
   - "v4"
 #  - "v5"
 #  - "v6"
 test_dataset_version:
 #  - "v1"
-  - "v2"
+#  - "v2"
 #  - "v3"
   - "v4"
   - "v5"
   - "v6"
 dataset_size:
   - 1
-  - 2
-  - 3
+#  - 2
+#  - 3
   - 100 # POC
 #  - 300
 #  - 900

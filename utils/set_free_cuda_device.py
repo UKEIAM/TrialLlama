@@ -39,7 +39,7 @@ def get_free_cuda_device():
                 least_busy_utilization = utilization
 
         os.environ["CUDA_VISIBLE_DEVICES"] = least_busy_gpu_index
-
+        print(least_busy_gpu_index)
         return least_busy_gpu_index
     except Exception as e:
         print(f"Error: {e}")

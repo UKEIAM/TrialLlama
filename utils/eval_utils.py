@@ -40,7 +40,7 @@ def prepare_files(
             pred_class = 1
         elif "eligible" in resp:
             pred_class = 2
-        elif "norelevantinformation" in resp:
+        elif "norelevantinformation" in resp or "notrelevant" in resp:
             pred_class = 0
 
         # Create a dictionary representing the new row

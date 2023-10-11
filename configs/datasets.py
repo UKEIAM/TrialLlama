@@ -21,11 +21,27 @@ class ct_train_sample_v2:
 
 
 @dataclass
-class ct_train_sample_v3:
-    dataset: str = "ct_train_sample_v3"
+class ct_train_sample_v4:
+    dataset: str = "ct_train_sample_v4"
     train_split: str = "train"
     test_split: str = "val"
-    data_path: str = "data/ct_train_sample_v3.json"
+    data_path: str = "data/ct_train_sample_v4.json"
+
+
+@dataclass
+class ct_train_sample_v5:
+    dataset: str = "ct_train_sample_v5"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v5.json"
+
+
+@dataclass
+class ct_train_sample_v6:
+    dataset: str = "ct_train_sample_v6"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v6.json"
 
 
 # Test data, never seen by the model
@@ -48,3 +64,24 @@ class ct_test_sample_v3:
     dataset: str = "ct_test_sample_v3"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
     data_path: str = "data/ct_test_sample_v3.json"
+
+
+@dataclass
+class ct_test_sample_v4:
+    dataset: str = "ct_test_sample_v4"
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    data_path: str = "data/ct_test_sample_v4.json"
+
+
+@dataclass
+class ct_test_sample_v5:
+    dataset: str = "ct_test_sample_v5"
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    data_path: str = "data/ct_test_sample_v5.json"
+
+
+@dataclass
+class ct_test_sample_v6:
+    dataset: str = "ct_test_sample_v6"
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    data_path: str = "data/ct_test_sample_v6.json"
