@@ -18,12 +18,14 @@ DATASET_PREPROC = {
     "ct_train_sample_v4": partial(InstructionDataset),
     "ct_train_sample_v5": partial(InstructionDataset),
     "ct_train_sample_v6": partial(InstructionDataset),
+    "ct_train_sample_v7": partial(InstructionDataset),
     "ct_test_sample_v1": partial(TestingDataset),
     "ct_test_sample_v2": partial(TestingDataset),
     "ct_test_sample_v3": partial(TestingDataset),
     "ct_test_sample_v4": partial(TestingDataset),
     "ct_test_sample_v5": partial(TestingDataset),
     "ct_test_sample_v6": partial(TestingDataset),
+    "ct_test_sample_v7": partial(TestingDataset),
 }
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
