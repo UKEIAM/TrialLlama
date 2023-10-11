@@ -1,0 +1,16 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/716444782259935025/3455898fce92479a81e5a80f6ded4afd/artifacts
+deleted_time: 1696994403604
+end_time: null
+entry_point_name: ''
+experiment_id: '716444782259935025'
+lifecycle_stage: deleted
+run_id: 3455898fce92479a81e5a80f6ded4afd
+run_name: kindly-vole-903
+run_uuid: 3455898fce92479a81e5a80f6ded4afd
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696991975825
+status: 1
+tags: []
+user_id: 1kkraus

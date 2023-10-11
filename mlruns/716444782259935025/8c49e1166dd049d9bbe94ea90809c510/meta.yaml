@@ -1,0 +1,16 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/716444782259935025/8c49e1166dd049d9bbe94ea90809c510/artifacts
+deleted_time: 1696994403603
+end_time: 1696991809356
+entry_point_name: ''
+experiment_id: '716444782259935025'
+lifecycle_stage: deleted
+run_id: 8c49e1166dd049d9bbe94ea90809c510
+run_name: orderly-rat-334
+run_uuid: 8c49e1166dd049d9bbe94ea90809c510
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696991805445
+status: 4
+tags: []
+user_id: 1kkraus

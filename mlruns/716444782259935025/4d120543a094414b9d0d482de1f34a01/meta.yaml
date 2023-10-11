@@ -1,0 +1,15 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/716444782259935025/4d120543a094414b9d0d482de1f34a01/artifacts
+end_time: 1696993317523
+entry_point_name: ''
+experiment_id: '716444782259935025'
+lifecycle_stage: active
+run_id: 4d120543a094414b9d0d482de1f34a01
+run_name: caring-bat-30
+run_uuid: 4d120543a094414b9d0d482de1f34a01
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696993198663
+status: 3
+tags: []
+user_id: 1kkraus

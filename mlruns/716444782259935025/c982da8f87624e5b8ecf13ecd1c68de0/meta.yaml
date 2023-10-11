@@ -1,0 +1,16 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/716444782259935025/c982da8f87624e5b8ecf13ecd1c68de0/artifacts
+deleted_time: 1696994403586
+end_time: 1696992506980
+entry_point_name: ''
+experiment_id: '716444782259935025'
+lifecycle_stage: deleted
+run_id: c982da8f87624e5b8ecf13ecd1c68de0
+run_name: peaceful-fish-585
+run_uuid: c982da8f87624e5b8ecf13ecd1c68de0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696992453049
+status: 4
+tags: []
+user_id: 1kkraus

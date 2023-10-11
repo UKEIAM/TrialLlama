@@ -1,0 +1,16 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/716444782259935025/ea15f45f81a04e068709074c5f0a3fe0/artifacts
+deleted_time: 1696994403588
+end_time: null
+entry_point_name: ''
+experiment_id: '716444782259935025'
+lifecycle_stage: deleted
+run_id: ea15f45f81a04e068709074c5f0a3fe0
+run_name: grandiose-cub-41
+run_uuid: ea15f45f81a04e068709074c5f0a3fe0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696992350385
+status: 1
+tags: []
+user_id: 1kkraus

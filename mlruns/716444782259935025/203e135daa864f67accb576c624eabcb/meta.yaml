@@ -1,0 +1,16 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/716444782259935025/203e135daa864f67accb576c624eabcb/artifacts
+deleted_time: 1696994403580
+end_time: 1696993438652
+entry_point_name: ''
+experiment_id: '716444782259935025'
+lifecycle_stage: deleted
+run_id: 203e135daa864f67accb576c624eabcb
+run_name: resilient-grub-290
+run_uuid: 203e135daa864f67accb576c624eabcb
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1696993438483
+status: 4
+tags: []
+user_id: 1kkraus
