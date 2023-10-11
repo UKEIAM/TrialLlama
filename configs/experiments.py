@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class experiment_config:
     base_model: str = "Llama-2-7b-chat-hf"
-    dataset_size: int = 300
+    dataset_size: int = 1
     dataset_version: str = "v3"
     dataset_size_testing: int = 20
     test_dataset_version: str = "v3"

@@ -21,26 +21,24 @@ def get_free_cuda_device():
 
         # Initialize variables to keep track of the least busy GPU
         least_busy_gpu_index = None
-        least_busy_utilization = 100  # Initialize with a high value
-
+        least_busy_utilization = 50  # Initialize with a high value
+        rel_used_memory = []
         for info in gpu_info:
             index, utilization, total_memory, used_memory, temperature, name = info
             utilization = float(utilization)
             used_memory = int(used_memory)
 
-            # Check if the GPU is running a process
-            if utilization == 0 and used_memory < 10:
-                least_busy_gpu_index = index
-                break
+            rel_used_memory.append(used_memory / int(total_memory))
 
-            # Check if the GPU has lower utilization and lower memory usage
-            if utilization < least_busy_utilization:
-                least_busy_gpu_index = index
-                least_busy_utilization = utilization
+        least_busy_gpu_index = rel_used_memory.index(min(rel_used_memory))
+        least_busy_memory = rel_used_memory[least_busy_gpu_index]
+        if least_busy_memory > 0.05:
+            # If the least busy GPU is more than 5% busy, return None
+            return False
 
-        os.environ["CUDA_VISIBLE_DEVICES"] = least_busy_gpu_index
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(least_busy_gpu_index)
         print(least_busy_gpu_index)
-        return least_busy_gpu_index
+        return True
     except Exception as e:
         print(f"Error: {e}")
         return None

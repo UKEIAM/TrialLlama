@@ -5,9 +5,10 @@ dataset_version:
 #  - "v1
 #  - "v2"
 #  - "v3"
-  - "v4"
+#  - "v4"
 #  - "v5"
 #  - "v6"
+  - "v7"
 test_dataset_version:
 #  - "v1"
 #  - "v2"
@@ -15,11 +16,12 @@ test_dataset_version:
   - "v4"
   - "v5"
   - "v6"
+  - "v7"
 dataset_size:
   - 1
 #  - 2
 #  - 3
-  - 100 # POC
+#  - 100 # POC
 #  - 300
 #  - 900
 #  - 1800

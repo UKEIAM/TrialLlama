@@ -100,7 +100,11 @@ def main(**kwargs):
             # artifact_uri = os.path.join(
             #     base_dir, "mlruns", run.info.experiment_id, run.info.run_id, "artifacts"
             # )
-            mlflow.log_artifact(local_path=eval_output_path)
+            try:
+                # TODO: Suddenly some issues with logging artifacts happened because of PermissionError on remote interpreter"
+                mlflow.log_artifact(local_path=eval_output_path)
+            except Exception as e:
+                logger.error(f"Error while logging artifact: {e}")
             clear_gpu_cache()
 
         if experiment_config.run_eval:
