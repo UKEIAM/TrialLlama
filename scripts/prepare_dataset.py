@@ -30,7 +30,7 @@ def create_JSON(
     versions=None,
 ):
     if versions is None:
-        versions = ["v1", "v2", "v3", "v4", "v5", "v6"]
+        versions = ["v4", "v5", "v6"]
     for ver in versions:
         version = ver
         test_samples = 1000
@@ -98,7 +98,7 @@ def create_JSON(
                             ct_input.append(f"{exclusion_crit}")
                     ct_input = "\n".join([f"{item}" for item in ct_input])
                     if label == 0:
-                        category = "no relevant information"
+                        category = "not relevant for clinical trial"
                     elif label == 1:
                         category = "not eligible"
                     else:
