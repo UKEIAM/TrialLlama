@@ -26,6 +26,7 @@ DATASET_PREPROC = {
     "ct_test_sample_v5": partial(TestingDataset),
     "ct_test_sample_v6": partial(TestingDataset),
     "ct_test_sample_v7": partial(TestingDataset),
+    "medqa": partial(QAInstructionDataset),
 }
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
@@ -69,11 +70,15 @@ def create_dataset_sample(
     out_path = base_dir
 
     # TODO: Refactor: Create a sample from ct_all_years and save it as "ct_all_years_testing"
-    # Derive train_dataset from "ct_all_years" but leave out ~1000 samples for test
+    # Derive train_dataset from "ct_all_years" but leave out ~1000 samples for testssh
     if type == "train":
         path = os.path.join(base_dir, "data", f"ct_train_{version}.json")
         out_path = os.path.join(base_dir, "data", f"ct_train_sample_{version}.json")
     elif type == "test":
+        if add_example:
+            example_path = os.path.join(
+                base_dir, "data", f"inference_example_{version}.json"
+            )
         path = os.path.join(base_dir, "data", f"ct_test_{version}.json")
         out_path = os.path.join(base_dir, "data", f"ct_test_sample_{version}.json")
 
@@ -87,24 +92,21 @@ def create_dataset_sample(
         complex with information. Hence we reduce to 800 words for the input, to provide the model with best possible
         train data.
     """
-    cols_to_count = ["instruction", "topic", "clinical_trial", "response"]
-    df["word_count"] = df[cols_to_count].apply(
-        lambda row: sum(row.map(count_words)), axis=1
-    )
-
-    mask = (
-        df["word_count"]
-        > 1000  # Max tokens of 2048 are somewhat about 1115 words and since a lot of CTs are longer, we go for the save solution.
-    )  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
-    df = df[~mask]
-
-    df = df.drop(columns=["word_count"])
+    word_count = 1000
 
     if type == "test":
+        if add_example:
+            df_example = pd.read_json(example_path)
+            input_value = df_example["input"]
+        df["instruction"] = df["instruction"] + input_value
+        df = truncate(df, word_count)
         assert dataset_size <= df.shape[0]
         data_sample = df.sample(n=dataset_size, random_state=42, ignore_index=True)
+        data_sample["instruction"] = data_sample["instruction"] + input_value
         data_sample.to_json(out_path, orient="records")
         return
+
+    df = truncate(df, word_count)
 
     """
         BALANCING: Since "IRRELEVANT" label is predominant in the dataset, we will truncate it in extracting a random
@@ -179,3 +181,20 @@ def create_dataset_sample(
 
     data_sample = balanced_df.sample(n=samples, random_state=42, ignore_index=True)
     data_sample.to_json(out_path, orient="records")
+
+
+def truncate(df, word_count):
+    cols_to_count = ["instruction", "topic", "clinical_trial", "response"]
+    df["word_count"] = df[cols_to_count].apply(
+        lambda row: sum(row.map(count_words)), axis=1
+    )
+
+    mask = (
+        df["word_count"]
+        > word_count
+        # Max tokens of 2048 are somewhat about 1115 words and since a lot of CTs are longer, we go for the save solution.
+    )  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
+    df = df[~mask]
+    df
+
+    return df

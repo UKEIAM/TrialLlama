@@ -29,6 +29,7 @@ class test_config:
         None  # the max padding length to be used with tokenizer padding the prompts.
     )
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers make use Flash Attention and Xformer memory-efficient kernels
-    load_peft_model: bool = True
+    load_peft_model: bool = False
     debug: bool = False
-    load_base_model: bool = False
+    evaluate_base_model: bool = False
+    add_example: bool = False

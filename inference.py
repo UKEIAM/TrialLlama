@@ -33,6 +33,7 @@ def main(
 
     create_dataset_sample(
         dataset_size=test_config.dataset_size,
+        add_example=test_config.add_example,
         version=test_config.dataset_version,
         type="test",
     )
@@ -53,9 +54,10 @@ def main(
             base_model,
             ft_model_path,
         )
-    elif test_config.load_base_model:
+    elif test_config.evaluate_base_model:
+        model_path = os.path.join("checkpoints", "meta-llama", test_config.base_model)
         model = LlamaForCausalLM.from_pretrained(
-            os.path.join("checkpints", "meta-llama", "Llama-2-13b-chat-hf"),
+            model_path,
             return_dict=True,
             load_in_8bit=test_config.quantization,
             device_map="auto",
@@ -118,7 +120,9 @@ def main(
     os.makedirs(out_dir, exist_ok=True)
 
     if eval_output_path is None:
-        eval_output_path = os.path.join(out_dir, f"eval_{test_config.ft_model}.json")
+        eval_output_path = os.path.join(
+            out_dir, f"eval_{test_config.ft_model}_{test_config.dataset_version}.json"
+        )
 
     raw_out.to_json(eval_output_path, orient="records")
     print(f"Evaluation file successfully saved under {out_dir}")
