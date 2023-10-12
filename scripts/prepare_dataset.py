@@ -98,11 +98,11 @@ def create_JSON(
                             ct_input.append(f"{exclusion_crit}")
                     ct_input = "\n".join([f"{item}" for item in ct_input])
                     if label == 0:
-                        category = "not relevant"
+                        category = "C: not relevant for clinical trial"
                     elif label == 1:
-                        category = "not eligible"
+                        category = "B: not eligible"
                     else:
-                        category = "eligible"
+                        category = "A: eligible"
                     id_string = f"{index}_{topic_nr}_{ct}"
                     item = {
                         "id": id_string,
