@@ -128,7 +128,7 @@ def create_JSON(
         df = shuffle(df, random_state=42)  # Shuffle the rows randomly
 
         # Step 2: Create a test dataset which withholds 5 topics from the training dataset
-        mask = df["ID"].apply(should_remove)
+        mask = df["id"].apply(should_remove)
 
         # test_dataset = df.sample(
         #     n=test_samples, random_state=42
