@@ -137,8 +137,8 @@ def create_JSON(
         # )  # Randomly select 1000 samples for testing
 
         # Step 3: Remove the test dataset from the original DataFrame
-        train_dataset = df[~mask]
-        test_dataset = df[mask]
+        train_dataset = df[~mask].copy()
+        test_dataset = df[mask].copy()
         train_dataset.drop(["topic_id"], axis=1, inplace=True)
         test_dataset.drop(["topic_id"], axis=1, inplace=True)
 
