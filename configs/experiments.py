@@ -3,9 +3,11 @@ from dataclasses import dataclass
 
 @dataclass
 class experiment_config:
-    base_model: str = "Llama-2-7b-chat-hf"
+    base_model: str = "Llama-2-13b-chat-hf"
     dataset_size: int = 1
     dataset_version: str = "v3"
+    dataset_name: str = f"ct_train_sample_{dataset_version}"
+    create_sample: bool = (True,)
     dataset_size_testing: int = 20
     test_dataset_version: str = "v3"
     max_tokens: int = 2048

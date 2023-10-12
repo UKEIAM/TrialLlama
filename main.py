@@ -64,8 +64,9 @@ def main(**kwargs):
             results = ft_main(
                 logger=logger,
                 dataset_version=experiment_config.dataset_version,
-                dataset=f"ct_train_sample_{experiment_config.dataset_version}",
+                dataset=experiment_config.dataset_name,
                 dataset_size=experiment_config.dataset_size,
+                create_sample=experiment_config.create_sample,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
                 model_name=experiment_config.base_model,
