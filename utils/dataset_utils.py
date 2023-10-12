@@ -9,7 +9,11 @@ import pandas as pd
 from functools import partial
 from typing import Optional
 
-from ft_datasets.instruct_dataset import InstructionDataset, TestingDataset
+from ft_datasets.instruct_dataset import (
+    InstructionDataset,
+    TestingDataset,
+    QAInstructionDataset,
+)
 
 DATASET_PREPROC = {
     "ct_train_sample_v1": partial(InstructionDataset),

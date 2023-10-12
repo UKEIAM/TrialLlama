@@ -94,7 +94,7 @@ def main(**kwargs):
                 debug=experiment_config.debug,
                 eval_output_path=eval_output_path,
                 logger=logger,
-                evaluate_base_model=experiment_config.evaluat_base_model,
+                evaluate_base_model=experiment_config.evaluate_base_model,
             )
             mlflow.set_tag("inference_conducted", "TRUE")
             mlflow.log_metric("number_of_empty_responses", results)
