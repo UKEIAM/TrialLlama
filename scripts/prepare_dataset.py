@@ -148,7 +148,9 @@ def create_JSON(
 
 def should_remove(entry):
     second_number = entry.split("_")[1]
-    return second_number.endswith(("1", "10", "20", "30", "50"))
+    return second_number.endswith(
+        ("1", "3", "10", "15", "20", "30", "40", "50", "60", "70")
+    )
 
 
 def clean_textblock(text):
