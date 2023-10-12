@@ -102,11 +102,10 @@ def create_dataset_sample(
         if add_example:
             df_example = pd.read_json(example_path)
             input_value = df_example["input"]
-        df["instruction"] = df["instruction"] + input_value
+            df["instruction"] = df["instruction"] + input_value
         df = truncate(df, word_count)
         assert dataset_size <= df.shape[0]
         data_sample = df.sample(n=dataset_size, random_state=42, ignore_index=True)
-        data_sample["instruction"] = data_sample["instruction"] + input_value
         data_sample.to_json(out_path, orient="records")
         return
 

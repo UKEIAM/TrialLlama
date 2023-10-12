@@ -14,7 +14,7 @@ class experiment_config:
     max_new_tokens: int = 200
     lr: float = 1e-4
     batch_size: int = 4
-    num_epochs: int = 3
+    num_epochs: int = 4
     ft_model: str = "llama-2-13b-chat-hf-300-default"
     gold_labels_year: int = 2022
     gamma: float = 0.85
