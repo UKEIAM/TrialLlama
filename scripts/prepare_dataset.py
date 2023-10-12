@@ -127,8 +127,10 @@ def create_JSON(
         # Step 1: Mix the samples
         df = shuffle(df, random_state=42)  # Shuffle the rows randomly
 
-        # Step 2: Create a test dataset which withholds 5 topics from the training dataset
-        mask = df["id"].apply(should_remove)
+        # Step 2: Create a test dataset which withholds 10 topics from the training dataset
+        df["topic_id"] = df["id"].str.split("_").str[1]
+        topics_to_filter = ["12", "15", "17", "27", "30", "36", "40", "53", "65", "71"]
+        mask = df["topic_id"].isin(topics_to_filter)
 
         # test_dataset = df.sample(
         #     n=test_samples, random_state=42
@@ -137,20 +139,13 @@ def create_JSON(
         # Step 3: Remove the test dataset from the original DataFrame
         train_dataset = df[~mask]
         test_dataset = df[mask]
-        print(len(test_dataset))
-        print(len(train_dataset))
+        train_dataset.drop(["topic_id"], axis=1, inplace=True)
+        test_dataset.drop(["topic_id"], axis=1, inplace=True)
 
         train_dataset.to_json(out_directory_train, orient="records")
         test_dataset.to_json(out_directory_test, orient="records")
 
         print(f"Saved dataset Version {version} with {counter} examples")
-
-
-def should_remove(entry):
-    second_number = entry.split("_")[1]
-    return second_number.endswith(
-        ("1", "3", "10", "15", "20", "30", "40", "50", "60", "71")
-    )
 
 
 def clean_textblock(text):
