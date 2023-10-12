@@ -21,7 +21,7 @@ class train_config:
     mixed_precision: bool = True
     val_batch_size: int = 1
     dataset_version: str = "v5"
-    dataset: str = f"ct_train_sample_{dataset_version}"
+    dataset: str = "ct_train_sample_v5"
     dataset_size: int = (
         None  # If number is given, all available data after balancing is used
     )

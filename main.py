@@ -20,16 +20,22 @@ base_dir = os.path.dirname((__file__))
 
 def main(**kwargs):
     update_config((experiment_config), **kwargs)
-
+    if "dataset_name" in kwargs:
+        experiment_config.dataset_name = kwargs["dataset_name"]
+    else:
+        experiment_config.dataset_name = (
+            f"ct_train_sample_{experiment_config.dataset_version}"
+        )
     qrels_dir = os.path.join(base_dir, "data", "gold_labels")
 
     mlflow.set_experiment(f"{experiment_config.ft_model}")
+    print(f"RUNNING EXPERIMENT: experiment_config.ft_model")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
     description = f"Fine-tuned model {experiment_config.ft_model} | qrels {experiment_config.gold_labels_year} | Dataset balancing v2"
     with mlflow.start_run(
         description=description,
     ) as run:
-        run_name = run.info.run_name
+        run_name = run.info.experiment_id
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         eval_output_path = os.path.join(
             base_dir,
@@ -43,6 +49,7 @@ def main(**kwargs):
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,
                 "dataset_version": experiment_config.dataset_version,
+                "dataset_name": experiment_config.dataset_name,
                 "test_dataset_version": experiment_config.test_dataset_version,
                 "dataset_size": experiment_config.dataset_size,
                 "dataset_size_testing": experiment_config.dataset_size_testing,

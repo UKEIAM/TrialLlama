@@ -29,6 +29,14 @@ class ct_train_sample_v2:
 
 
 @dataclass
+class ct_train_sample_v3:
+    dataset: str = "ct_train_sample_v3"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v3.json"
+
+
+@dataclass
 class ct_train_sample_v4:
     dataset: str = "ct_train_sample_v4"
     train_split: str = "train"

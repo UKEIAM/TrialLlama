@@ -8,7 +8,7 @@ class test_config:
     ft_model: str = "llama-2-13b-chat-hf-default"
     quantization: bool = True
     dataset_version: str = "v5"
-    dataset: str = f"ct_test_sample_{dataset_version}"
+    dataset: str = "ct_test_sample_v5"
     dataset_size: int = 250
     num_workers_dataloader: int = 1
     max_new_tokens: int = 1024
