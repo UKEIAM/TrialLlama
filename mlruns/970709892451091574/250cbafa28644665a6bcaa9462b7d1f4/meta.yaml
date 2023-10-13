@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/970709892451091574/250cbafa28644665a6bcaa9462b7d1f4/artifacts
+end_time: 1697111874103
+entry_point_name: ''
+experiment_id: '970709892451091574'
+lifecycle_stage: active
+run_id: 250cbafa28644665a6bcaa9462b7d1f4
+run_name: mysterious-ram-583
+run_uuid: 250cbafa28644665a6bcaa9462b7d1f4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697105868224
+status: 3
+tags: []
+user_id: 1kkraus

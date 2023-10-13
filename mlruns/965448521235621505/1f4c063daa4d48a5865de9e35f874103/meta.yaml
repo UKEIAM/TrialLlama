@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/965448521235621505/1f4c063daa4d48a5865de9e35f874103/artifacts
+end_time: 1697112374853
+entry_point_name: ''
+experiment_id: '965448521235621505'
+lifecycle_stage: active
+run_id: 1f4c063daa4d48a5865de9e35f874103
+run_name: silent-dove-605
+run_uuid: 1f4c063daa4d48a5865de9e35f874103
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697112000890
+status: 3
+tags: []
+user_id: 1kkraus
