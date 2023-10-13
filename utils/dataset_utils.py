@@ -102,7 +102,7 @@ def create_dataset_sample(
         if add_example:
             df_example = pd.read_json(example_path)
             input_value = df_example["input"]
-            df["instruction"] = df["instruction"] + input_value
+            df["instruction"] = df["instruction"] + input_value[0]
         df = truncate(df, word_count)
         try:
             assert dataset_size <= df.shape[0]
@@ -195,13 +195,11 @@ def truncate(df, word_count):
     df["word_count"] = df[cols_to_count].apply(
         lambda row: sum(row.map(count_words)), axis=1
     )
-
     mask = (
         df["word_count"]
         > word_count
         # Max tokens of 2048 are somewhat about 1115 words and since a lot of CTs are longer, we go for the save solution.
     )  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
     df = df[~mask]
-    df
 
     return df

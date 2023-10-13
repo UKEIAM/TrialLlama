@@ -25,7 +25,7 @@ class train_config:
     dataset_size: int = (
         None  # If number is given, all available data after balancing is used
     )
-    create_sample: bool = (True,)
+    create_sample: bool = True
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = True
     ft_model: str = "llama-2-13b-chat-hf-default"  # Name for the output ft-model

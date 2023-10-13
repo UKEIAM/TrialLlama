@@ -10,7 +10,7 @@ max_allowed_words = 1000
 
 path = base_dir
 out_path = base_dir
-path = os.path.join(base_dir, "data", f"ct_{type}_v4.json")
+path = os.path.join(base_dir, "data", f"ct_{type}_v7.json")
 
 df = pd.read_json(path)
 
@@ -45,11 +45,15 @@ class_counts_filtered_reduced = df_reduced["output"].value_counts()
 print(class_counts_filtered_reduced)
 
 # CURATED DATASET: Reduce amount of data in returning only x examples per patient topic
-desired_label_count = 1
+
 df_reduced["topic_id"] = df_reduced["id"].str.split("_").str[1]
 balanced_df = pd.DataFrame(columns=df_reduced.columns)
 
 for unique_id in df_reduced["topic_id"].unique():
+    id_subset = df_reduced[df_reduced["topic_id"] == unique_id]
+    desired_label_count = (
+        id_subset.groupby("topic_id")["output"].value_counts().sort_values()[0]
+    )
     # Get all rows with the current unique ID
     id_subset = df_reduced[df_reduced["topic_id"] == unique_id]
 
@@ -71,8 +75,29 @@ for unique_id in df_reduced["topic_id"].unique():
     for df_item in balanced_label_groups:
         balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
 
-grouped_df = balanced_df.groupby("topic_id")["output"].value_counts()
-balanced_df.drop(["topic_id"], axis=1, inplace=True)
+value_counts_grouped = balanced_df["output"].value_counts()
+
+example_path = os.path.join(base_dir, "data", f"inference_example_v6.json")
+max_words_2 = balanced_df["word_count"].max()
+df_example = pd.read_json(example_path)
+input_value = df_example["input"]
+balanced_df["instruction"] = balanced_df["instruction"].astype("str") + input_value[0]
+
+for col in cols_to_count:
+    balanced_df[col] = balanced_df[col].astype("str")
+
+balanced_df["word_count"] = balanced_df[cols_to_count].apply(
+    lambda row: sum(row.map(count_words)), axis=1
+)
+
+max_words_3 = balanced_df["word_count"].max()
+mask = (
+    balanced_df["word_count"] > max_allowed_words
+)  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
+df_reduced_final = balanced_df[~mask]
+class_counts_filtered_reduced_final = df_reduced_final["output"].value_counts()
+
+print(class_counts_filtered_reduced_final)
 
 # Create a bar chart of the class distribution
 plt.figure(figsize=(8, 6))
@@ -82,7 +107,7 @@ plt.xlabel("Class")
 plt.ylabel("Count")
 plt.xticks(rotation=0)
 
-for i, count in enumerate(class_counts_filtered_reduced):
+for i, count in enumerate(class_counts_filtered_reduced_final):
     ax.text(i, count, str(count), ha="center", va="bottom", fontsize=12, color="black")
 
 # Save the plot as an image file (e.g., PNG)
@@ -96,10 +121,3 @@ plt.savefig(
     ),
     bbox_inches="tight",
 )
-
-# Check if the classes are balanced
-is_balanced = all(class_counts.values == class_counts.values[0])
-if is_balanced:
-    print("The classes are balanced.")
-else:
-    print("The classes are not balanced.")
