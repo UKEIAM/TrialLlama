@@ -29,7 +29,7 @@ def main(**kwargs):
     qrels_dir = os.path.join(base_dir, "data", "gold_labels")
 
     mlflow.set_experiment(f"{experiment_config.ft_model}")
-    print(f"RUNNING EXPERIMENT: experiment_config.ft_model")
+    print(f"RUNNING EXPERIMENT: {experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
     description = f"Fine-tuned model {experiment_config.ft_model} | qrels {experiment_config.gold_labels_year} | Dataset balancing v3"
     with mlflow.start_run(
