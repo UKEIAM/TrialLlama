@@ -1,0 +1,122 @@
+[
+  {
+    "ID" : "8479_12_NCT03009331",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "O based on the information and inclusions provided in the clinical trial, the patient would not be eligible for the trial due to the presence of pulmonary fibrosis and chronic exposure to asbestosis. The exclusion criteria for the trial state that patients with a diagnosis of obstructive or restrictive lung disease are not eligible, and the patient's history of asbestosis and pulmonary fibrosis would likely be considered a restrictive lung disease.",
+    "PROBA" : 0.8087241781
+  },
+  {
+    "ID" : "5254_12_NCT00629902",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "Onot eligible.\n\nBased on the provided information and the criteria for the clinical trial, the patient would not be considered eligible for the clinical trial since she does not meet the inclusion criteria of being at least 18 years old. The patient is only 34 years old and is therefore not eligible for the trial.",
+    "PROBA" : 0.8239847818
+  },
+  {
+    "ID" : "25379_36_NCT02894151",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "(eligible \/ not eligible \/ not relevant for clinical trial)",
+    "PROBA" : 0.8910718463
+  },
+  {
+    "ID" : "10394_15_NCT04133883",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "Obased on the given information and the criteria for the clinical trial, the patient is not eligible for the clinical trial because the patient is 8 years old and the inclusion criteria specifies that the participants should be between 6 and 40 years old, hence the patient does not meet the age criteria. Additionally, the study is focused on haemophilia A patients treated with plasma-derived factor VIII (pdFVIII) or recombinant (conventional or extended half-life) factor VIII (rFVIII), whereas the patient is diagnosed with DMD.\n\nSo, the patient is \"not eligible\" for the clinical trial.",
+    "PROBA" : 0.8468087228
+  },
+  {
+    "ID" : "10330_15_NCT03574922",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "________________________________________________\n\neligible",
+    "PROBA" : 0.6211129561
+  },
+  {
+    "ID" : "27493_40_NCT00405613",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "\nNo, the patient is not eligible for the clinical trial. The patient has a medical history of prolonged oral bleeding immediately after a tooth extraction, which is an exclusion criterion for the study. The patient is also taking no medications, which is an inclusion criterion for the study, but it is not relevant to the study criteria.",
+    "PROBA" : 0.8305017512
+  },
+  {
+    "ID" : "8185_12_NCT00870246",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "O: eligible (asbestos bodies on lung biopsy)",
+    "PROBA" : 0.6182108779
+  },
+  {
+    "ID" : "11461_17_NCT00760240",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "OYes, the patient is eligible for the clinical trial.",
+    "PROBA" : 0.8500009035
+  },
+  {
+    "ID" : "8025_17_NCT03288922",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "______ eligible ______ not eligible ______ not relevant for clinical trial",
+    "PROBA" : 0.8424479011
+  },
+  {
+    "ID" : "25227_53_NCT02585739",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "\nBased on the provided patient note and clinical trial information, the patient is not eligible for the clinical trial.\n\nThe patient note does not mention any specific medical conditions or symptoms that would make the patient eligible for the clinical trial, which is focused on investigating the possible link between the SPINK 1 gene and cluster headache. Additionally, the patient's age (34 years old) and gender (female) do not meet the specified inclusion criteria for the clinical trial, which requires participants to be aged 18 or over and of any gender.\n\nTherefore, the patient is \"not eligible\" for the clinical trial.",
+    "PROBA" : 0.8725086529
+  },
+  {
+    "ID" : "18898_40_NCT00453128",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "\\strong{Not Eligible}\n\nBased on the provided patient note and the criteria for the clinical trial, the patient is not eligible for the clinical trial. The patient has been diagnosed with Paget's disease of bone, which does not meet the inclusion criterion of having calcium pyrophosphate dihydrate deposition disease. Additionally, the patient has several extraoral lesions and increased uptake of radioactive substance, which would be considered exclusion criteria as they are associated with rheumatoid arthritis disease.",
+    "PROBA" : 0.8266589987
+  },
+  {
+    "ID" : "27649_40_NCT01541241",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "= eligible",
+    "PROBA" : 0.7235724552
+  },
+  {
+    "ID" : "18812_27_NCT01812395",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : " Yes  Eligible\nNo  Not eligible",
+    "PROBA" : 0.6023869632
+  },
+  {
+    "ID" : "8462_12_NCT02892396",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "'eligible' : eligible",
+    "PROBA" : 0.7420899394
+  },
+  {
+    "ID" : "25029_53_NCT01026584",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : ": eligible",
+    "PROBA" : 0.6745140193
+  },
+  {
+    "ID" : "12671_27_NCT02813057",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "",
+    "PROBA" : 0.0466795973
+  },
+  {
+    "ID" : "33651_71_NCT02228343",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "[eligible]  Yes",
+    "PROBA" : 0.6702300408
+  },
+  {
+    "ID" : "30674_65_NCT01887431",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "",
+    "PROBA" : 0.0464556105
+  },
+  {
+    "ID" : "25445_53_NCT04709744",
+    "TOPIC_YEAR" : 2021,
+    "RESPONSE" : "O: Eligible",
+    "PROBA" : 0.6265147006
+  },
+  {
+    "ID" : "10309_15_NCT03372655",
+    "TOPIC_YEAR" : 2022,
+    "RESPONSE" : "[eligible]",
+    "PROBA" : 0.7802983772
+  }
+]

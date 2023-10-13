@@ -1,0 +1,15 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/970709892451091574/f691f93a4eb3443d89556c08380242db/artifacts
+end_time: 1697184332022
+entry_point_name: ''
+experiment_id: '970709892451091574'
+lifecycle_stage: active
+run_id: f691f93a4eb3443d89556c08380242db
+run_name: skillful-sponge-329
+run_uuid: f691f93a4eb3443d89556c08380242db
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697183970202
+status: 3
+tags: []
+user_id: 1kkraus

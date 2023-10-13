@@ -1,0 +1,15 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/928002726927055816/49f0cc9641464cf68ae867234758a3df/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '928002726927055816'
+lifecycle_stage: active
+run_id: 49f0cc9641464cf68ae867234758a3df
+run_name: suave-wolf-557
+run_uuid: 49f0cc9641464cf68ae867234758a3df
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697158639511
+status: 1
+tags: []
+user_id: 1kkraus

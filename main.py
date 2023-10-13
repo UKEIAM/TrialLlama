@@ -35,7 +35,7 @@ def main(**kwargs):
     with mlflow.start_run(
         description=description,
     ) as run:
-        run_name = run.info.experiment_id
+        run_name = run.info.run_name
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         eval_output_path = os.path.join(
             base_dir,
@@ -48,11 +48,12 @@ def main(**kwargs):
                 "batch_size": experiment_config.batch_size,
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,
-                "dataset_version": experiment_config.dataset_version,
                 "dataset_name": experiment_config.dataset_name,
+                "dataset_version": experiment_config.dataset_version,
+                "dataset_size_testing": experiment_config.dataset_size_testing,
+                "one_shot_example": experiment_config.add_example,
                 "test_dataset_version": experiment_config.test_dataset_version,
                 "dataset_size": experiment_config.dataset_size,
-                "dataset_size_testing": experiment_config.dataset_size_testing,
                 "max_tokens": experiment_config.max_tokens,
                 "max_new_tokens": experiment_config.max_new_tokens,
                 "temperature": experiment_config.temperature,
@@ -85,7 +86,7 @@ def main(**kwargs):
             clear_gpu_cache()
 
         if experiment_config.run_inference:
-            print("Running testing...")
+            print("Running inference...")
             results = test_main(
                 dataset_size=experiment_config.dataset_size_testing,
                 dataset_version=experiment_config.test_dataset_version,
@@ -103,6 +104,7 @@ def main(**kwargs):
                 eval_output_path=eval_output_path,
                 logger=logger,
                 evaluate_base_model=experiment_config.evaluate_base_model,
+                add_example=experiment_config.add_example,
             )
             mlflow.set_tag("inference_conducted", "TRUE")
             mlflow.log_metric("number_of_empty_responses", results)
