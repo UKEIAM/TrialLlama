@@ -4,7 +4,7 @@ entry_point_name: ''
 experiment_id: '961009899933377693'
 lifecycle_stage: active
 run_id: cc84343cfebc4000b267ba01e1814c8e
-run_name: honorable-ram-934
+run_name: llama-tuned-v5-v6-oneShot
 run_uuid: cc84343cfebc4000b267ba01e1814c8e
 source_name: ''
 source_type: 4

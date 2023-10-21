@@ -4,7 +4,7 @@ entry_point_name: ''
 experiment_id: '961009899933377693'
 lifecycle_stage: active
 run_id: bd261f3dba5545d390fb27b4bc744d65
-run_name: persistent-croc-711
+run_name: lama-tuned-v5-v5-noShot
 run_uuid: bd261f3dba5545d390fb27b4bc744d65
 source_name: ''
 source_type: 4

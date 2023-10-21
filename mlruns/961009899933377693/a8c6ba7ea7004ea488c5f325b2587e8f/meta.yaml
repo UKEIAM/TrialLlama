@@ -1,10 +1,11 @@
 artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/961009899933377693/a8c6ba7ea7004ea488c5f325b2587e8f/artifacts
+deleted_time: 1697881967089
 end_time: null
 entry_point_name: ''
 experiment_id: '961009899933377693'
-lifecycle_stage: active
+lifecycle_stage: deleted
 run_id: a8c6ba7ea7004ea488c5f325b2587e8f
-run_name: nosy-croc-662
+run_name: llama-tuned-v5-v6-noShot
 run_uuid: a8c6ba7ea7004ea488c5f325b2587e8f
 source_name: ''
 source_type: 4

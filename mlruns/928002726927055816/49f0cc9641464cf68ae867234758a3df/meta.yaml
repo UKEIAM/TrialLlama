@@ -4,7 +4,7 @@ entry_point_name: ''
 experiment_id: '928002726927055816'
 lifecycle_stage: active
 run_id: 49f0cc9641464cf68ae867234758a3df
-run_name: suave-wolf-557
+run_name: medLama-base-v5
 run_uuid: 49f0cc9641464cf68ae867234758a3df
 source_name: ''
 source_type: 4

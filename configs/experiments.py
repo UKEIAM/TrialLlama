@@ -3,12 +3,12 @@ from dataclasses import dataclass
 
 @dataclass
 class experiment_config:
-    base_model: str = "Llama-2-13b-chat-hf"
+    base_model: str = "MedLlama-2-13b-chat-hf"
     dataset_size: int = 1
     dataset_version: str = "v5"
     dataset_name: str = "ct_train_sample_v5"
     create_sample: bool = True
-    dataset_size_testing: int = 20
+    dataset_size_testing: int = 50
     test_dataset_version: str = "v5"
     max_tokens: int = 2048
     max_new_tokens: int = 200

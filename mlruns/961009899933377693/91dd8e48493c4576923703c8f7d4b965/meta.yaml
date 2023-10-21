@@ -4,7 +4,7 @@ entry_point_name: ''
 experiment_id: '961009899933377693'
 lifecycle_stage: active
 run_id: 91dd8e48493c4576923703c8f7d4b965
-run_name: rare-cat-301
+run_name: llama-tuned-v5-v6-noShot
 run_uuid: 91dd8e48493c4576923703c8f7d4b965
 source_name: ''
 source_type: 4

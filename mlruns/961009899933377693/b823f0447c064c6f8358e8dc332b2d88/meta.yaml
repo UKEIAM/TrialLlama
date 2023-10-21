@@ -4,7 +4,7 @@ entry_point_name: ''
 experiment_id: '961009899933377693'
 lifecycle_stage: active
 run_id: b823f0447c064c6f8358e8dc332b2d88
-run_name: agreeable-mule-10
+run_name: llama-tuned-v5-v5-oneShot
 run_uuid: b823f0447c064c6f8358e8dc332b2d88
 source_name: ''
 source_type: 4
