@@ -2,6 +2,8 @@
 import os
 import logging
 import fire
+import random
+import string
 
 import mlflow
 import mlflow.pytorch
@@ -28,20 +30,31 @@ def main(**kwargs):
         )
     qrels_dir = os.path.join(base_dir, "data", "gold_labels")
 
-    mlflow.set_experiment(f"{experiment_config.ft_model}")
+    mlflow.set_experiment(
+        f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}"
+    )
     print(f"RUNNING EXPERIMENT: {experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
     description = f"Fine-tuned model {experiment_config.ft_model} | qrels {experiment_config.gold_labels_year} | Dataset balancing v3"
-    with mlflow.start_run(
-        description=description,
-    ) as run:
-        run_name = run.info.run_name
+    # Define the characters to choose from for the prefix
+    prefix_characters = string.ascii_lowercase + string.digits
+    prefix_length = 8  # Adjust the length as needed
+    # Generate a random prefix
+    prefix = "".join(random.choice(prefix_characters) for _ in range(prefix_length))
+    # Define the length of the random number
+    number_length = 3
+    # Generate a random number with the specified length
+    random_number = "".join(random.choice(string.digits) for _ in range(number_length))
+    # Combine the random prefix and random number to create the run_name
+    rand_name = f"{prefix}-{random_number}"
+    run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.batch_size}_{experiment_config.lr}_{experiment_config.temperature}"
+    with mlflow.start_run(description=description, run_name=run_name) as run:
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         eval_output_path = os.path.join(
             base_dir,
             "out",
             "eval",
-            f"eval_{experiment_config.ft_model}_{run_name}_{experiment_config.test_dataset_version}.json",
+            f"eval_{run_name}.json",
         )
         mlflow.log_params(
             {
@@ -52,7 +65,7 @@ def main(**kwargs):
                 "dataset_version": experiment_config.dataset_version,
                 "dataset_size_testing": experiment_config.dataset_size_testing,
                 "one_shot_example": experiment_config.add_example,
-                "test_dataset_version": experiment_config.test_dataset_version,
+                "dataset_test_version": experiment_config.dataset_test_version,
                 "dataset_size": experiment_config.dataset_size,
                 "max_tokens": experiment_config.max_tokens,
                 "max_new_tokens": experiment_config.max_new_tokens,
@@ -89,8 +102,8 @@ def main(**kwargs):
             print("Running inference...")
             results = test_main(
                 dataset_size=experiment_config.dataset_size_testing,
-                dataset_version=experiment_config.test_dataset_version,
-                dataset=f"ct_test_sample_{experiment_config.test_dataset_version}",
+                dataset_version=experiment_config.dataset_test_version,
+                dataset=f"ct_test_sample_{experiment_config.dataset_test_version}",
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
                 load_peft_model=True,
