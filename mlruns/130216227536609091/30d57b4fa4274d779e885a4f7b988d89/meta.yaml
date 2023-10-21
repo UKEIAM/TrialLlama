@@ -1,0 +1,16 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/130216227536609091/30d57b4fa4274d779e885a4f7b988d89/artifacts
+deleted_time: 1697889650436
+end_time: 1697889134594
+entry_point_name: ''
+experiment_id: '130216227536609091'
+lifecycle_stage: deleted
+run_id: 30d57b4fa4274d779e885a4f7b988d89
+run_name: bustling-ant-214
+run_uuid: 30d57b4fa4274d779e885a4f7b988d89
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697889099367
+status: 4
+tags: []
+user_id: 1kkraus

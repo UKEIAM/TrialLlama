@@ -67,7 +67,7 @@ def count_words(text):
 def create_dataset_sample(
     dataset_size: Optional[int] = None,
     add_example: Optional[bool] = False,
-    version: str = "v2",
+    version: str = "v5",
     type: str = "train",
 ) -> None:
     path = base_dir
@@ -97,23 +97,8 @@ def create_dataset_sample(
         train data.
     """
     word_count = 1000
-
-    if type == "test":
-        if add_example:
-            df_example = pd.read_json(example_path)
-            input_value = df_example["input"]
-            df["instruction"] = df["instruction"] + input_value[0]
-        df = truncate(df, word_count)
-        try:
-            assert dataset_size <= df.shape[0]
-        except AssertionError as e:
-            print("Dataset size is larger than the actual dataset.")
-            dataset_size = df.shape[0]
-        data_sample = df.sample(n=dataset_size, random_state=42, ignore_index=True)
-        data_sample.to_json(out_path, orient="records")
-        return
-
     df = truncate(df, word_count)
+    df.drop(["word_count"], axis=1, inplace=True)
 
     """
         BALANCING: Since "IRRELEVANT" label is predominant in the dataset, we will truncate it in extracting a random
@@ -121,24 +106,6 @@ def create_dataset_sample(
         That creates a more balanced, but not perfectly balanced dataset. Only applied on train data.
         WARNING: Don"t change random state value!
  """
-    # col_name = "output"
-    # value_counts = df[col_name].value_counts()
-    #
-    # max_label = value_counts.index[0]
-    # avg_item_size_for_truncation = int((value_counts[1] + value_counts[2]) / 2)
-    #
-    # max_label_df = df[df[col_name] == max_label]
-    # trunc_max_label_df = max_label_df.sample(
-    #     n=avg_item_size_for_truncation, random_state=42, ignore_index=True
-    # )
-    #
-    # df = df[df[col_name] != max_label]
-    # balanced_df = pd.concat([df, trunc_max_label_df], ignore_index=True)
-    #
-    # if dataset_size == None:
-    #     dataset_size = len(balanced_df)
-    # assert dataset_size <= balanced_df.shape[0]
-    # data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
 
     # CURATED DATASET: Reduce amount of data in returning only x examples per patient topic
     df["topic_id"] = df["id"].str.split("_").str[1]
@@ -185,6 +152,34 @@ def create_dataset_sample(
                 "WARNING: Balanced dataset smaller than desired dataset size. Returning balanced dataset."
             )
             samples = balanced_df.shape[0]
+
+    if type == "test":
+        if add_example:
+            word_count = 1500
+            df_example = pd.read_json(example_path)
+            input_value = df_example["input"]
+            balanced_df["instruction"] = balanced_df["instruction"] + input_value[0]
+        balanced_df = truncate(balanced_df, word_count)
+        balanced_df.drop(["word_count"], axis=1, inplace=True)
+
+    # col_name = "output"
+    # value_counts = balanced_df[col_name].value_counts()
+    #
+    # max_label = value_counts.index[0]
+    # avg_item_size_for_truncation = int((value_counts[1] + value_counts[2]) / 2)
+    #
+    # max_label_df = balanced_df[balanced_df[col_name] == max_label]
+    # trunc_max_label_df = max_label_df.sample(
+    #     n=avg_item_size_for_truncation, random_state=42, ignore_index=True
+    # )
+    #
+    # balanced_df = balanced_df[balanced_df[col_name] != max_label]
+    # macro_balanced_df = pd.concat([balanced_df, trunc_max_label_df], ignore_index=True)
+    #
+    # if dataset_size == None:
+    #     dataset_size = len(balanced_df)
+    # assert dataset_size <= balanced_df.shape[0]
+    # data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
 
     data_sample = balanced_df.sample(n=samples, random_state=42, ignore_index=True)
     data_sample.to_json(out_path, orient="records")

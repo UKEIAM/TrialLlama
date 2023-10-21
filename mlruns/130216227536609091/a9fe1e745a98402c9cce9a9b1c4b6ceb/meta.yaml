@@ -1,0 +1,15 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/130216227536609091/a9fe1e745a98402c9cce9a9b1c4b6ceb/artifacts
+end_time: 1697890420573
+entry_point_name: ''
+experiment_id: '130216227536609091'
+lifecycle_stage: active
+run_id: a9fe1e745a98402c9cce9a9b1c4b6ceb
+run_name: secretive-quail-439
+run_uuid: a9fe1e745a98402c9cce9a9b1c4b6ceb
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697890163414
+status: 3
+tags: []
+user_id: 1kkraus

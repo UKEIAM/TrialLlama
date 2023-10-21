@@ -1,0 +1,15 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/130216227536609091/b0faf71b9fcf4252adc15b0ff2389a83/artifacts
+end_time: 1697891034451
+entry_point_name: ''
+experiment_id: '130216227536609091'
+lifecycle_stage: active
+run_id: b0faf71b9fcf4252adc15b0ff2389a83
+run_name: kindly-croc-563
+run_uuid: b0faf71b9fcf4252adc15b0ff2389a83
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697890813455
+status: 3
+tags: []
+user_id: 1kkraus

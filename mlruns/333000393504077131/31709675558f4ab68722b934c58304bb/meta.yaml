@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/333000393504077131/31709675558f4ab68722b934c58304bb/artifacts
+end_time: 1697895675060
+entry_point_name: ''
+experiment_id: '333000393504077131'
+lifecycle_stage: active
+run_id: 31709675558f4ab68722b934c58304bb
+run_name: dashing-colt-258
+run_uuid: 31709675558f4ab68722b934c58304bb
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697889574259
+status: 3
+tags: []
+user_id: 1kkraus
