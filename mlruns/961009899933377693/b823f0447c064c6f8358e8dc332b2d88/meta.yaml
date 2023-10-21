@@ -1,0 +1,15 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/961009899933377693/b823f0447c064c6f8358e8dc332b2d88/artifacts
+end_time: 1697221603546
+entry_point_name: ''
+experiment_id: '961009899933377693'
+lifecycle_stage: active
+run_id: b823f0447c064c6f8358e8dc332b2d88
+run_name: agreeable-mule-10
+run_uuid: b823f0447c064c6f8358e8dc332b2d88
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697205883382
+status: 3
+tags: []
+user_id: 1kkraus

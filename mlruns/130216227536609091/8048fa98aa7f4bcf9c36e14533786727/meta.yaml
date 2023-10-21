@@ -1,0 +1,15 @@
+artifact_uri: mlruns/130216227536609091/8048fa98aa7f4bcf9c36e14533786727/artifacts
+end_time: 1697819825324
+entry_point_name: ''
+experiment_id: '130216227536609091'
+lifecycle_stage: active
+run_id: 8048fa98aa7f4bcf9c36e14533786727
+run_name: unleashed-cod-325
+run_uuid: 8048fa98aa7f4bcf9c36e14533786727
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1697819339239
+status: 3
+tags: []
+user_id: 1kkraus
