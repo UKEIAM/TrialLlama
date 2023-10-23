@@ -34,12 +34,10 @@ for param_set in param_combinations:
         top_p,
     ) = param_set
 
-    decimal_part_lr = str(lr).split(".")[1]
+    # decimal_part_lr = str(lr).split(".")[1] if "." in str(lr) else "0"
 
     # TODO: Check if learning rate at the end works, since dot in folder name
-    ft_model = (
-        f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-{lr}"
-    )
+    ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}"
 
     command = [
         "python",
@@ -69,6 +67,11 @@ for param_set in param_combinations:
     if os.path.exists(os.path.join("out", ft_model)):
         command.append("--run_training")
         command.append(str(False))
+
+    # For response generation we add a one-shot example to enhance the output quality of the model
+    if dataset_test_version == "v6":
+        command.append("--add_example")
+        command.append(str(True))
 
     # Run the model script
     subprocess.run(command)

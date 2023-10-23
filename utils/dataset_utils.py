@@ -140,7 +140,7 @@ def create_dataset_sample(
         for df_item in balanced_label_groups:
             balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
 
-    balanced_df.drop(["topic_id"], axis=1, inplace=True)
+    # balanced_df.drop(["topic_id"], axis=1, inplace=True)
 
     samples = balanced_df.shape[0]
     if dataset_size > 3:

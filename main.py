@@ -31,7 +31,7 @@ def main(**kwargs):
     qrels_dir = os.path.join(base_dir, "data", "gold_labels")
 
     mlflow.set_experiment(
-        f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}"
+        f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-final"
     )
     print(f"RUNNING EXPERIMENT: {experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
