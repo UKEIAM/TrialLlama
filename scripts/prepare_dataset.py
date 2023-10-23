@@ -30,7 +30,7 @@ def create_JSON(
     versions=None,
 ):
     if versions is None:
-        versions = ["v5"]
+        versions = ["v5_1", "v5_2", "v6_1", "v6_2"]
     for ver in versions:
         version = ver
         test_samples = 1000
@@ -63,8 +63,8 @@ def create_JSON(
             qrels = read_qrel_txt(qrel_path)
 
             # DEBUG
-            # qrels = qrels[:100]
-            # test_samples = int(qrels*0,10)
+            qrels = qrels[:100]
+            test_samples = int(qrels * 0, 10)
 
             for index, row in tqdm(qrels.iterrows()):
                 topic_nr = row["topic"]
@@ -92,10 +92,13 @@ def create_JSON(
                             exclusion_crit = item[item_index:index_gender]
                             general_inclusion_crit = item[index_gender:]
                             ct_input.pop(idx)
-                            ct_input.insert(
-                                idx, f"{inclusion_crit}\n{general_inclusion_crit}"
-                            )
-                            ct_input.append(f"{exclusion_crit}")
+                            if version == "v5_1" or version == "v5_2":
+                                ct_input.insert(
+                                    idx, f"{inclusion_crit}\n{general_inclusion_crit}"
+                                )
+                            else:
+                                ct_input.insert(idx, f"{exclusion_crit}")
+                                # ct_input.append(f"{exclusion_crit}")
                     ct_input = "\n".join([f"{item}" for item in ct_input])
                     if label == 0:
                         category = "C: not relevant for clinical trial"

@@ -28,4 +28,4 @@ class experiment_config:
     length_penalty: int = 1
     debug: bool = True
     evaluate_base_model: bool = False
-    add_example: bool = True
+    add_example: bool = False
