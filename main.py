@@ -37,7 +37,7 @@ def main(**kwargs):
     )
 
     mlflow.set_experiment(
-        f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-final"
+        f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}"
     )
     print(f"RUNNING EXPERIMENT: {experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))

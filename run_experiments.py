@@ -38,6 +38,11 @@ for param_set in param_combinations:
 
     # TODO: Check if learning rate at the end works, since dot in folder name
     ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}"
+    if dataset_test_version == "v6-one":
+        one_shot = True
+        dataset_test_version = "v6"
+    else:
+        one_shot = False
 
     command = [
         "python",
@@ -69,7 +74,7 @@ for param_set in param_combinations:
         command.append(str(False))
 
     # For response generation we add a one-shot example to enhance the output quality of the model
-    if dataset_test_version == "v6":
+    if one_shot:
         command.append("--add_example")
         command.append(str(True))
 
