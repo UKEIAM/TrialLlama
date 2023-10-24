@@ -62,7 +62,7 @@ def create_JSON(
             qrels = read_qrel_txt(qrel_path)
 
             # DEBUG
-            qrels = qrels[:100]
+            # qrels = qrels[:100]
 
             for index, row in tqdm(qrels.iterrows()):
                 topic_nr = row["topic"]
