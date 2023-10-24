@@ -146,6 +146,15 @@ def create_dataset_sample(
 
     # balanced_df.drop(["topic_id"], axis=1, inplace=True)
 
+    if type == "test":
+        if add_example:
+            word_count = 1500
+            df_example = pd.read_json(example_path)
+            input_value = df_example["input"]
+            balanced_df["instruction"] = balanced_df["instruction"] + input_value[0]
+        balanced_df = truncate(balanced_df, word_count)
+        balanced_df.drop(["word_count"], axis=1, inplace=True)
+
     samples = balanced_df.shape[0]
     if dataset_size > 3:
         try:
@@ -156,15 +165,6 @@ def create_dataset_sample(
                 "WARNING: Balanced dataset smaller than desired dataset size. Returning balanced dataset."
             )
             samples = balanced_df.shape[0]
-
-    if type == "test":
-        if add_example:
-            word_count = 1500
-            df_example = pd.read_json(example_path)
-            input_value = df_example["input"]
-            balanced_df["instruction"] = balanced_df["instruction"] + input_value[0]
-        balanced_df = truncate(balanced_df, word_count)
-        balanced_df.drop(["word_count"], axis=1, inplace=True)
 
     # col_name = "output"
     # value_counts = balanced_df[col_name].value_counts()
