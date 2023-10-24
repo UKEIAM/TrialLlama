@@ -33,7 +33,6 @@ def create_JSON(
         versions = ["v5_1", "v5_2", "v6_1", "v6_2"]
     for ver in versions:
         version = ver
-        test_samples = 1000
         data_list = []
 
         config_file = os.path.join(base_directory, "configs/ct_data.yaml")
@@ -64,7 +63,6 @@ def create_JSON(
 
             # DEBUG
             qrels = qrels[:100]
-            test_samples = int(qrels * 0, 10)
 
             for index, row in tqdm(qrels.iterrows()):
                 topic_nr = row["topic"]

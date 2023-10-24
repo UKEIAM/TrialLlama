@@ -1,2 +1,0 @@
-2023-10-11 03:13:15,473 - utils.logger_utils - ERROR - Response: norelevant -> local variable 'pred_class' referenced before assignment
-2023-10-11 03:13:15,473 - utils.logger_utils - ERROR - Response: 45-year-oldkneeosteoarthritis -> local variable 'pred_class' referenced before assignment

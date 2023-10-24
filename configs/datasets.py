@@ -53,11 +53,43 @@ class ct_train_sample_v5:
 
 
 @dataclass
+class ct_train_sample_v5_1:
+    dataset: str = "ct_train_sample_v5_1"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v5_1.json"
+
+
+@dataclass
+class ct_train_sample_v5_2:
+    dataset: str = "ct_train_sample_v5_2"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v5_2.json"
+
+
+@dataclass
 class ct_train_sample_v6:
     dataset: str = "ct_train_sample_v6"
     train_split: str = "train"
     test_split: str = "val"
     data_path: str = "data/ct_train_sample_v6.json"
+
+
+@dataclass
+class ct_train_sample_v6_1:
+    dataset: str = "ct_train_sample_v6_1"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v6_1.json"
+
+
+@dataclass
+class ct_train_sample_v6_2:
+    dataset: str = "ct_train_sample_v6_2"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v6_2.json"
 
 
 @dataclass
@@ -105,10 +137,38 @@ class ct_test_sample_v5:
 
 
 @dataclass
+class ct_test_sample_v5_1:
+    dataset: str = "ct_test_sample_v5_1"
+    train_split: str = "train"
+    data_path: str = "data/ct_test_sample_v5_1.json"
+
+
+@dataclass
+class ct_test_sample_v5_2:
+    dataset: str = "ct_test_sample_v5_2"
+    train_split: str = "train"
+    data_path: str = "data/ct_test_sample_v5_2.json"
+
+
+@dataclass
 class ct_test_sample_v6:
     dataset: str = "ct_test_sample_v6"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
     data_path: str = "data/ct_test_sample_v6.json"
+
+
+@dataclass
+class ct_test_sample_v6_1:
+    dataset: str = "ct_test_sample_v6_1"
+    train_split: str = "train"
+    data_path: str = "data/ct_test_sample_v6_1.json"
+
+
+@dataclass
+class ct_test_sample_v6_2:
+    dataset: str = "ct_test_sample_v6_2"
+    train_split: str = "train"
+    data_path: str = "data/ct_test_sample_v6_2.json"
 
 
 @dataclass

@@ -29,6 +29,9 @@ def main(**kwargs):
             f"ct_train_sample_{experiment_config.dataset_version}"
         )
     qrels_dir = os.path.join(base_dir, "data", "gold_labels")
+    experiment_config_dir = os.path.join(
+        base_dir, "configs", "experiment_definitions.yaml"
+    )
 
     mlflow.set_experiment(
         f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-final"
@@ -126,6 +129,7 @@ def main(**kwargs):
             # )
             try:
                 # TODO: Suddenly some issues with logging artifacts happened because of PermissionError on remote interpreter"
+                mlflow.log_artifact(local_path=experiment_config_dir)
                 mlflow.log_artifact(local_path=eval_output_path)
             except Exception as e:
                 logger.error(f"Error while logging artifact: {e}")
