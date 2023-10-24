@@ -10,9 +10,11 @@ import math
 import fire
 import torch
 import transformers
+import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from typing import List, Optional
+
 
 """
 Unused imports:
@@ -283,6 +285,18 @@ def train(
         results["avg_eval_loss"] = avg_eval_loss
     results["avg_epoch_time"] = avg_epoch_time
     results["avg_checkpoint_time"] = avg_checkpoint_time
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(train_loss, label="Training Loss", color="blue")
+    plt.plot(val_loss, label="Validation Loss", color="red")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.title("Training and Validation Loss")
+
+    plt_save_path = os.path.join("out", "eval", "img", f"{train_config.ft_model}.png")
+
+    plt.savefig(plt_save_path)
 
     # saving the training params including fsdp setting for reference.
     if train_config.enable_fsdp and not train_config.use_peft:

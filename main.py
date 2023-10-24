@@ -32,6 +32,9 @@ def main(**kwargs):
     experiment_config_dir = os.path.join(
         base_dir, "configs", "experiment_definitions.yaml"
     )
+    train_plt_path = plt_save_path = os.path.join(
+        "out", "eval", "img", f"{experiment_config.ft_model}.png"
+    )
 
     mlflow.set_experiment(
         f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-final"
@@ -99,6 +102,7 @@ def main(**kwargs):
             )
             mlflow.set_tag("ft_conducted", "TRUE")
             mlflow.log_metrics(results)
+            mlflow.log_artifact(local_path=train_plt_path)
             clear_gpu_cache()
 
         if experiment_config.run_inference:
