@@ -30,7 +30,7 @@ def create_JSON(
     versions=None,
 ):
     if versions is None:
-        versions = ["v5_1", "v5_2", "v6_1", "v6_2"]
+        versions = ["v6", "v7"]
     for ver in versions:
         version = ver
         data_list = []
@@ -101,7 +101,7 @@ def create_JSON(
                     if label == 0:
                         category = "C: not relevant for clinical trial"
                     elif label == 1:
-                        category = "B: not eligible"
+                        category = "B: excluded"
                     else:
                         category = "A: eligible"
                     id_string = f"{index}_{topic_nr}_{ct}"

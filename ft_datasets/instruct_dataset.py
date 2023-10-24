@@ -86,7 +86,7 @@ class QAInstructionDataset(Dataset):
         example = torch.tensor(example, dtype=torch.int64)
         padding = self.max_tokens - example.shape[0]
         if padding > 0:
-            example = torch.cat((example, torch.zeros(padding, dtype=torch.int64) - 1))
+            example = torch.cat(example, torch.zeros(padding, dtype=torch.int64) - 1)
         labels = copy.deepcopy(example)
         labels[: len(prompt)] = -1
         example_mask = example.ge(0)

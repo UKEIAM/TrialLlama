@@ -36,7 +36,7 @@ def prepare_files(
         resp = item[1]["RESPONSE"].lower()
         resp = "".join(resp.split())
 
-        if "noteligible" in resp:
+        if "noteligible" in resp or "excluded" in resp:
             pred_class = 1
         elif "eligible" in resp:
             pred_class = 2
@@ -182,8 +182,8 @@ def calculate_metrics(
         annot=True,
         fmt="d",
         # cmap="Blues",
-        xticklabels=["no relevant information", "not eligible", "eligible"],
-        yticklabels=["no relevant information", "not eligible", "eligible"],
+        xticklabels=["no relevant information", "excluded", "eligible"],
+        yticklabels=["no relevant information", "excluded", "eligible"],
     )
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
