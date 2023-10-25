@@ -38,9 +38,11 @@ for param_set in param_combinations:
 
     # TODO: Check if learning rate at the end works, since dot in folder name
     ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}"
-    if dataset_test_version == "v6-one":
+    if "one" in dataset_test_version:
         one_shot = True
-        dataset_test_version = "v6"
+        dataset_test_version = dataset_test_version.split("-")[
+            0
+        ]  # TODO: test if this works
     else:
         one_shot = False
 
@@ -69,9 +71,9 @@ for param_set in param_combinations:
         str(top_p),
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
-    if os.path.exists(os.path.join("out", ft_model)):
-        command.append("--run_training")
-        command.append(str(False))
+    # if os.path.exists(os.path.join("out", ft_model)):
+    #     command.append("--run_training")
+    #     command.append(str(False))
 
     # For response generation we add a one-shot example to enhance the output quality of the model
     if one_shot:
