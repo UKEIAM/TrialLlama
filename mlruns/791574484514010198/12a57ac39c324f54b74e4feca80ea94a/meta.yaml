@@ -1,8 +1,9 @@
 artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/791574484514010198/12a57ac39c324f54b74e4feca80ea94a/artifacts
+deleted_time: 1698192956458
 end_time: 1698147935351
 entry_point_name: ''
 experiment_id: '791574484514010198'
-lifecycle_stage: active
+lifecycle_stage: deleted
 run_id: 12a57ac39c324f54b74e4feca80ea94a
 run_name: 3vayc2a0-027_v6_4_0.0001_1.0
 run_uuid: 12a57ac39c324f54b74e4feca80ea94a
