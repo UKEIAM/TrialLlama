@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/791574484514010198/a12cd1054d994b0a8d3ae570fe65f28f/artifacts
+deleted_time: 1698206403021
+end_time: null
+entry_point_name: ''
+experiment_id: '791574484514010198'
+lifecycle_stage: deleted
+run_id: a12cd1054d994b0a8d3ae570fe65f28f
+run_name: bgj37wk0-374_v5_4_0.0001_1.0
+run_uuid: a12cd1054d994b0a8d3ae570fe65f28f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1698205909609
+status: 1
+tags: []
+user_id: 1kkraus

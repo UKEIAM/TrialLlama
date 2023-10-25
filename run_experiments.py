@@ -32,6 +32,7 @@ for param_set in param_combinations:
         temperature,
         top_k,
         top_p,
+        evaluate_base_model,
     ) = param_set
 
     # decimal_part_lr = str(lr).split(".")[1] if "." in str(lr) else "0"
@@ -69,6 +70,8 @@ for param_set in param_combinations:
         str(top_k),
         "--top_p",
         str(top_p),
+        "--evaluate_base_model",
+        str(evaluate_base_model),
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
     if os.path.exists(os.path.join("out", ft_model)):
@@ -79,6 +82,12 @@ for param_set in param_combinations:
     if one_shot:
         command.append("--add_example")
         command.append(str(True))
+        # command.append("--max_new_tokens")
+        # command.append(str(1024))
+
+    if evaluate_base_model:
+        command.append("--load_peft_model")
+        command.append(str(False))
 
     # Run the model script
     subprocess.run(command)

@@ -5,17 +5,18 @@ from dataclasses import dataclass
 class experiment_config:
     base_model: str = "MedLlama-2-13b-chat-hf"
     dataset_size: int = 1
-    dataset_version: str = "v5"
-    dataset_name: str = "ct_train_sample_v5"
+    dataset_version: str = "v7"
+    dataset_name: str = "ct_train_sample_v7"
     create_sample: bool = True
     dataset_size_testing: int = 50
     dataset_test_version: str = "v5"
     max_tokens: int = 2048
-    max_new_tokens: int = 200
+    max_new_tokens: int = 1024
     lr: float = 1e-4
     batch_size: int = 4
     num_epochs: int = 4
-    ft_model: str = "llama-2-13b-chat-hf-300-default"
+    ft_model: str = "llama-2-13b-chat-hf-3"
+    load_peft_model: bool = True
     gold_labels_year: int = 2022
     gamma: float = 0.85
     run_training: bool = True

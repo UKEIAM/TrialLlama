@@ -1,0 +1,16 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/791574484514010198/30633152eece4adbac6d61493ebfae30/artifacts
+deleted_time: 1698206403013
+end_time: 1698204508258
+entry_point_name: ''
+experiment_id: '791574484514010198'
+lifecycle_stage: deleted
+run_id: 30633152eece4adbac6d61493ebfae30
+run_name: qsrydngy-749_v5_4_0.0001_1.0
+run_uuid: 30633152eece4adbac6d61493ebfae30
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1698204484325
+status: 4
+tags: []
+user_id: 1kkraus

@@ -78,8 +78,11 @@ def main(
             "pad_token": "<PAD>",
         }
     )
-
-    max_tokens = 3072  # Max tokens need to be set beneath the max_tokens the model might be able to ingest, since the response otherwise exceeds the number of max_tokens
+    max_tokens = 3072
+    # if test_config.add_example:
+    #     max_tokens = 3072
+    # else:
+    #     max_tokens = 2048
 
     dataset_test = get_preprocessed_dataset(
         tokenizer,
