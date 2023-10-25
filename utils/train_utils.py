@@ -10,10 +10,12 @@ import math
 import fire
 import torch
 import transformers
+import numpy as np
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from typing import List, Optional
+from torch.nn.utils import clip_grad_norm_
 
 
 """
@@ -94,12 +96,14 @@ def train(
         world_size = int(os.environ["WORLD_SIZE"])
     train_prep = []
     train_loss = []
+    train_step_loss = []
     val_prep = []
     val_loss = []
     epoch_times = []
     checkpoint_times = []
     results = {}
     best_val_loss = float("inf")
+    max_grad_norm = 1.0
     for epoch in range(train_config.num_epochs):
         epoch_start_time = time.perf_counter()
         with MemoryTrace() as memtrace:  # track the memory usage
@@ -118,6 +122,7 @@ def train(
                 loss = model(**batch).loss
                 loss = loss / gradient_accumulation_steps
                 total_loss += loss.detach().float()
+                train_step_loss.append(total_loss)
                 if train_config.use_fp16:
                     # if fp16 is enabled, use gradient scaler to handle gradient update
                     scaler.scale(loss).backward()
@@ -125,6 +130,7 @@ def train(
                         train_dataloader
                     ) - 1:
                         scaler.step(optimizer)
+                        clip_grad_norm_(model.parameters(), max_grad_norm)
                         scaler.update()
                         optimizer.zero_grad()
                         pbar.update(step // gradient_accumulation_steps)
@@ -134,6 +140,7 @@ def train(
                     if (step + 1) % gradient_accumulation_steps == 0 or step == len(
                         train_dataloader
                     ) - 1:
+                        clip_grad_norm_(model.parameters(), max_grad_norm)
                         optimizer.step()
                         optimizer.zero_grad()
                         pbar.update(step // gradient_accumulation_steps)
@@ -286,16 +293,20 @@ def train(
     results["avg_epoch_time"] = avg_epoch_time
     results["avg_checkpoint_time"] = avg_checkpoint_time
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(train_loss, label="Training Loss", color="blue")
-    plt.plot(val_loss, label="Validation Loss", color="red")
-    plt.xlabel("Epochs")
+    # Convert the tensors to NumPy arrays
+    train_step_losses = [loss.item() for loss in train_step_loss]
+    # Create x-axis values (epochs)
+    epochs = np.arange(1, len(train_step_losses) + 1)
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(epochs, train_step_losses, label="Training Loss", marker="o")
+    # plt.plot(epochs, val_losses, label='Validation Loss', marker='o')
+    plt.xlabel(f"Steps")
     plt.ylabel("Loss")
+    plt.title("Training and Validation Loss Over Epochs")
     plt.legend()
-    plt.title("Training and Validation Loss")
-
+    plt.grid(True)
     plt_save_path = os.path.join("out", "eval", "img", f"{train_config.ft_model}.png")
-
     plt.savefig(plt_save_path)
 
     # saving the training params including fsdp setting for reference.
@@ -368,7 +379,7 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
     else:
         print(f" {eval_ppl=} {eval_epoch_loss=}")
 
-    return eval_ppl, eval_epoch_loss
+    return eval_ppl, eval_epoch_loss, step_loss
 
 
 def freeze_transformer_layers(model, num_layer):
