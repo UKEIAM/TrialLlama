@@ -1,0 +1,1 @@
+2023-10-13 18:26:43,239 - utils.logger_utils - ERROR - Response:  -> local variable 'pred_class' referenced before assignment

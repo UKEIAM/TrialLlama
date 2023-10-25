@@ -379,7 +379,7 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
     else:
         print(f" {eval_ppl=} {eval_epoch_loss=}")
 
-    return eval_ppl, eval_epoch_loss, step_loss
+    return eval_ppl, eval_epoch_loss
 
 
 def freeze_transformer_layers(model, num_layer):

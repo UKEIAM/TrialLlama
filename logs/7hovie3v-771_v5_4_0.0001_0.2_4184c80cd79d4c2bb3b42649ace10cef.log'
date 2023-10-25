@@ -1,0 +1,1 @@
+2023-10-23 01:13:13,583 - utils.logger_utils - ERROR - Error while logging artifact: [Errno 13] Permission denied: '/Users'

@@ -1,0 +1,2 @@
+2023-10-22 06:20:07,205 - utils.logger_utils - ERROR - Error while logging artifact: [Errno 13] Permission denied: '/Users'
+2023-10-22 06:20:07,211 - utils.logger_utils - ERROR - Response: ible -> local variable 'pred_class' referenced before assignment

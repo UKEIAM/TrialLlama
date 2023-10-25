@@ -71,9 +71,9 @@ for param_set in param_combinations:
         str(top_p),
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
-    # if os.path.exists(os.path.join("out", ft_model)):
-    #     command.append("--run_training")
-    #     command.append(str(False))
+    if os.path.exists(os.path.join("out", ft_model)):
+        command.append("--run_training")
+        command.append(str(False))
 
     # For response generation we add a one-shot example to enhance the output quality of the model
     if one_shot:

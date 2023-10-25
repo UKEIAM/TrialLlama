@@ -1,0 +1,2 @@
+2023-10-21 10:26:45,499 - utils.logger_utils - ERROR - Error while logging artifact: [Errno 13] Permission denied: '/Users'
+2023-10-21 10:26:45,505 - utils.logger_utils - ERROR - Response:  -> local variable 'pred_class' referenced before assignment
