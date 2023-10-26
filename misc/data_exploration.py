@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
 type = "train"
+one_shot = False
 max_allowed_words = 1000
 
 path = base_dir
@@ -77,11 +78,14 @@ for unique_id in df_reduced["topic_id"].unique():
 
 value_counts_grouped = balanced_df["output"].value_counts()
 
-example_path = os.path.join(base_dir, "data", f"inference_example_v6.json")
-max_words_2 = balanced_df["word_count"].max()
-df_example = pd.read_json(example_path)
-input_value = df_example["input"]
-balanced_df["instruction"] = balanced_df["instruction"].astype("str") + input_value[0]
+if one_shot:
+    example_path = os.path.join(base_dir, "data", f"inference_example_v6.json")
+    max_words_2 = balanced_df["word_count"].max()
+    df_example = pd.read_json(example_path)
+    input_value = df_example["input"]
+    balanced_df["instruction"] = (
+        balanced_df["instruction"].astype("str") + input_value[0]
+    )
 
 for col in cols_to_count:
     balanced_df[col] = balanced_df[col].astype("str")
@@ -101,7 +105,7 @@ print(class_counts_filtered_reduced_final)
 
 # Create a bar chart of the class distribution
 plt.figure(figsize=(8, 6))
-ax = class_counts.plot(kind="bar", color="skyblue")
+ax = class_counts_filtered_reduced_final.plot(kind="bar", color="skyblue")
 plt.title("Class Distribution of Clinical Trials Dataset")
 plt.xlabel("Class")
 plt.ylabel("Count")

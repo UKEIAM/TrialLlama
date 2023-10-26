@@ -1,6 +1,6 @@
 base_model:
 #  - "Llama-2-7b-chat-hf"
-#  - "Llama-2-13b-chat-hf"
+  - "Llama-2-13b-chat-hf"
   - "MedLlama-2-13b-chat-hf"
 dataset_version:
 #  - "v1
@@ -20,18 +20,18 @@ dataset_test_version:
 #  - "v5"
 #  - "v5_1"
 #  - "v5_2"
-  - "v6"
-  - "v6-one"
+#  - "v6"
+#  - "v6-one"
   - "v7"
 dataset_size:
-#  - 1
+  - 1
 #  - 2
 #  - 3
 #  - 100 # POC
 #  - 300
 #  - 900
 #  - 1800
-  - 3000
+#  - 3000
 #  - 5000
 #  - 10000
 #  - 15000
@@ -48,7 +48,7 @@ lr:
 #  - 0.00001
 temperature:
 #  - 0.0 # Ideally used, for deterministic output -> Not working for now, some known issue with Llama-2. Temperature has to be higher
-#  - 0.1
+  - 0.1
 #  - 0.2 # 0.2 and 0.1 show same results
 #  - 0.5
 #  - 0.95
@@ -83,5 +83,5 @@ top_p:
 #  - 0.98
   - 1.0 # Default
 evaluate_base_model:
-  - true
-#  - false
+#  - true
+  - false

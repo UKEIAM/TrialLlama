@@ -35,8 +35,11 @@ def main(**kwargs):
     train_plt_path = plt_save_path = os.path.join(
         "out", "eval", "img", f"{experiment_config.ft_model}.png"
     )
-
-    mlflow.set_experiment(f"base-model-comparison")
+    if experiment_config.evaluate_base_model:
+        experiment_name = f"base-model-eval-{experiment_config.base_model.lower()}"
+    else:
+        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}"
+    mlflow.set_experiment(experiment_name)
     print(
         f"RUNNING EXPERIMENT: {experiment_config.base_model.lower()}-{experiment_config.dataset_version}"
     )
@@ -64,6 +67,7 @@ def main(**kwargs):
         )
         mlflow.log_params(
             {
+                "base_model": experiment_config.base_model,
                 "batch_size": experiment_config.batch_size,
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,
