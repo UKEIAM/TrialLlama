@@ -14,14 +14,14 @@ class train_config:
     num_epochs: int = 4
     num_workers_dataloader: int = 1
     lr: float = 1e-4
-    weight_decay: float = 0.0
+    weight_decay: float = 0.01
     gamma: float = 0.85
     seed: int = 42
     use_fp16: bool = True
     mixed_precision: bool = True
     val_batch_size: int = 1
-    dataset_version: str = "v5"
-    dataset: str = "ct_train_sample_v5"
+    dataset_version: str = "v7"
+    dataset: str = "ct_train_sample_v7"
     dataset_size: int = (
         None  # If number is given, all available data after balancing is used
     )

@@ -38,7 +38,11 @@ for param_set in param_combinations:
     # decimal_part_lr = str(lr).split(".")[1] if "." in str(lr) else "0"
 
     # TODO: Check if learning rate at the end works, since dot in folder name
-    ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}"
+    if evaluate_base_model:
+        ft_model = f"{base_model.lower()}-base"
+    else:
+        ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}"
+
     if "one" in dataset_test_version:
         one_shot = True
         dataset_test_version = dataset_test_version.split("-")[
@@ -87,6 +91,8 @@ for param_set in param_combinations:
 
     if evaluate_base_model:
         command.append("--load_peft_model")
+        command.append(str(False))
+        command.append("--run_training")
         command.append(str(False))
 
     if "v6" in dataset_test_version:

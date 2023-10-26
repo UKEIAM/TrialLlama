@@ -7,7 +7,6 @@ import yaml
 import time
 import math
 
-import fire
 import torch
 import transformers
 import numpy as np
@@ -301,7 +300,7 @@ def train(
     plt.figure(figsize=(8, 6))
     plt.plot(epochs, train_epoch_loss, label="Training Loss", marker="o")
     # plt.plot(epochs, val_losses, label='Validation Loss', marker='o')
-    plt.xlabel(f"Steps")
+    plt.xlabel(f"Epochs")
     plt.ylabel("Loss")
     plt.title("Training and Validation Loss Over Epochs")
     plt.legend()

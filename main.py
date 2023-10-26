@@ -44,7 +44,9 @@ def main(**kwargs):
         f"RUNNING EXPERIMENT: {experiment_config.base_model.lower()}-{experiment_config.dataset_version}"
     )
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
-    description = f"Fine-tuned model {experiment_config.ft_model} | qrels {experiment_config.gold_labels_year} | Dataset balancing v3"
+    description = (
+        f"Fine-tuned model {experiment_config.ft_model} | Dataset balancing v3"
+    )
     # Define the characters to choose from for the prefix
     prefix_characters = string.ascii_lowercase + string.digits
     prefix_length = 8  # Adjust the length as needed

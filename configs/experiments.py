@@ -8,7 +8,7 @@ class experiment_config:
     dataset_version: str = "v7"
     dataset_name: str = "ct_train_sample_v7"
     create_sample: bool = True
-    dataset_size_testing: int = 50
+    dataset_size_testing: int = 10
     dataset_test_version: str = "v7"
     max_tokens: int = 2048
     max_new_tokens: int = 1024
@@ -17,7 +17,6 @@ class experiment_config:
     num_epochs: int = 4
     ft_model: str = "llama-2-13b-chat-hf-3"
     load_peft_model: bool = True
-    gold_labels_year: int = 2022
     gamma: float = 0.85
     run_training: bool = True
     run_inference: bool = True
