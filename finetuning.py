@@ -257,7 +257,7 @@ def main(logger: Optional[object] = None, **kwargs):
         optimizer = optim.AdamW(
             model.parameters(),
             lr=train_config.lr,
-            weight_decay=0.0,
+            weight_decay=0.01,
         )
     scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
 
