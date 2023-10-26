@@ -126,7 +126,10 @@ def create_dataset_sample(
         id_subset = df[df["topic_id"] == unique_id]
         if dataset_size > 3:
             desired_label_count = (
-                id_subset.groupby("topic_id")["output"].value_counts().sort_values()[0]
+                id_subset.groupby("topic_id")["output"]
+                .value_counts()
+                .sort_values()
+                .iloc[0]
             )
         else:
             desired_label_count = dataset_size

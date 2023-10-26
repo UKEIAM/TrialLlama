@@ -1,7 +1,12 @@
 # Masters-Thesis
 @author Kevin Kraus
 Masters thesis in the domain of NLP in cooperation with the IAM at UKE: Fine-tuning small LLMs for precision oncology use-cases
-# MTB Patient Trial Matching based on a fine-tuned Llama2-7b model
+# MTB Patient Trial Matching based on a fine-tuned Llama-2-13b model
+## Setup
+This repository is an adaptaion of `lama-recepies` by facebook labs. To simply install or required dependencies run following:
+`pip install --extra-index-url https://download.pytorch.org/whl/test/cu118 llama-recipes`
+On top of that run `pip install -r requirements.txt` to add project specific requirements.
+
 ## Repo structure
 Beside a whole bunch of utils, scripts and data-related files the most important python files are:
 - `scripts/prepare_dataset.py` for preparing the dataset for fine-tuning based on the data provided by TREC Precision Medicine Track Challenge
