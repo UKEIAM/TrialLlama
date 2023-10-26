@@ -7,7 +7,8 @@ import copy
 import json
 import torch
 
-from sentencepiece import SentencePieceProcessor
+import torch.nn.functional as F
+
 from torch.utils.data import Dataset
 
 

@@ -117,7 +117,7 @@ tomli==2.0.1
 torch==2.0.1+cu118
 tqdm==4.66.1
 traitlets==5.10.0
-transformers==4.33.2
+transformers==4.31.0
 triton==2.0.0
 typing_extensions==4.8.0
 urllib3==1.26.16

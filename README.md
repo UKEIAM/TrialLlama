@@ -12,11 +12,10 @@ Beside a whole bunch of utils, scripts and data-related files the most important
 
 ## Data availablity
 For the sake of experimentation and future work, the final version of the used dataset is uploaded to huggingface-hub, so no one has to figure out how to run my data_extraction and preparation scripts.
-`Kevinkrs/mtb_ai_v3`
 
 ## Model availability
 The model is available on huggingface-hub as well if someone wants to play with it!
-`Kevinkrs/mtb_ai_v1`
+`kevinkrs/mtb_ai_v1`
 
 ## Setup
 - Run `pip install -r requirements.txt`

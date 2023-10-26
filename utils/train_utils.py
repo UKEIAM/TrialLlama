@@ -296,17 +296,19 @@ def train(
     # Convert the tensors to NumPy arrays
     train_step_losses = [loss.item() for loss in train_step_loss]
     # Create x-axis values (epochs)
-    epochs = np.arange(1, len(train_step_losses) + 1)
+    epochs = np.arange(1, len(train_epoch_loss) + 1)
 
     plt.figure(figsize=(8, 6))
-    plt.plot(epochs, train_step_losses, label="Training Loss", marker="o")
+    plt.plot(epochs, train_epoch_loss, label="Training Loss", marker="o")
     # plt.plot(epochs, val_losses, label='Validation Loss', marker='o')
     plt.xlabel(f"Steps")
     plt.ylabel("Loss")
     plt.title("Training and Validation Loss Over Epochs")
     plt.legend()
     plt.grid(True)
-    plt_save_path = os.path.join("out", "eval", "img", f"{train_config.ft_model}.png")
+    plt_save_path = os.path.join(
+        "out", "eval", "img", f"{train_config.ft_model}_loss_vs_epoch.png"
+    )
     plt.savefig(plt_save_path)
 
     # saving the training params including fsdp setting for reference.

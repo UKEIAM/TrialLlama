@@ -249,6 +249,7 @@ def main(logger: Optional[object] = None, **kwargs):
         optimizer = AnyPrecisionAdamW(
             model.parameters(),
             lr=train_config.lr,
+            weight_decay=0.01,
             momentum_dtype=torch.bfloat16,
             variance_dtype=torch.bfloat16,
             use_kahan_summation=False,

@@ -1,7 +1,8 @@
 base_model:
 #  - "Llama-2-7b-chat-hf"
   - "Llama-2-13b-chat-hf"
-  - "MedLlama-2-13b-chat-hf"
+  - "Llama-2-13b-hf"
+#  - "MedLlama-2-13b-chat-hf"
 dataset_version:
 #  - "v1
 #  - "v2"
@@ -52,7 +53,7 @@ temperature:
 #  - 0.2 # 0.2 and 0.1 show same results
 #  - 0.5
 #  - 0.95
-  - 1.0 # Default
+#  - 1.0 # Default
 #  - 1.5
 #  - 2.0
 #  - 3.0
