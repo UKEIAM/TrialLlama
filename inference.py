@@ -78,6 +78,7 @@ def main(
             "pad_token": "<PAD>",
         }
     )
+    model.resize_token_embeddings(model.config.vocab_size + 1)
     max_tokens = 3072
     # if test_config.add_example:
     #     max_tokens = 3072

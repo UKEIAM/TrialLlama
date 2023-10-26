@@ -136,9 +136,13 @@ def main(logger: Optional[object] = None, **kwargs):
 
     # Load the tokenizer and add special tokens
     tokenizer = LlamaTokenizer.from_pretrained(model_path)
-    tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.add_special_tokens(
+        {
+            "pad_token": "<PAD>",
+        }
+    )
     # TODO: Evaluate if this approach suits better for my use-case. Originated from News Classification with LLM by Kshitiz Sahay
-    # tokenizer.pad_token = tokenizer.eos_token
+    model.resize_token_embeddings(model.config.vocab_size + 1)
 
     if train_config.use_peft:
         peft_config = generate_peft_config(train_config, kwargs)
