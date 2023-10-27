@@ -12,6 +12,7 @@ import transformers
 import numpy as np
 import matplotlib.pyplot as plt
 
+from contextlib import nullcontext
 from tqdm import tqdm
 from typing import List, Optional
 from torch.nn.utils import clip_grad_norm_
@@ -93,6 +94,8 @@ def train(
         scaler = torch.cuda.amp.GradScaler()
     if train_config.enable_fsdp:
         world_size = int(os.environ["WORLD_SIZE"])
+    autocast = torch.cuda.amp.autocast if train_config.use_fp16 else nullcontext
+
     train_prep = []
     train_loss = []
     train_step_loss = []
@@ -110,7 +113,10 @@ def train(
             total_loss = 0.0
             total_length = len(train_dataloader) // gradient_accumulation_steps
             pbar = tqdm(
-                colour="blue", desc=f"Training Epoch: {epoch}", total=total_length
+                colour="blue",
+                desc=f"Training Epoch: {epoch+1}",
+                total=total_length,
+                dynamic_ncols=True,
             )
             for step, batch in enumerate(train_dataloader):
                 for key in batch.keys():
@@ -118,7 +124,8 @@ def train(
                         batch[key] = batch[key].to(local_rank)
                     else:
                         batch[key] = batch[key].to("cuda:0")
-                loss = model(**batch).loss
+                with autocast():
+                    loss = model(**batch).loss
                 loss = loss / gradient_accumulation_steps
                 total_loss += loss.detach().float()
                 train_step_loss.append(total_loss)
@@ -132,7 +139,7 @@ def train(
                         clip_grad_norm_(model.parameters(), max_grad_norm)
                         scaler.update()
                         optimizer.zero_grad()
-                        pbar.update(step // gradient_accumulation_steps)
+                        pbar.update(1)
                 else:
                     # regular backpropagation when fp16 is not used
                     loss.backward()
@@ -142,10 +149,10 @@ def train(
                         clip_grad_norm_(model.parameters(), max_grad_norm)
                         optimizer.step()
                         optimizer.zero_grad()
-                        pbar.update(step // gradient_accumulation_steps)
+                        pbar.update(1)
 
                 pbar.set_description(
-                    f"Training Epoch: {epoch}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})"
+                    f"Training Epoch: {epoch+1}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})"
                 )
 
         epoch_end_time = time.perf_counter() - epoch_start_time

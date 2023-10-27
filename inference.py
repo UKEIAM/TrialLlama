@@ -70,14 +70,10 @@ def main(
             device_map="auto",
             low_cpu_mem_usage=True,
         )
-    tokenizer = LlamaTokenizer.from_pretrained(
-        os.path.join("checkpoints", "meta-llama", test_config.base_model)
-    )
-    tokenizer.add_special_tokens(
-        {
-            "pad_token": "<PAD>",
-        }
-    )
+    base_model_path = os.path.join("checkpoints", "meta-llama", test_config.base_model)
+    tokenizer = LlamaTokenizer.from_pretrained(base_model_path)
+    tokenizer.pad_token_id = tokenizer.eos_token_id
+
     model.resize_token_embeddings(model.config.vocab_size + 1)
     max_tokens = 3072
     # if test_config.add_example:
