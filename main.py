@@ -33,7 +33,7 @@ def main(**kwargs):
         base_dir, "configs", "experiment_definitions.yaml"
     )
     train_plt_path = plt_save_path = os.path.join(
-        "out", "eval", "img", f"{experiment_config.ft_model}.png"
+        "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch.png"
     )
     if experiment_config.evaluate_base_model:
         experiment_name = f"base-model-eval-{experiment_config.base_model.lower()}"
@@ -73,6 +73,7 @@ def main(**kwargs):
                 "batch_size": experiment_config.batch_size,
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,
+                "weight_decay": experiment_config.weight_decay,
                 "dataset_name": experiment_config.dataset_name,
                 "dataset_version": experiment_config.dataset_version,
                 "dataset_size_testing": experiment_config.dataset_size_testing,

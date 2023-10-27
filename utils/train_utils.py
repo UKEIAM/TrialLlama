@@ -293,12 +293,12 @@ def train(
     results["avg_checkpoint_time"] = avg_checkpoint_time
 
     # Convert the tensors to NumPy arrays
-    train_step_losses = [loss.item() for loss in train_step_loss]
+    train_losses = [loss.item() for loss in train_loss]
     # Create x-axis values (epochs)
     epochs = np.arange(1, len(train_loss) + 1)
 
     plt.figure(figsize=(8, 6))
-    plt.plot(epochs, train_epoch_loss, label="Training Loss", marker="o")
+    plt.plot(epochs, train_losses, label="Training Loss", marker="o")
     # plt.plot(epochs, val_losses, label='Validation Loss', marker='o')
     plt.xlabel(f"Epochs")
     plt.ylabel("Loss")
