@@ -9,7 +9,7 @@ class test_config:
     quantization: bool = True
     dataset_version: str = "v6"
     dataset: str = "ct_test_sample_v6"
-    dataset_size: int = 250
+    dataset_size: int = 100
     num_workers_dataloader: int = 1
     max_new_tokens: int = 1024
     seed: int = 42  # seed value for reproducibility

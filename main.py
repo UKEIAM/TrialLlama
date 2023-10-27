@@ -10,7 +10,7 @@ import mlflow.pytorch
 
 from utils.train_utils import clear_gpu_cache
 from finetuning import main as ft_main
-from inference import main as test_main
+from inference_main import main as test_main
 from utils.eval_utils import calculate_metrics, prepare_files
 from configs.experiments import experiment_config
 from utils.config_utils import update_config
@@ -109,7 +109,7 @@ def main(**kwargs):
             )
             mlflow.set_tag("ft_conducted", "TRUE")
             mlflow.log_metrics(results)
-            mlflow.log_artifact(local_path=train_plt_path)
+            # mlflow.log_artifact(local_path=train_plt_path)
             clear_gpu_cache()
 
         if experiment_config.run_inference:

@@ -1,0 +1,3 @@
+Main model selected trough trial and error. Model fine-tuned on v5 dataset, since best performance after multiple iterations of prompt engineering.
+Under this experiment all runs can be found, which are related to testing different hyperparameters regarding fine-tuning and inference.
+Naming convention of runs: <Random_Name>_<test_dataset_version>_<batch_size>_<learning_rate>_<temperature><OPTIONAL_VALUES>

@@ -1,8 +1,8 @@
 base_model:
 #  - "Llama-2-7b-chat-hf"
   - "Llama-2-13b-chat-hf"
-  - "Llama-2-13b-hf"
-  - "MedLlama-2-13b-chat-hf"
+#  - "Llama-2-13b-hf"
+#  - "MedLlama-2-13b-chat-hf"
 dataset_version:
 #  - "v1
 #  - "v2"
@@ -25,12 +25,12 @@ dataset_test_version:
 #  - "v6-one"
   - "v7"
 dataset_size:
-  - 1
+#  - 1
 #  - 2
 #  - 3
 #  - 100 # POC
 #  - 300
-#  - 900
+  - 900
 #  - 1800
 #  - 3000
 #  - 5000
@@ -84,5 +84,5 @@ top_p:
 #  - 0.98
   - 1.0 # Default
 evaluate_base_model:
-#  - true
-  - false
+  - true
+#  - false
