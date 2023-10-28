@@ -25,7 +25,7 @@ def prepare_files(
     # TODO Prepare the trec_eval output file and save it as well as the output file required to run metrics
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
-    id_pattern = r"^(\d+)_(\d+)_(\w+)$"
+    id_pattern = r"^(\d+)_(\d+\-\d+)_(\w+)$"
     pattern = r"\w[:]?\s?\(?\w+\)?"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
@@ -49,14 +49,14 @@ def prepare_files(
         # Create a dictionary representing the new row
         try:
             new_row_eval = {
-                "TOPIC_NO": int(match.group(2)),
+                "TOPIC_NO": int(match.group(2).split("-")[0]),
                 "Q0": 0,
                 "NCT_ID": match.group(3),
                 "LABEL": int(pred_class),
                 "TOPIC_YEAR": int(item[1]["TOPIC_YEAR"]),
             }
             new_row_trec = {
-                "TOPIC_NO": match.group(2),
+                "TOPIC_NO": match.group(2).split("-")[0],
                 "Q0": 0,
                 "NCT_ID": match.group(3),
                 "SCORE": item[1]["PROBA"],

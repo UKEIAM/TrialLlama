@@ -77,7 +77,7 @@ def count_words(text):
 def create_dataset_sample(
     dataset_size: Optional[int] = None,
     add_example: Optional[bool] = False,
-    version: str = "v5",
+    version: str = "v7",
     type: str = "train",
 ) -> None:
     path = base_dir
@@ -106,7 +106,10 @@ def create_dataset_sample(
         complex with information. Hence we reduce to 800 words for the input, to provide the model with best possible
         train data.
     """
-    word_count = 1000
+    if type == "test":
+        word_count = 1500
+    else:
+        word_count = 1000
     df = truncate(df, word_count)
     df.drop(["word_count"], axis=1, inplace=True)
 
@@ -157,7 +160,6 @@ def create_dataset_sample(
 
     if type == "test":
         if add_example:
-            word_count = 1500
             df_example = pd.read_json(example_path)
             input_value = df_example["input"]
             balanced_df["instruction"] = balanced_df["instruction"] + input_value[0]
