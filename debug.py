@@ -5,7 +5,7 @@ from utils.eval_utils import prepare_files, calculate_metrics
 eval_output_path = os.path.join(
     "out",
     "eval",
-    f"eval_3uzppo0g-562_v7_4_0.0001_0.1.json",
+    f"eval_xbf2eqdf-626_v7_4_0.0001_1.0.json",
 )
 
 eval_df = prepare_files(eval_output_path, "super_duper_run")

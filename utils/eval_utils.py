@@ -26,7 +26,7 @@ def prepare_files(
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+\-\d+)_(\w+)$"
-    pattern = r"\w[:]?\s?\(?\w+\)?"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
+    pattern = r"[A-C][:]?\s?\(?\w+\)?"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
 
@@ -35,9 +35,9 @@ def prepare_files(
     for item in raw_df.iterrows():
         match = re.match(id_pattern, item[1]["ID"])
         match_label = re.findall(pattern, item[1]["RESPONSE"])
-        if match_label == None or len(match_label > 1):
+        if len(match_label) == 0 or len(match_label) > 1:
             continue
-        resp = match_label.lower()
+        resp = match_label[0].lower()
 
         if "excluded" in resp:
             pred_class = 1
@@ -45,6 +45,8 @@ def prepare_files(
             pred_class = 2
         elif "not relevant information" in resp or "not relevant" in resp:
             pred_class = 0
+        else:
+            continue
 
         # Create a dictionary representing the new row
         try:
@@ -196,6 +198,7 @@ def calculate_metrics(
     plt.savefig(os.path.join(out_img_path, f"cm_{ft_model_name}_{run_name}.png"))
 
     return {
+        "evaluatable_items ": len(merged_df),
         "accuracy": accuracy,
         "precision": precision,
         "recall": recall,
