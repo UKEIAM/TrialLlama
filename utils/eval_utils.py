@@ -26,6 +26,7 @@ def prepare_files(
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+)_(\w+)$"
+    pattern = r"([A-Z](?::)? [a-zA-Z ]+(?: \([^)]+\))?)"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
 
@@ -33,14 +34,16 @@ def prepare_files(
 
     for item in raw_df.iterrows():
         match = re.match(id_pattern, item[1]["ID"])
-        resp = item[1]["RESPONSE"].lower()
-        resp = "".join(resp.split())
+        match_label = re.match(pattern, item[1]["RESPONSE"])
+        if match_label == None:
+            continue
+        resp = match_label.lower()
 
-        if "noteligible" in resp or "excluded" in resp:
+        if "excluded" in resp:
             pred_class = 1
         elif "eligible" in resp:
             pred_class = 2
-        elif "norelevantinformation" in resp or "notrelevant" in resp:
+        elif "not relevant information" in resp or "not relevant" in resp:
             pred_class = 0
 
         # Create a dictionary representing the new row
