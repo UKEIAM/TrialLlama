@@ -30,7 +30,7 @@ def create_JSON(
     versions=None,
 ):
     if versions is None:
-        versions = ["v6", "v7"]
+        versions = ["v6", "v7", "v8"]
     for ver in versions:
         version = ver
         data_list = []
@@ -65,11 +65,11 @@ def create_JSON(
             # qrels = qrels[:100]
 
             for index, row in tqdm(qrels.iterrows()):
-                topic_nr = row["topic"]
+                topic_nr = f"{row['topic']}-{topic_year}"
                 try:
-                    topic = topics_df[topics_df["number"] == str(topic_nr)][
-                        "topic"
-                    ].values[0]
+                    topic = topics_df[
+                        topics_df["number"] == str(topic_nr.split("-")[0])
+                    ]["topic"].values[0]
                     cleaned_topic = clean_textblock(topic)
                 except KeyError as e:
                     continue
@@ -99,7 +99,7 @@ def create_JSON(
                                 # ct_input.append(f"{exclusion_crit}")
                     ct_input = "\n".join([f"{item}" for item in ct_input])
                     if label == 0:
-                        category = "C: not relevant for clinical trial"
+                        category = "C: irrelevant"
                     elif label == 1:
                         category = "B: excluded"
                     else:
@@ -130,7 +130,18 @@ def create_JSON(
 
         # Step 2: Create a test dataset which withholds 10 topics from the training dataset
         df["topic_id"] = df["id"].str.split("_").str[1]
-        topics_to_filter = ["12", "15", "17", "27", "30", "36", "40", "53", "65", "71"]
+        topics_to_filter = [
+            "12-2021",
+            "15-2021",
+            "17-2022",
+            "27-2022",
+            "30-2021",
+            "36-2021",
+            "40-2022",
+            "53-2021",
+            "65-2021",
+            "71-2021",
+        ]
         mask = df["topic_id"].isin(topics_to_filter)
 
         # test_dataset = df.sample(

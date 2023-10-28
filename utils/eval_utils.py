@@ -26,7 +26,7 @@ def prepare_files(
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+)_(\w+)$"
-    pattern = r"([A-Z](?::)? [a-zA-Z ]+(?: \([^)]+\))?)"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
+    pattern = r"\w[:]?\s?\(?\w+\)?"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
 
@@ -34,8 +34,8 @@ def prepare_files(
 
     for item in raw_df.iterrows():
         match = re.match(id_pattern, item[1]["ID"])
-        match_label = re.match(pattern, item[1]["RESPONSE"])
-        if match_label == None:
+        match_label = re.findall(pattern, item[1]["RESPONSE"])
+        if match_label == None or len(match_label > 1):
             continue
         resp = match_label.lower()
 
