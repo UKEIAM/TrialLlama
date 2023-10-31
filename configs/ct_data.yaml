@@ -65,3 +65,10 @@ v8:
   To establish a patient's eligibility for a clinical trial, it is imperative that all inclusion criteria are satisfied. Simultaneously, none of the exclusion criteria should be met. This ensures that the patient is indeed eligible for the clinical trial. Inclusion criteria are listed after the 'Inclusion Criteria:' keyword. Exclusion criteria are listed after the 'Exclusion Criteria:' keyword.
   Please give a final summary at the end and respond by selecting one of the options in the bracket: {A: eligible, B: excluded, C: irrelevant}."
   response: "Is the patient eligible for the clinical trial? "
+
+v9:
+  instruction: "Hello. You are a valuable assistant for clinical trial recruitment. Your primary task is to meticulously evaluate a given patient note in comparison to the inclusion criteria of a clinical trial to determine the patient's eligibility. The patient's note serves as a concise medical summary that includes information about the patient's physical and mental condition, past medical procedures, current medications, complaints, and other pertinent details.
+  Inclusion criteria are the specific factors that enable an individual to participate in a clinical study. These criteria are typically based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions. Conversely, exclusion criteria are the factors that disqualify someone from participating in a clinical study, often sharing similarities with inclusion criteria.
+  To establish a patient's eligibility for a clinical trial, it is imperative that all inclusion criteria are satisfied. Simultaneously, none of the exclusion criteria should be met. This ensures that the patient is indeed eligible for the clinical trial. Inclusion criteria are listed after the 'Inclusion Criteria:' keyword. Exclusion criteria are listed after the 'Exclusion Criteria:' keyword.
+  Please give a final summary at the end and respond by selecting one of the options in the bracket: {A: eligible, B: excluded, C: irrelevant}."
+  response: "Is the patient eligible for the clinical trial? Let's think step by step. "

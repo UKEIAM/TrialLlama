@@ -96,9 +96,5 @@ for param_set in param_combinations:
         command.append(str(False))
         print("EVALUATING BASE MODEL")
 
-    if "v6" in dataset_test_version:
-        command.append("--run_eval")
-        command.append(str(False))
-
     # Run the model script
     subprocess.run(command)
