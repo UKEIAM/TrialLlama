@@ -1,2 +1,0 @@
-2023-10-12 11:59:51,986 - utils.logger_utils - ERROR - Response:  -> local variable 'pred_class' referenced before assignment
-2023-10-12 11:59:51,987 - utils.logger_utils - ERROR - Response: o:a -> local variable 'pred_class' referenced before assignment

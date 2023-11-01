@@ -1,2 +1,0 @@
-2023-10-12 06:27:23,465 - utils.logger_utils - ERROR - Error while logging artifact: [Errno 13] Permission denied: '/Users'
-2023-10-12 06:27:23,470 - utils.logger_utils - ERROR - Response: {asp2151clinicaltrialeligibilitycriteriamedicalcondition} -> local variable 'pred_class' referenced before assignment

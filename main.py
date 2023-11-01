@@ -36,9 +36,9 @@ def main(**kwargs):
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch.png"
     )
     if experiment_config.evaluate_base_model:
-        experiment_name = f"base-model-eval-{experiment_config.base_model.lower()}"
+        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-base"
     else:
-        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-v2"
+        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-{experiment_config.dataset_size}"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
@@ -145,24 +145,29 @@ def main(**kwargs):
             clear_gpu_cache()
 
         if experiment_config.run_eval:
-            print("Running evaluation...")
-            eval_df = prepare_files(
-                eval_output_path=eval_output_path, run_name=run_name, logger=logger
-            )
-            scores = calculate_metrics(
-                eval_df=eval_df,
-                gold_labels_dir=qrels_dir,
-                ft_model_name=experiment_config.ft_model,
-                run_name=run_name,
-                logger=logger,
-            )
-            mlflow.set_tag("evaluation_conducted", "TRUE")
-            mlflow.log_metrics(scores)
-            clear_gpu_cache()
+            try:
+                print("Running evaluation...")
+                eval_df = prepare_files(
+                    eval_output_path=eval_output_path, run_name=run_name, logger=logger
+                )
+                scores = calculate_metrics(
+                    eval_df=eval_df,
+                    gold_labels_dir=qrels_dir,
+                    ft_model_name=experiment_config.ft_model,
+                    run_name=run_name,
+                    logger=logger,
+                )
+                mlflow.set_tag("evaluation_conducted", "TRUE")
+                mlflow.log_metrics(scores)
+                clear_gpu_cache()
+
+            except Exception as e:
+                logger.error(f"Output does not corresponds to the required format: {e}")
 
         # Clean gpu_cache before next mlflow run
         print("Run completed successfully")
         logger.debug(f"Run with ID {run.info.run_id} finished successful")
+        clear_gpu_cache()
     # Set experiment ID
     # Run experiments from experiment.yaml
     # Train model on different parameters

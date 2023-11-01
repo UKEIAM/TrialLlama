@@ -20,7 +20,7 @@ class experiment_config:
     gamma: float = 0.85
     run_training: bool = True
     run_inference: bool = True
-    run_eval: bool = True
+    run_eval: bool = False
     top_p: float = 1.0
     temperature: float = 1.0
     top_k: int = 50
