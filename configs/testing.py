@@ -9,9 +9,9 @@ class test_config:
     quantization: bool = True
     dataset_version: str = "v6"
     dataset: str = "ct_test_sample_v6"
-    dataset_size: int = 100
+    dataset_size: int = 50
     num_workers_dataloader: int = 1
-    max_new_tokens: int = 1024
+    max_new_tokens: int = 500
     seed: int = 42  # seed value for reproducibility
     do_sample: bool = (
         True  # Whether or not to use sampling ; use greedy decoding otherwise.

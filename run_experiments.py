@@ -33,6 +33,7 @@ for param_set in param_combinations:
         top_k,
         top_p,
         evaluate_base_model,
+        task,
     ) = param_set
 
     # decimal_part_lr = str(lr).split(".")[1] if "." in str(lr) else "0"
@@ -50,6 +51,11 @@ for param_set in param_combinations:
         ]  # TODO: test if this works
     else:
         one_shot = False
+
+    if task == "classification":
+        max_new_tokens = 10
+    else:
+        max_new_tokens = 500
 
     command = [
         "python",
@@ -76,6 +82,8 @@ for param_set in param_combinations:
         str(top_p),
         "--evaluate_base_model",
         str(evaluate_base_model),
+        "--max_new_tokens",
+        str(max_new_tokens),
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
     if os.path.exists(os.path.join("out", ft_model)):

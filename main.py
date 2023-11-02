@@ -36,9 +36,9 @@ def main(**kwargs):
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch.png"
     )
     if experiment_config.evaluate_base_model:
-        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-base"
+        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-base-classifier"
     else:
-        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-{experiment_config.dataset_size}"
+        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-classifier"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))

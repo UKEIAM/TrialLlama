@@ -191,7 +191,7 @@ class ct_test_sample_v6_2:
 class ct_test_sample_v7:
     dataset: str = "ct_test_sample_v7"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
-    data_path: str = "data/ct_test_sample_v7.json"
+    data_path: str = "data/ct_test_sample_v6.json"
 
 
 @dataclass

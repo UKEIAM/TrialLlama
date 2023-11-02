@@ -24,6 +24,7 @@ dataset_test_version:
   - "v6"
   - "v6-one"
   - "v7"
+  - "v7-one"
   - "v8"
   - "v8-one"
   - "v9"
@@ -88,5 +89,8 @@ top_p:
 #  - 0.98
   - 1.0 # Default
 evaluate_base_model:
-  - true
+#  - true
   - false
+task:
+  - classification
+#  - reasoning

@@ -72,3 +72,7 @@ v9:
   To establish a patient's eligibility for a clinical trial, it is imperative that all inclusion criteria are satisfied. Simultaneously, none of the exclusion criteria should be met. This ensures that the patient is indeed eligible for the clinical trial. Inclusion criteria are listed after the 'Inclusion Criteria:' keyword. Exclusion criteria are listed after the 'Exclusion Criteria:' keyword.
   Please give a final summary at the end and respond by selecting one of the options in the bracket: {A: eligible, B: excluded, C: irrelevant}."
   response: "Is the patient eligible for the clinical trial? Let's think step by step. "
+
+v10:
+  instruction: "Based on the information provided, is the patient eligible, excluded or irrelevant for the clinical trial?"
+  response: "Answer with one of the options in the bracket {A: eligible, B: excluded, C: irrelevant} "

@@ -3,15 +3,15 @@ from dataclasses import dataclass
 
 @dataclass
 class experiment_config:
-    base_model: str = "MedLlama-2-13b-chat-hf"
+    base_model: str = "Llama-2-13b-chat-hf"
     dataset_size: int = 1
     dataset_version: str = "v7"
     dataset_name: str = "ct_train_sample_v7"
     create_sample: bool = True
-    dataset_size_testing: int = 20
+    dataset_size_testing: int = 50
     dataset_test_version: str = "v7"
     max_tokens: int = 2048
-    max_new_tokens: int = 1024
+    max_new_tokens: int = 500
     lr: float = 1e-4
     batch_size: int = 4
     num_epochs: int = 4
@@ -20,7 +20,7 @@ class experiment_config:
     gamma: float = 0.85
     run_training: bool = True
     run_inference: bool = True
-    run_eval: bool = False
+    run_eval: bool = True
     top_p: float = 1.0
     temperature: float = 1.0
     top_k: int = 50
