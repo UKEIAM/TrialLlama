@@ -32,5 +32,7 @@ for idx, entry in enumerate(model_output):
     eval_list.append(entry)
 
 df = pd.DataFrame(eval_list)
-base_dir = os.path.dirname(os.path.abspath(__file__))
-df.to_json("out/eval/summary_eval_file.json", orient="records")
+base_dir = os.path.dirname(os.path.dirname(__file__))
+df.to_json(
+    os.path.join(base_dir, "out", "eval", "summary_eval_file.json"), orient="records"
+)

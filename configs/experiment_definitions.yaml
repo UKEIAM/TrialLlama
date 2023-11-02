@@ -27,7 +27,7 @@ dataset_test_version:
 #  - "v7"
 #  - "v7-one"
   - "v8"
-#  - "v8-one"
+  - "v8-one"
 #  - "v9"
 #  - "v9-one"
 dataset_size:

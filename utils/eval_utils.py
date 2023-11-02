@@ -39,11 +39,11 @@ def prepare_files(
             continue
         resp = match_label[0].lower()
 
-        if "excluded" in resp or "B" in resp:
+        if "excluded" in resp or "b" in resp:
             pred_class = 1
-        elif "eligible" in resp or "A" in resp:
+        elif "eligible" in resp or "a" in resp:
             pred_class = 2
-        elif "irrelevant" in resp or "C" in resp:
+        elif "irrelevant" in resp or "c" in resp:
             pred_class = 0
         else:
             continue
