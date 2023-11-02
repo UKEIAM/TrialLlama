@@ -10,7 +10,7 @@ from utils.eval_utils import (
 eval_output_path = os.path.join(
     "out",
     "eval",
-    f"eval_wfu5a6jy-952_v8_4_0.0001_0.1.json",
+    f"eval_xrsc7i43-514_v8_4_0.0001_0.1.json",
 )
 
 eval_df = prepare_files(eval_output_path, "super_duper_run")
@@ -34,3 +34,4 @@ scores_binary = evaluate_binary(
 )
 
 print(scores_binary)
+print("FINISH")

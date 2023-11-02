@@ -55,7 +55,7 @@ for param_set in param_combinations:
     if task == "classification":
         max_new_tokens = 10
     else:
-        max_new_tokens = 500
+        max_new_tokens = 1024
 
     command = [
         "python",
@@ -103,8 +103,6 @@ for param_set in param_combinations:
         command.append("--run_training")
         command.append(str(False))
         print("EVALUATING BASE MODEL")
-
-    print(f"EVALUATING {ft_model}")
 
     # Run the model script
     subprocess.run(command)

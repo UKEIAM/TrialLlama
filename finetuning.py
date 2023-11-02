@@ -22,6 +22,7 @@ from transformers import (
     LlamaForCausalLM,
     LlamaTokenizer,
     LlamaConfig,
+    AutoTokenizer,
     default_data_collator,
 )
 from transformers.models.llama.modeling_llama import LlamaDecoderLayer
@@ -132,7 +133,7 @@ def main(logger: Optional[object] = None, **kwargs):
             )
 
     base_model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
-    tokenizer = LlamaTokenizer.from_pretrained(base_model_path)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_path)
     tokenizer.pad_token_id = tokenizer.eos_token_id
 
     print_model_size(model, train_config, rank if train_config.enable_fsdp else 0)
