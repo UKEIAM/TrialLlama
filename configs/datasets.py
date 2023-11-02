@@ -116,6 +116,14 @@ class ct_train_sample_v9:
     data_path: str = "data/ct_train_sample_v9.json"
 
 
+@dataclass
+class ct_train_sample_v10:
+    dataset: str = "ct_train_sample_v10"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v10.json"
+
+
 # Test data, never seen by the model
 @dataclass
 class ct_test_sample_v1:
@@ -206,3 +214,10 @@ class ct_test_sample_v9:
     dataset: str = "ct_test_sample_v9"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
     data_path: str = "data/ct_test_sample_v9.json"
+
+
+@dataclass
+class ct_test_sample_v10:
+    dataset: str = "ct_test_sample_v10"
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    data_path: str = "data/ct_test_sample_v10.json"

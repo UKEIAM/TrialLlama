@@ -11,7 +11,12 @@ import mlflow.pytorch
 from utils.train_utils import clear_gpu_cache
 from finetuning import main as ft_main
 from inference_main import main as test_main
-from utils.eval_utils import calculate_metrics, prepare_files
+from utils.eval_utils import (
+    calculate_metrics,
+    prepare_files,
+    prepare_binary,
+    evaluate_binary,
+)
 from configs.experiments import experiment_config
 from utils.config_utils import update_config
 from utils.logger_utils import setup_logger
@@ -36,9 +41,9 @@ def main(**kwargs):
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch.png"
     )
     if experiment_config.evaluate_base_model:
-        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-base-classifier"
+        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-base-{experiment_config.task}"
     else:
-        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-classifier"
+        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-{experiment_config.task}"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
@@ -157,8 +162,20 @@ def main(**kwargs):
                     run_name=run_name,
                     logger=logger,
                 )
+
+                binary_val_df = prepare_binary(
+                    eval_output_path=eval_output_path, run_name=run_name, logger=logger
+                )
+                binary_scores = evaluate_binary(
+                    eval_df=binary_val_df,
+                    gold_labels_dir=qrels_dir,
+                    ft_model_name=experiment_config.ft_model,
+                    run_name=run_name,
+                    logger=logger,
+                )
                 mlflow.set_tag("evaluation_conducted", "TRUE")
                 mlflow.log_metrics(scores)
+                mlflow.log_metrics(binary_scores)
                 clear_gpu_cache()
 
             except Exception as e:

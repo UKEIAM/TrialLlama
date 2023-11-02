@@ -21,14 +21,14 @@ dataset_test_version:
 #  - "v5"
 #  - "v5_1"
 #  - "v5_2"
-  - "v6"
-  - "v6-one"
-  - "v7"
-  - "v7-one"
+#  - "v6"
+#  - "v6-one"
+#  - "v7"
+#  - "v7-one"
   - "v8"
-  - "v8-one"
-  - "v9"
-  - "v9-one"
+#  - "v8-one"
+#  - "v9"
+#  - "v9-one"
 dataset_size:
 #  - 1
 #  - 2
