@@ -41,7 +41,9 @@ def main(**kwargs):
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch.png"
     )
     if experiment_config.evaluate_base_model:
-        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-base-{experiment_config.task}"
+        experiment_name = (
+            f"{experiment_config.base_model.lower()}-base-{experiment_config.task}"
+        )
     else:
         experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-{experiment_config.task}"
     mlflow.set_experiment(experiment_name)
