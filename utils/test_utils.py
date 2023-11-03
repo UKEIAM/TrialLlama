@@ -65,38 +65,6 @@ def test(
                         else batch["input_ids"].shape[1]
                     )
 
-                    # generated_tokens = outputs.sequences[:, input_length:]
-                    # generated_response = tokenizer.decode(generated_tokens[0], skip_special_tokens=True)
-                    # print("Model Response:", generated_response)
-                    #
-                    # # Ask a follow-up question
-                    # follow_up_question = "Are you sure this is right?"
-                    # follow_up_input = generated_response + " " + follow_up_question
-                    #
-                    # # Append the follow-up input to the batch
-                    # follow_up_input_ids = tokenizer.encode(follow_up_input, return_tensors="pt").to("cuda:0")
-                    # batch["input_ids"] += follow_up_input_ids
-                    #
-                    # # Generate a response to the follow-up question
-                    # follow_up_outputs = model.generate(
-                    #     **batch,
-                    #     max_new_tokens=test_config.max_new_tokens,
-                    #     do_sample=test_config.do_sample,
-                    #     temperature=test_config.temperature,
-                    #     min_length=test_config.min_length,
-                    #     use_cache=test_config.use_cache,
-                    #     top_k=test_config.top_k,
-                    #     top_p=test_config.top_p,
-                    #     repetition_penalty=test_config.repetition_penalty,
-                    #     length_penalty=test_config.length_penalty,
-                    #     return_dict_in_generate=True,
-                    #     output_scores=True,
-                    # )
-                    #
-                    # # Get the follow-up response
-                    # follow_up_response = tokenizer.decode(follow_up_outputs[0], skip_special_tokens=True)
-                    # print("Follow-up Response:", follow_up_response)
-
                 except RuntimeError as e:
                     logger.error(
                         f"Model eval Output Error: {e} | Sample Identifier {test_data_json[step]['id']}"
@@ -119,6 +87,7 @@ def test(
 
                 if test_config.debug:
                     print(f"{response}")
+                    print(f"GROUND TRUTH: {test_data_json[step]['output']}")
 
                 topic_year = test_data_json[step]["topic_year"]
                 probas = []

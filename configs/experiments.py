@@ -8,10 +8,10 @@ class experiment_config:
     dataset_version: str = "v7"
     dataset_name: str = "ct_train_sample_v7"
     create_sample: bool = True
-    dataset_size_testing: int = 60
-    dataset_test_version: str = "v7"
+    dataset_size_testing: int = 50
+    dataset_test_version: str = "v8"
     max_tokens: int = 2048
-    max_new_tokens: int = 500
+    max_new_tokens: int = 1024
     lr: float = 1e-4
     batch_size: int = 4
     num_epochs: int = 4
