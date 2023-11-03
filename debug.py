@@ -18,7 +18,7 @@ eval_df = prepare_files(eval_output_path, "super_duper_run")
 scores = calculate_metrics(
     eval_df=eval_df,
     gold_labels_dir="data/gold_labels/",
-    ft_model_name="llama-2-13b-chat-hf-900-v7-4",
+    ft_model_name="llama-2-13b-chat-hf-3000-v7-4",
     run_name="debug_run",
 )
 
