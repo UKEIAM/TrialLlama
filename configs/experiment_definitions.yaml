@@ -28,17 +28,17 @@ dataset_test_version:
 #  - "v7-one"
   - "v8"
 #  - "v8-one"
-  - "v9"
+#  - "v9"
 #  - "v9-one"
 dataset_size:
 #  - 1
 #  - 2
 #  - 3
 #  - 100 # POC
-#  - 300
+  - 300
 #  - 1000
 #  - 1800
-  - 3000
+#  - 3000
 #  - 5000
 #  - 10000
 #  - 15000
@@ -46,12 +46,12 @@ dataset_size:
 num_epochs:
 #  -  2
 #  - 3
-  - 4 # Default
-#  - 5
+#  - 4 # Default
+  - 5
 #  - 6
 lr:
-#  - 0.001
-  - 0.0001 # Default
+  - 0.001
+#  - 0.0001 # Default
 #  - 0.00001
 temperature:
 #  - 0.0 # Ideally used, for deterministic output -> Not working for now, some known issue with Llama-2. Temperature has to be higher

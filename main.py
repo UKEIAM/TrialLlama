@@ -63,7 +63,7 @@ def main(**kwargs):
     random_number = "".join(random.choice(string.digits) for _ in range(number_length))
     # Combine the random prefix and random number to create the run_name
     rand_name = f"{prefix}-{random_number}"
-    run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.batch_size}_{experiment_config.lr}_{experiment_config.temperature}"
+    run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.dataset_size}_{experiment_config.batch_size}_{experiment_config.lr}_{experiment_config.temperature}"
     with mlflow.start_run(description=description, run_name=run_name) as run:
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         eval_output_path = os.path.join(

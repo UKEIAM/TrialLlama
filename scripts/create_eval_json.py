@@ -3,6 +3,7 @@
 
 import os
 import json
+import re
 import pandas as pd
 
 base_dir = os.path.dirname(os.path.dirname((__file__)))
@@ -28,18 +29,18 @@ merged_df = testing_set.merge(output, on=["id"], suffixes=("_model", "_truth"))
 eval_list = []
 for entry in merged_df.iterrows():
     new_entry = {
-        "id": entry[1]["id"],
-        "ground_truth": entry[1]["output"],
-        "topic": entry[1]["topic"],
-        "clinical_trial": entry[1]["clinical_trial"],
-        "response": entry[1]["RESPONSE"],
-        "certainty": entry[1]["PROBA"],
+        "ID": entry[1]["id"],
+        "Ground Truth": entry[1]["output"],
+        "Topic": entry[1]["topic"],
+        "Clinical Trial": entry[1]["clinical_trial"],
+        "Model Certainty": entry[1]["PROBA"],
+        "Model Response": entry[1]["RESPONSE"],
     }
     eval_list.append(new_entry)
 
 df = pd.DataFrame(eval_list)
 base_dir = os.path.dirname(os.path.dirname(__file__))
-eval_df = df.sample(n=30, random_state=42, ignore_index=True)
+eval_df = df.sample(n=30, random_state=15, ignore_index=True)
 df.to_json(
     os.path.join(base_dir, "out", "eval", "summary_eval_file_full.json"),
     orient="records",
@@ -47,3 +48,35 @@ df.to_json(
 eval_df.to_json(
     os.path.join(base_dir, "out", "eval", "summary_eval_file_30.json"), orient="records"
 )
+
+eval_json = (os.path.join(base_dir, "out", "eval", "summary_eval_file_30.json"),)
+
+
+# Load the JSON data from your JSON file
+with open(eval_json[0], "r") as json_file:
+    data = json.load(json_file)
+
+dir_path = os.path.join(base_dir, "out", "eval", "qual_eval")
+txt_path = os.path.join(base_dir, dir_path, "eval.html")
+os.makedirs(dir_path, exist_ok=True)
+# Open a text file for writing
+with open(txt_path, "w") as text_file:
+    for item in data:
+        for key, value in item.items():
+            # Write the capitalized key in bold
+            if key in ["ID", "Ground Truth", "Model Certainty"]:
+                text_file.write(f"<strong>{key}</strong> ")
+            elif key in ["Model Response"]:
+                text_file.write(f"<br><strong>{key}</strong> ")
+            else:
+                text_file.write(f"<strong>{key}</strong><br> ")
+
+            # Write the value underneath the key
+            if key == "Model Response":
+                value = re.sub(r"#\d+", r"<br>\g<0>", value)
+                text_file.write(f"{value}<br><br><br>")
+            else:
+                text_file.write(f"{value}<br>")
+
+
+print("FINISHED")

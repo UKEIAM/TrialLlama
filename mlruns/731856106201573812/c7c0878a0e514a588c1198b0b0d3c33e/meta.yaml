@@ -4,7 +4,7 @@ entry_point_name: ''
 experiment_id: '731856106201573812'
 lifecycle_stage: active
 run_id: c7c0878a0e514a588c1198b0b0d3c33e
-run_name: NO_EVALUATION_y9jzi20b-281_v6_4_0.0001_0.1
+run_name: FINE_TUNED_y9jzi20b-281_v6_4_0.0001_0.1
 run_uuid: c7c0878a0e514a588c1198b0b0d3c33e
 source_name: ''
 source_type: 4
