@@ -63,7 +63,7 @@ def main(**kwargs):
     random_number = "".join(random.choice(string.digits) for _ in range(number_length))
     # Combine the random prefix and random number to create the run_name
     rand_name = f"{prefix}-{random_number}"
-    run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.dataset_size}_{experiment_config.batch_size}_{experiment_config.lr}_{experiment_config.temperature}"
+    run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.dataset_size_testing}_{experiment_config.batch_size}_{experiment_config.lr}_{experiment_config.temperature}"
     with mlflow.start_run(description=description, run_name=run_name) as run:
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         eval_output_path = os.path.join(
@@ -97,6 +97,10 @@ def main(**kwargs):
                 "run_eval": experiment_config.run_eval,
             }
         )
+        try:
+            mlflow.log_artifact(local_path=experiment_config_dir)
+        except Exception as e:
+            logger.error(f"Error while logging artifact: {e}")
 
         if experiment_config.run_training:
             print("Running training...")
@@ -116,7 +120,6 @@ def main(**kwargs):
             mlflow.log_metrics(results)
             # mlflow.log_artifact(local_path=train_plt_path)
             clear_gpu_cache()
-
         if experiment_config.run_inference:
             print("Running inference...")
             results = test_main(
@@ -145,7 +148,6 @@ def main(**kwargs):
             # )
             try:
                 # TODO: Suddenly some issues with logging artifacts happened because of PermissionError on remote interpreter"
-                mlflow.log_artifact(local_path=experiment_config_dir)
                 mlflow.log_artifact(local_path=eval_output_path)
             except Exception as e:
                 logger.error(f"Error while logging artifact: {e}")
