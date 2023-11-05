@@ -35,7 +35,7 @@ v6_1:
   The patient's note serves as a concise medical summary that includes information about the patient's physical and mental condition, past medical procedures, current medications, complaints, and other pertinent details.
   Inclusion criteria are the specific factors that enable an individual to participate in a clinical study. These criteria are typically based on characteristics such as age, gender, the type and stage of a disease, previous treatment history, and other medical conditions.
   To establish a patient's eligibility for a clinical trial, it is imperative that all inclusion criteria are satisfied.  Inclusion criteria are listed after the 'Inclusion Criteria:' keyword.
-  Please give a final summary at the end and respond by selecting one of the options in the bracket: {A: eligible, B: excluded, C: irrelevant}."
+  Please give a final summary at the end and respond by selecting one of the options in the bracket: {A: eligible, B: not eligible, C: irrelevant}."
   response: "Is the patient eligible for the clinical trial? Let's think step by step. "
 
 v6_2:

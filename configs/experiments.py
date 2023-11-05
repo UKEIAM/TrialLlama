@@ -8,7 +8,7 @@ class experiment_config:
     dataset_version: str = "v7"
     dataset_name: str = "ct_train_sample_v7"
     create_sample: bool = True
-    dataset_size_testing: int = 500
+    dataset_size_testing: int = 50
     dataset_test_version: str = "v8"
     max_tokens: int = 2048
     max_new_tokens: int = 1024
