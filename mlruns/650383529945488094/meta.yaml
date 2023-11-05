@@ -1,0 +1,6 @@
+artifact_location: file:///ltstorage/home/1kkraus/master_thesis/mlruns/650383529945488094
+creation_time: 1699156669989
+experiment_id: '650383529945488094'
+last_update_time: 1699156669989
+lifecycle_stage: active
+name: llama-2-13b-chat-hf-base-reasoning
