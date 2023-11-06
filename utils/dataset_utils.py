@@ -107,7 +107,7 @@ def create_dataset_sample(
 
     """
         Some examples are very long. Checking some random samples showed that those are often faulty or just unnecessary
-        complex with information. Hence we reduce to 800 words for the input, to provide the model with best possible
+        complex with information. Hence we reduce to 1000 words for the input, to provide the model with best possible
         train data.
     """
     if type == "test":

@@ -264,6 +264,7 @@ def main(logger: Optional[object] = None, **kwargs):
             lr=train_config.lr,
             weight_decay=train_config.weight_decay,
         )
+        # Here's where warmup steps could be defined
     scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
 
     # Start the training process

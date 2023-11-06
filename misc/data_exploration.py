@@ -5,15 +5,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
-type = "train"
-one_shot = False
-max_allowed_words = 1000
+type = "test"
+one_shot = True
+max_allowed_words = 1500
 
 path = base_dir
 out_path = base_dir
 path = os.path.join(base_dir, "data", f"ct_{type}_v7.json")
 
 df = pd.read_json(path)
+
+print(f"DATASET LENGTH: {len(df)}")
 
 
 def count_words(text):
@@ -24,6 +26,7 @@ def count_words(text):
 
 # Assuming you have a DataFrame named df with a "class" column
 class_counts = df["output"].value_counts()
+print(class_counts)
 
 filtered_df = df[df["clinical_trial"].str.contains("Exclusion Criteria")]
 
