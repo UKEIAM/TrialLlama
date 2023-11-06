@@ -42,7 +42,9 @@ for param_set in param_combinations:
     if evaluate_base_model:
         ft_model = f"{base_model.lower()}-base"
     else:
-        ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}"
+        ft_model = (
+            f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-v2"
+        )
 
     if "one" in dataset_test_version:
         one_shot = True

@@ -1,297 +1,218 @@
-"""This script will only work with TREC 2021/22 data, since they changed the input format in 2023"""
-
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
 import os
-import re
-import json
 import sys
-import yaml
 import torch
 
 import pandas as pd
-import xml.etree.ElementTree as ET
 
-from tqdm import tqdm
-from pathlib import Path
+from functools import partial
 from typing import Optional
-from sklearn.utils import shuffle
 
-# from configs.config import train_config, eval_config
+from ft_datasets.instruct_dataset import (
+    InstructionDataset,
+    TestingDataset,
+    QAInstructionDataset,
+)
 
-# sys.path.append(str(Path(__file__).resolve().parent.parent))
+DATASET_PREPROC = {
+    "ct_train_sample_v1": partial(InstructionDataset),
+    "ct_train_sample_v2": partial(InstructionDataset),
+    "ct_train_sample_v3": partial(InstructionDataset),
+    "ct_train_sample_v4": partial(InstructionDataset),
+    "ct_train_sample_v5": partial(InstructionDataset),
+    "ct_train_sample_v5_1": partial(InstructionDataset),
+    "ct_train_sample_v5_2": partial(InstructionDataset),
+    "ct_train_sample_v6": partial(InstructionDataset),
+    "ct_train_sample_v6_1": partial(InstructionDataset),
+    "ct_train_sample_v6_2": partial(InstructionDataset),
+    "ct_train_sample_v7": partial(InstructionDataset),
+    "ct_train_sample_v8": partial(InstructionDataset),
+    "ct_train_sample_v9": partial(InstructionDataset),
+    "ct_train_sample_v10": partial(InstructionDataset),
+    "ct_test_sample_v1": partial(TestingDataset),
+    "ct_test_sample_v2": partial(TestingDataset),
+    "ct_test_sample_v3": partial(TestingDataset),
+    "ct_test_sample_v4": partial(TestingDataset),
+    "ct_test_sample_v5": partial(TestingDataset),
+    "ct_test_sample_v5_1": partial(InstructionDataset),
+    "ct_test_sample_v5_2": partial(InstructionDataset),
+    "ct_test_sample_v6": partial(TestingDataset),
+    "ct_test_sample_v6_1": partial(InstructionDataset),
+    "ct_test_sample_v6_2": partial(InstructionDataset),
+    "ct_test_sample_v7": partial(TestingDataset),
+    "ct_test_sample_v8": partial(TestingDataset),
+    "ct_test_sample_v9": partial(TestingDataset),
+    "ct_test_sample_v10": partial(TestingDataset),
+    "medqa": partial(QAInstructionDataset),
+}
 
-base_directory = os.path.dirname(os.path.dirname((__file__)))
-data_directory = os.path.join(base_directory, "data")
-home_directory = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-raw_ct_data_directory = os.path.join(home_directory, "data")
-
-
-def create_JSON(
-    versions=None,
-):
-    if versions is None:
-        versions = ["v7", "v9", "v8"]
-    for ver in versions:
-        version = ver
-        data_list = []
-
-        config_file = os.path.join(base_directory, "configs/ct_data.yaml")
-        with open(config_file, "r") as file:
-            config = yaml.safe_load(file)
-
-        counter = 0
-        for topic_year in config["year_of_topics"]:
-            source_data_directory = os.path.join(
-                raw_ct_data_directory, str(config["year_of_data"])
-            )
-            required_data_directory = os.path.join(
-                raw_ct_data_directory, "required_cts"
-            )
-
-            topics_df = parse_XML_to_df(
-                os.path.join(source_data_directory, f"topics{topic_year}.xml"),
-                ["number", "topic"],
-            )
-            topics_df["topic"] = topics_df["topic"].replace("\n", " ", regex=True)
-
-            qrel_path = os.path.join(
-                raw_ct_data_directory,
-                str(config["year_of_data"]),
-                f"{config['qrels_path']}{topic_year}.txt",
-            )
-            qrels = read_qrel_txt(qrel_path)
-
-            # DEBUG
-            # qrels = qrels[:100]
-
-            for index, row in tqdm(qrels.iterrows()):
-                topic_nr = f"{row['topic']}-{topic_year}"
-                try:
-                    topic = topics_df[
-                        topics_df["number"] == str(topic_nr.split("-")[0])
-                    ]["topic"].values[0]
-                    cleaned_topic = clean_textblock(topic)
-                except KeyError as e:
-                    continue
-                ct = row["clinical trial id"]
-                label = row["label"]
-                ct_path = os.path.join(required_data_directory, ct + ".xml")
-                if os.path.exists(ct_path):
-                    clinical_trial_dict = parse_XML_to_json(ct_path)
-                    ct_data = extract_required_data_from_clinical_trials(
-                        clinical_trial_dict
-                    )
-                    filter = " ".join(ct_data)
-                    if "exclusion criteria" in filter.lower():
-                        ct_input = ct_data.copy()
-                        for idx, item in enumerate(ct_data):
-
-                            item_index = item.lower().find("exclusion criteria")
-                            # index_gender = item.lower().find("gender")
-                            inclusion_crit = item[:item_index]
-                            parts = inclusion_crit.split("INCLUSION CRITERIA:")
-                            if len(parts) == 2:
-                                inclusion_crit = "INCLUSION CRITERIA:" + parts[1]
-                            # general_inclusion_crit = item[index_gender:]
-                            exclusion_crit = item[item_index:]
-                            ct_input.pop(idx)
-                            # ct_input.insert(idx, f"OVERVIEW: {general_inclusion_crit}\n{inclusion_crit}\n{exclusion_crit}")
-                            ct_input.insert(
-                                idx, f"{inclusion_crit}\n{exclusion_crit}"
-                            )  # I removed the "Overview thing, to keep it pure text"
-                            # ct_input.append(f"{exclusion_crit}")
-                        ct_final_input = "\n".join([f"{item}" for item in ct_input])
-                    else:
-                        continue
-                    if label == 0:
-                        category = "C: irrelevant"
-                    elif label == 1:
-                        category = "B: excluded"
-                    else:
-                        category = "A: eligible"
-                    id_string = f"{index}_{topic_nr}_{ct}"
-                    item = {
-                        "id": id_string,
-                        "topic_year": topic_year,
-                        "instruction": config[version]["instruction"],
-                        "topic": f"Here is the patient note:\n{cleaned_topic}",
-                        "clinical_trial": f"Here is the clinical trial:\n{ct_final_input}",
-                        "response": config[version]["response"],
-                        "output": f"{category}",
-                    }
-
-                    data_list.append(item)
-                    counter += 1
-                else:
-                    continue
-
-        """The below function is returning the full CT parsed into a JSON format + cleaned"""
-        out_directory_train = os.path.join(data_directory, f"ct_train_{version}.json")
-        out_directory_test = os.path.join(data_directory, f"ct_test_{version}.json")
-
-        df = pd.DataFrame(data_list)
-        # Step 1: Mix the samples
-        df = shuffle(df, random_state=42)  # Shuffle the rows randomly
-
-        # Step 2: Create a test dataset which withholds 10 topics from the training dataset
-        df["topic_id"] = df["id"].str.split("_").str[1]
-        topics_to_filter = [
-            "12-2021",
-            "15-2021",
-            "17-2022",
-            "27-2022",
-            "30-2021",
-            "33-2022",
-            "36-2021",
-            "40-2022",
-            "53-2021",
-            "65-2021",
-            "71-2021",
-            "75-2021",
-        ]
-        mask = df["topic_id"].isin(topics_to_filter)
-
-        # test_dataset = df.sample(
-        #     n=test_samples, random_state=42
-        # )  # Randomly select 1000 samples for testing
-
-        # Step 3: Remove the test dataset from the original DataFrame
-        train_dataset = df[~mask].copy()
-        test_dataset = df[mask].copy()
-        train_dataset.drop(["topic_id"], axis=1, inplace=True)
-        test_dataset.drop(["topic_id"], axis=1, inplace=True)
-
-        train_dataset.to_json(out_directory_train, orient="records")
-        test_dataset.to_json(out_directory_test, orient="records")
-
-        print(f"Saved dataset Version {version} with {counter} examples")
+base_dir = os.path.dirname(os.path.dirname(__file__))
 
 
-def clean_textblock(text):
-    cleaned_text = text.replace(r'\\"', r"'")
-    cleaned_text = re.sub(r"\s+", " ", cleaned_text.strip())
-    return cleaned_text
+def get_preprocessed_dataset(
+    tokenizer, dataset_config, max_tokens, split: str = "train"
+) -> torch.utils.data.Dataset:
+    if not dataset_config.dataset in DATASET_PREPROC:
+        raise NotImplementedError(f"{dataset_config.dataset} is not (yet) implemented")
 
+    def get_split():
+        return (
+            dataset_config.train_split
+            if split == "train"
+            else dataset_config.test_split
+        )
 
-def format_criteria(criteria_text):
-    return [criterion.strip() for criterion in criteria_text.strip().split("\n")]
-
-
-def extract_data_info(element_type, elements):
-    info = []
-    for key, value in elements.items():
-        if element_type == "Eligibility":
-            if key == "criteria":
-                textblock_element = value.get("textblock")
-                value = clean_textblock(textblock_element)
-                info.append(f"{value}")
-            elif key == "study_pop":
-                continue
-            else:
-                info.append(f"\n{key.capitalize().replace('_', ' ')}: {value}")
-        if element_type == "Summary":
-            value = clean_textblock(value)
-            info.append(f"{value}")
-    return "".join(info)
-
-
-def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> list:
-    """Extracts all eligibility information from the 'clinical_trials' section"""
-    elements = []
-
-    if isinstance(clinical_trial, list):
-        result_dict = {}
-        for d in clinical_trial:
-            result_dict.update(d)
-        clinical_trial = result_dict
-    for key, value in clinical_trial.items():
-        if key == "eligibility" and isinstance(value, dict):
-            key = "Eligibility"
-            info = extract_data_info(key, value)
-            elements.append(f"{key}: {info}")
-        elif key == "brief_summary" and isinstance(value, dict):
-            key = "Summary"
-            info = extract_data_info(key, value)
-            elements.append(f"{key}: {info}")
-        elif key == "brief_title":
-            key = "Title"
-            elements.append(f"{key}: {value}")
-        elif key == "intervention_type":
-            key = "Intervention Type"
-            elements.append(f"{key}: {value}")
-        elif isinstance(value, (list, dict)):
-            elements.extend(extract_required_data_from_clinical_trials(value))
-
-    return elements
-
-
-# def extract_criteria_from_clinical_trials(clinical_trial: dict) -> list:
-#     criteria = []
-#     for key, value in clinical_trial.items():
-#         if key == "criteria":
-#             criteria.append(value)
-#         elif isinstance(value, dict):
-#             criteria.extend(extract_criteria_from_clinical_trials(value))
-#     return criteria
-
-
-def read_qrel_txt(qrel_path: str) -> pd.DataFrame:
-    qrels = pd.read_csv(
-        qrel_path,
-        sep=" ",
-        header=None,
-        names=["topic", "N/A", "clinical trial id", "label"],
+    return DATASET_PREPROC[dataset_config.dataset](
+        dataset_config,
+        tokenizer,
+        get_split(),
+        max_tokens,
     )
 
-    return qrels
+
+def count_words(text):
+    if isinstance(text, str):
+        return len(text.split())
+    else:
+        return 0
 
 
-def parse_XML_to_df(xml_file, df_cols) -> pd.DataFrame:
-    """Parse the input XML file and store the result in a pandas
-    DataFrame with the given columns.
+def create_dataset_sample(
+    dataset_size: Optional[int] = None,
+    add_example: Optional[bool] = False,
+    version: str = "v7",
+    type: str = "train",
+) -> None:
+    path = base_dir
+    out_path = base_dir
 
-    The first element of df_cols is supposed to be the identifier
-    variable, which is an attribute of each node element in the
-    XML data; other features will be parsed from the text content
-    of each sub-element.
+    # TODO: Refactor: Create a sample from ct_all_years and save it as "ct_all_years_testing"
+    # Derive train_dataset from "ct_all_years" but leave out ~1000 samples for testssh
+    if type == "train":
+        path = os.path.join(base_dir, "data", f"ct_train_{version}.json")
+        out_path = os.path.join(base_dir, "data", f"ct_train_sample_{version}.json")
+    elif type == "test":
+        if add_example:
+            example_path = os.path.join(
+                base_dir, "data", f"inference_example_{version}.json"
+            )
+        path = os.path.join(base_dir, "data", f"ct_test_{version}.json")
+        out_path = os.path.join(base_dir, "data", f"ct_test_sample_{version}.json")
+
+    df = pd.read_json(path)
+    df = df[
+        df["clinical_trial"].str.contains("Exclusion Criteria:")
+    ]  # Only take items  into consideration with Inclusion and Exclusion Criteria
+
     """
-    xtree = ET.parse(xml_file)
-    xroot = xtree.getroot()
-    rows = []
+        Some examples are very long. Checking some random samples showed that those are often faulty or just unnecessary
+        complex with information. Hence we reduce to 800 words for the input, to provide the model with best possible
+        train data.
+    """
+    if type == "test":
+        word_count = 1500
+    else:
+        word_count = 1000
+    df = truncate(df, word_count)
+    df.drop(["word_count"], axis=1, inplace=True)
 
-    for node in xroot:
-        res = []
-        res.append(node.attrib.get(df_cols[0]))
-        for el in df_cols[1:]:
-            if node is not None and node.text is not None:
-                res.append(node.text)
-            else:
-                res.append(None)
-        rows.append({df_cols[i]: res[i] for i, _ in enumerate(df_cols)})
+    """
+        BALANCING: Since "IRRELEVANT" label is predominant in the dataset, we will truncate it in extracting a random
+        sample from it based on the average number of items in the two other classes.
+        That creates a more balanced, but not perfectly balanced dataset. Only applied on train data.
+        WARNING: Don"t change random state value!
+ """
 
-    out_df = pd.DataFrame(rows, columns=df_cols)
+    # CURATED DATASET: Reduce amount of data in returning only x examples per patient topic
+    df["topic_id"] = df["id"].str.split("_").str[1]
+    balanced_df = pd.DataFrame(columns=df.columns)
+    if dataset_size is None:
+        dataset_size = len(df)
 
-    return out_df
-
-
-def parse_XML_to_json(xml_file: str) -> dict:
-    xtree = ET.parse(xml_file)
-    xroot = xtree.getroot()
-    dict_data = xml_to_dict(xroot)
-
-    return dict_data
-
-
-def xml_to_dict(element):
-    data = {}
-    for child in element:
-        if list(child):
-            data[child.tag] = xml_to_dict(child)
+    for unique_id in df["topic_id"].unique():
+        # Get all rows with the current unique ID
+        id_subset = df[df["topic_id"] == unique_id]
+        if dataset_size > 3:
+            desired_label_count = (
+                id_subset.groupby("topic_id")["output"]
+                .value_counts()
+                .sort_values()
+                .iloc[0]
+            )
         else:
-            data[child.tag] = child.text
-    return data
+            desired_label_count = dataset_size
+        # Separate the rows by label
+        label_groups = [
+            id_subset[id_subset["output"] == label]
+            for label in id_subset["output"].unique()
+        ]
+
+        # Balance each label group to have the desired_label_count
+        balanced_label_groups = [
+            group.sample(n=desired_label_count, random_state=42, replace=True)
+            if len(group) < desired_label_count
+            else group.sample(n=desired_label_count, random_state=42)
+            for group in label_groups
+        ]
+
+        # Concatenate the balanced label groups and add them to the balanced_df
+        for df_item in balanced_label_groups:
+            balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
+
+    # balanced_df.drop(["topic_id"], axis=1, inplace=True)
+
+    if type == "test":
+        if add_example:
+            df_example = pd.read_json(example_path)
+            input_value = df_example["input"]
+            balanced_df["instruction"] = balanced_df["instruction"] + input_value[0]
+        balanced_df = truncate(balanced_df, word_count)
+        balanced_df.drop(["word_count"], axis=1, inplace=True)
+
+    samples = balanced_df.shape[0]
+    if dataset_size > 3:
+        try:
+            assert dataset_size <= balanced_df.shape[0]
+            samples = dataset_size
+        except AssertionError:
+            print(
+                "WARNING: Balanced dataset smaller than desired dataset size. Returning balanced dataset."
+            )
+            samples = balanced_df.shape[0]
+
+    # col_name = "output"
+    # value_counts = balanced_df[col_name].value_counts()
+    #
+    # max_label = value_counts.index[0]
+    # avg_item_size_for_truncation = int((value_counts[1] + value_counts[2]) / 2)
+    #
+    # max_label_df = balanced_df[balanced_df[col_name] == max_label]
+    # trunc_max_label_df = max_label_df.sample(
+    #     n=avg_item_size_for_truncation, random_state=42, ignore_index=True
+    # )
+    #
+    # balanced_df = balanced_df[balanced_df[col_name] != max_label]
+    # macro_balanced_df = pd.concat([balanced_df, trunc_max_label_df], ignore_index=True)
+    #
+    # if dataset_size == None:
+    #     dataset_size = len(balanced_df)
+    # assert dataset_size <= balanced_df.shape[0]
+    # data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
+    data_sample = balanced_df.sample(n=samples, random_state=42, ignore_index=True)
+    data_sample.to_json(out_path, orient="records")
 
 
-if __name__ == "__main__":
-    from jsonargparse import CLI
+def truncate(df, word_count):
+    cols_to_count = ["instruction", "topic", "clinical_trial", "response"]
+    df["word_count"] = df[cols_to_count].apply(
+        lambda row: sum(row.map(count_words)), axis=1
+    )
+    mask = (
+        df["word_count"]
+        > word_count
+        # Max tokens of 2048 are somewhat about 1115 words and since a lot of CTs are longer, we go for the save solution.
+    )  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
+    df = df[~mask]
 
-    CLI(create_JSON)
+    return df
