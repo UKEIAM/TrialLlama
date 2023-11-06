@@ -30,7 +30,7 @@ def create_JSON(
     versions=None,
 ):
     if versions is None:
-        versions = ["v6", "v7", "v8"]
+        versions = ["v7", "v9", "v8"]
     for ver in versions:
         version = ver
         data_list = []
@@ -93,7 +93,6 @@ def create_JSON(
                             ct_input.insert(
                                 idx, f"{inclusion_crit}\n{general_inclusion_crit}"
                             )
-
                             ct_input.insert(idx, f"{exclusion_crit}")
                             # ct_input.append(f"{exclusion_crit}")
                     ct_input = "\n".join([f"{item}" for item in ct_input])
@@ -181,8 +180,8 @@ def extract_data_info(element_type, elements):
                 info.append(f"{value}")
             elif key == "study_pop":
                 continue
-            else:
-                info.append(f"\n{key.capitalize().replace('_', ' ')}:{value}")
+            # else:
+            #     info.append(f"\n{key.capitalize().replace('_', ' ')}:{value}")
         if element_type == "Summary":
             value = clean_textblock(value)
             info.append(f"{value}")

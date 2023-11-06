@@ -9,7 +9,7 @@ import pandas as pd
 base_dir = os.path.dirname(os.path.dirname((__file__)))
 
 model_file_path = os.path.join(
-    base_dir, "out", "eval", "eval_bs105o6y-784_v9_4_0.0001_0.1.json"
+    base_dir, "out", "eval", "eval_ffr6fuah-894_v9_3000_4_0.0001_0.1.json"
 )
 sample_file_path = os.path.join(base_dir, "data", "ct_test_v9.json")
 # Load the main data JSON
@@ -77,6 +77,9 @@ with open(txt_path, "w") as text_file:
                 text_file.write(f"{value}<br><br><br>")
             else:
                 text_file.write(f"{value}<br>")
+
+            if key == "Clinical Trial":
+                print(value)
 
 
 print("FINISHED")
