@@ -97,7 +97,6 @@ def create_JSON(
                                 idx,
                                 f"OVERVIEW: {general_inclusion_crit}\n{inclusion_crit}\n{exclusion_crit}",
                             )
-                            print("X")
                             # ct_input.append(f"{exclusion_crit}")
                         else:
                             continue
