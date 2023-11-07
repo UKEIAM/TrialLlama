@@ -38,6 +38,7 @@ def main(
         add_example=test_config.add_example,
         version=test_config.dataset_version,
         type="test",
+        binary_eval=test_config.binary_eval,
     )
     dataset_config = generate_dataset_config(test_config, kwargs)
 

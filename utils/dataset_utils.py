@@ -51,7 +51,10 @@ base_dir = os.path.dirname(os.path.dirname(__file__))
 
 
 def get_preprocessed_dataset(
-    tokenizer, dataset_config, max_tokens, split: str = "train"
+    tokenizer,
+    dataset_config,
+    max_tokens,
+    split: str = "train",
 ) -> torch.utils.data.Dataset:
     if not dataset_config.dataset in DATASET_PREPROC:
         raise NotImplementedError(f"{dataset_config.dataset} is not (yet) implemented")
@@ -83,6 +86,7 @@ def create_dataset_sample(
     add_example: Optional[bool] = False,
     version: str = "v7",
     type: str = "train",
+    binary_eval: Optional[bool] = False,
 ) -> None:
     path = base_dir
     out_path = base_dir
@@ -149,16 +153,43 @@ def create_dataset_sample(
         ]
 
         # Balance each label group to have the desired_label_count
-        balanced_label_groups = [
-            group.sample(n=desired_label_count, random_state=42, replace=True)
-            if len(group) < desired_label_count
-            else group.sample(n=desired_label_count, random_state=42)
-            for group in label_groups
-        ]
+        if binary_eval:
+            total_samples = desired_label_count * 3
+            # Sample the required number of data points from Label A
+            num_eligible = (
+                int(total_samples / 2)
+                if int(total_samples / 2) <= len(label_groups[1])
+                else len(label_groups[1])
+            )
+            sampled_A = label_groups[1].sample(n=int(num_eligible), random_state=42)
 
-        # Concatenate the balanced label groups and add them to the balanced_df
-        for df_item in balanced_label_groups:
-            balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
+            # Sample the same number of data points from Label B and Label C
+            sampled_B = label_groups[0].sample(
+                n=int(total_samples / 4), random_state=42
+            )
+            sampled_C = label_groups[2].sample(
+                n=int(total_samples / 4), random_state=42
+            )
+
+            # Concatenate the sampled dataframes to create the balanced dataset
+            balanced_dataset = pd.concat(
+                [sampled_A, sampled_B, sampled_C], ignore_index=True
+            )
+
+            # Shuffle the dataset to randomize the order
+            balanced_df = balanced_dataset.sample(frac=1, random_state=42)
+
+        else:
+            balanced_label_groups = [
+                group.sample(n=desired_label_count, random_state=42, replace=True)
+                if len(group) < desired_label_count
+                else group.sample(n=desired_label_count, random_state=42)
+                for group in label_groups
+            ]
+
+            # Concatenate the balanced label groups and add them to the balanced_df
+            for df_item in balanced_label_groups:
+                balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
 
     # balanced_df.drop(["topic_id"], axis=1, inplace=True)
 
