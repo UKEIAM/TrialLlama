@@ -81,24 +81,32 @@ def create_JSON(
                         clinical_trial_dict
                     )
                     filter = " ".join(ct_data)
-                    if "exclusion criteria" in filter.lower():
+                    if (
+                        "inclusion criteria:" in filter.lower()
+                        and "exclusion criteria:" in filter.lower()
+                    ):
                         ct_input = ct_data.copy()
+                        if ct == "NCT00424346":
+                            print()
                         for idx, item in enumerate(ct_data):
-                            if "eligibility" in item.lower():
-                                item_index = item.lower().find("exclusion criteria")
-                                # Uncomment and adjust index
-                                index_gender = item.lower().find("gender")
-                                inclusion_crit = item[:item_index]
-                                parts = inclusion_crit.split("INCLUSION CRITERIA:")
-                                if len(parts) == 2:
-                                    inclusion_crit = "INCLUSION CRITERIA:" + parts[1]
-                                exclusion_crit = item[item_index:index_gender]
+                            if "eligibility:" in item.lower():
+                                index_exclusion = item.lower().find(
+                                    "exclusion criteria"
+                                )
+                                index_inclusion = item.lower().find("inclusion")
+                                inclusion_crit = item[index_inclusion:index_exclusion]
+                                exclusion_crit = item[index_exclusion:]
+                                pattern = (
+                                    r"(Inclusion|Exclusion)(\s+Criteria|\s+criteria):?"
+                                )
+                                replace_inc = "INCLUSION CRITERIA:"
+                                replace_exc = "EXCLUSION CRITERIA:"
+                                inclusion = re.sub(pattern, replace_inc, inclusion_crit)
+                                exclusion = re.sub(pattern, replace_exc, exclusion_crit)
                                 # general_inclusion_crit = item[index_gender:]
                                 ct_input.pop(idx)
                                 # ct_input.insert(idx, f"OVERVIEW: {general_inclusion_crit}\n{inclusion_crit}\n{exclusion_crit}")
-                                ct_input.insert(
-                                    idx, f"{inclusion_crit}\n{exclusion_crit}"
-                                )
+                                ct_input.insert(idx, f"{inclusion}\n{exclusion}")
                             else:
                                 continue
                         ct_final_input = "\n".join([f"{item}" for item in ct_input])
@@ -120,7 +128,16 @@ def create_JSON(
                         "response": config[version]["response"],
                         "output": f"{category}",
                     }
-
+                    try:
+                        pattern_final_check = (
+                            r"(INCLUSION CRITERIA:|EXCLUSION CRITERIA:)"
+                        )
+                        matches = re.findall(
+                            pattern_final_check, item["clinical_trial"]
+                        )
+                        assert len(matches) == 2
+                    except AssertionError as e:
+                        continue
                     data_list.append(item)
                     counter += 1
                 else:
@@ -181,15 +198,13 @@ def format_criteria(criteria_text):
 def extract_data_info(element_type, elements):
     info = []
     for key, value in elements.items():
-        if element_type == "Eligibility":
+        if element_type == "eligibility":
             if key == "criteria":
                 textblock_element = value.get("textblock")
                 value = clean_textblock(textblock_element)
                 info.append(f"{value}")
-            elif key == "study_pop":
-                continue
             else:
-                info.append(f"\n{key.capitalize().replace('_', ' ')}: {value}")
+                continue
         if element_type == "Summary":
             value = clean_textblock(value)
             info.append(f"{value}")
@@ -207,8 +222,8 @@ def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> l
         clinical_trial = result_dict
     for key, value in clinical_trial.items():
         if key == "eligibility" and isinstance(value, dict):
-            key = "Eligibility"
             info = extract_data_info(key, value)
+            key = "ELIGIBILITY"
             elements.append(f"{key}: {info}")
         elif key == "brief_summary" and isinstance(value, dict):
             key = "Summary"
