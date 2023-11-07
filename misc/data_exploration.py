@@ -8,7 +8,6 @@ base_dir = os.path.dirname(os.path.dirname(__file__))
 type = "test"
 one_shot = True
 max_allowed_words = 1500
-
 path = base_dir
 out_path = base_dir
 path = os.path.join(base_dir, "data", f"ct_{type}_v7.json")
@@ -28,22 +27,19 @@ def count_words(text):
 class_counts = df["output"].value_counts()
 print(class_counts)
 
-filtered_df = df[df["clinical_trial"].str.contains("Exclusion Criteria")]
-
-class_counts_filtered = filtered_df["output"].value_counts()
 
 # Step 4: Apply the function to your DataFrame column
 cols_to_count = ["instruction", "topic", "clinical_trial", "response"]
-filtered_df["word_count"] = filtered_df[cols_to_count].apply(
+df["word_count"] = df[cols_to_count].apply(
     lambda row: sum(row.map(count_words)), axis=1
 )
 
-max_words = filtered_df["word_count"].max()
+max_words = df["word_count"].max()
 
 mask = (
-    filtered_df["word_count"] > max_allowed_words
+    df["word_count"] > max_allowed_words
 )  # Checking the data on random samples showed that most inputs wich have more than 500 words are gibberish since the trial did not keep a proper format that is processable by the system.
-df_reduced = filtered_df[~mask]
+df_reduced = df[~mask]
 class_counts_filtered_reduced = df_reduced["output"].value_counts()
 
 print(class_counts_filtered_reduced)
