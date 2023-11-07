@@ -38,12 +38,12 @@ dataset_size:
   - 3
 #  - 100 # POC
 #  - 300
-  - 900
+#  - 900
 #  - 1800
-  - 3000
+#  - 3000
 #  - 5000
 #  - 10000
-  - 15000
+#  - 15000
 #  - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 15426
 num_epochs:
 #  -  2
