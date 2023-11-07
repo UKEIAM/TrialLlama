@@ -105,9 +105,6 @@ def create_dataset_sample(
         out_path = os.path.join(base_dir, "data", f"ct_test_sample_{version}.json")
 
     df = pd.read_json(path)
-    df = df[
-        df["clinical_trial"].str.contains("Exclusion Criteria:")
-    ]  # Only take items  into consideration with Inclusion and Exclusion Criteria
 
     """
         Some examples are very long. Checking some random samples showed that those are often faulty or just unnecessary
