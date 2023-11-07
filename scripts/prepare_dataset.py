@@ -84,21 +84,23 @@ def create_JSON(
                     if "exclusion criteria" in filter.lower():
                         ct_input = ct_data.copy()
                         for idx, item in enumerate(ct_data):
-                            item_index = item.lower().find("exclusion criteria")
-                            # Uncomment and adjust index
-                            index_gender = item.lower().find("gender")
-                            inclusion_crit = item[:item_index]
-                            parts = inclusion_crit.split("INCLUSION CRITERIA:")
-                            if len(parts) == 2:
-                                inclusion_crit = "INCLUSION CRITERIA:" + parts[1]
-                            # general_inclusion_crit = item[index_gender:]
-                            exclusion_crit = item[item_index:index_gender]
-                            ct_input.pop(idx)
-                            # ct_input.insert(idx, f"OVERVIEW: {general_inclusion_crit}\n{inclusion_crit}\n{exclusion_crit}")
-                            ct_input.insert(
-                                idx, f"{inclusion_crit}\n{exclusion_crit}"
-                            )  # I removed the "Overview thing, to keep it pure text"
-                            # ct_input.append(f"{exclusion_crit}")
+                            if "eligibility" in item.lower():
+                                item_index = item.lower().find("exclusion criteria")
+                                # Uncomment and adjust index
+                                index_gender = item.lower().find("gender")
+                                inclusion_crit = item[:item_index]
+                                parts = inclusion_crit.split("INCLUSION CRITERIA:")
+                                if len(parts) == 2:
+                                    inclusion_crit = "INCLUSION CRITERIA:" + parts[1]
+                                exclusion_crit = item[item_index:index_gender]
+                                # general_inclusion_crit = item[index_gender:]
+                                ct_input.pop(idx)
+                                # ct_input.insert(idx, f"OVERVIEW: {general_inclusion_crit}\n{inclusion_crit}\n{exclusion_crit}")
+                                ct_input.insert(
+                                    idx, f"{inclusion_crit}\n{exclusion_crit}"
+                                )
+                            else:
+                                continue
                         ct_final_input = "\n".join([f"{item}" for item in ct_input])
                     else:
                         continue
@@ -187,8 +189,7 @@ def extract_data_info(element_type, elements):
             elif key == "study_pop":
                 continue
             else:
-                continue
-                # info.append(f"\n{key.capitalize().replace('_', ' ')}: {value}")
+                info.append(f"\n{key.capitalize().replace('_', ' ')}: {value}")
         if element_type == "Summary":
             value = clean_textblock(value)
             info.append(f"{value}")
