@@ -84,15 +84,15 @@ def create_JSON(
                     if "exclusion criteria" in filter.lower():
                         ct_input = ct_data.copy()
                         for idx, item in enumerate(ct_data):
-
                             item_index = item.lower().find("exclusion criteria")
-                            # index_gender = item.lower().find("gender")
+                            # Uncomment and adjust index
+                            index_gender = item.lower().find("gender")
                             inclusion_crit = item[:item_index]
                             parts = inclusion_crit.split("INCLUSION CRITERIA:")
                             if len(parts) == 2:
                                 inclusion_crit = "INCLUSION CRITERIA:" + parts[1]
                             # general_inclusion_crit = item[index_gender:]
-                            exclusion_crit = item[item_index:]
+                            exclusion_crit = item[item_index:index_gender]
                             ct_input.pop(idx)
                             # ct_input.insert(idx, f"OVERVIEW: {general_inclusion_crit}\n{inclusion_crit}\n{exclusion_crit}")
                             ct_input.insert(
@@ -187,7 +187,8 @@ def extract_data_info(element_type, elements):
             elif key == "study_pop":
                 continue
             else:
-                info.append(f"\n{key.capitalize().replace('_', ' ')}: {value}")
+                continue
+                # info.append(f"\n{key.capitalize().replace('_', ' ')}: {value}")
         if element_type == "Summary":
             value = clean_textblock(value)
             info.append(f"{value}")
@@ -211,12 +212,15 @@ def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> l
         elif key == "brief_summary" and isinstance(value, dict):
             key = "Summary"
             info = extract_data_info(key, value)
+            # continue
             elements.append(f"{key}: {info}")
         elif key == "brief_title":
             key = "Title"
+            # continue
             elements.append(f"{key}: {value}")
         elif key == "intervention_type":
             key = "Intervention Type"
+            # continue
             elements.append(f"{key}: {value}")
         elif isinstance(value, (list, dict)):
             elements.extend(extract_required_data_from_clinical_trials(value))
