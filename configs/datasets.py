@@ -101,6 +101,14 @@ class ct_train_sample_v7:
 
 
 @dataclass
+class ct_train_sample_v7_3:
+    dataset: str = "ct_train_sample_v7_3"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v7_3.json"
+
+
+@dataclass
 class ct_train_sample_v8:
     dataset: str = "ct_train_sample_v8"
     train_split: str = "train"
@@ -109,11 +117,27 @@ class ct_train_sample_v8:
 
 
 @dataclass
+class ct_train_sample_v8_3:
+    dataset: str = "ct_train_sample_v8_3"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v8_3.json"
+
+
+@dataclass
 class ct_train_sample_v9:
     dataset: str = "ct_train_sample_v9"
     train_split: str = "train"
     test_split: str = "val"
     data_path: str = "data/ct_train_sample_v9.json"
+
+
+@dataclass
+class ct_train_sample_v9_3:
+    dataset: str = "ct_train_sample_v9_3"
+    train_split: str = "train"
+    test_split: str = "val"
+    data_path: str = "data/ct_train_sample_v9_3.json"
 
 
 @dataclass
