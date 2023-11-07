@@ -229,7 +229,7 @@ def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> l
             key = "Summary"
             # info = extract_data_info(key, value)
             continue
-            elements.append(f"{key}: {info}")
+            # elements.append(f"{key}: {info}")
         elif key == "brief_title":
             key = "Title"
             continue
