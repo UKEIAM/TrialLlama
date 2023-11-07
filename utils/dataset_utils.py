@@ -212,24 +212,6 @@ def create_dataset_sample(
             )
             samples = balanced_df.shape[0]
 
-    # col_name = "output"
-    # value_counts = balanced_df[col_name].value_counts()
-    #
-    # max_label = value_counts.index[0]
-    # avg_item_size_for_truncation = int((value_counts[1] + value_counts[2]) / 2)
-    #
-    # max_label_df = balanced_df[balanced_df[col_name] == max_label]
-    # trunc_max_label_df = max_label_df.sample(
-    #     n=avg_item_size_for_truncation, random_state=42, ignore_index=True
-    # )
-    #
-    # balanced_df = balanced_df[balanced_df[col_name] != max_label]
-    # macro_balanced_df = pd.concat([balanced_df, trunc_max_label_df], ignore_index=True)
-    #
-    # if dataset_size == None:
-    #     dataset_size = len(balanced_df)
-    # assert dataset_size <= balanced_df.shape[0]
-    # data_sample = balanced_df.sample(n=dataset_size, random_state=42, ignore_index=True)
     data_sample = balanced_df.sample(n=samples, random_state=42, ignore_index=True)
     data_sample.to_json(out_path, orient="records")
 
