@@ -227,17 +227,17 @@ def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> l
             elements.append(f"{key}: {info}")
         elif key == "brief_summary" and isinstance(value, dict):
             key = "Summary"
-            info = extract_data_info(key, value)
-            # continue
+            # info = extract_data_info(key, value)
+            continue
             elements.append(f"{key}: {info}")
         elif key == "brief_title":
             key = "Title"
-            # continue
-            elements.append(f"{key}: {value}")
+            continue
+            # elements.append(f"{key}: {value}")
         elif key == "intervention_type":
             key = "Intervention Type"
-            # continue
-            elements.append(f"{key}: {value}")
+            continue
+            # elements.append(f"{key}: {value}")
         elif isinstance(value, (list, dict)):
             elements.extend(extract_required_data_from_clinical_trials(value))
 
