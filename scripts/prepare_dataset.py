@@ -29,7 +29,7 @@ def create_JSON(
     versions=None,
 ):
     if versions is None:
-        versions = ["v7", "v9", "v8"]
+        versions = ["v12"]
     for ver in versions:
         version = ver
         data_list = []
@@ -103,6 +103,8 @@ def create_JSON(
                                 replace_exc = "EXCLUSION CRITERIA:"
                                 inclusion = re.sub(pattern, replace_inc, inclusion_crit)
                                 exclusion = re.sub(pattern, replace_exc, exclusion_crit)
+                                inclusion = create_numbered_list(inclusion)
+                                exclusion = create_numbered_list(exclusion)
                                 # general_inclusion_crit = item[index_gender:]
                                 ct_input.pop(idx)
                                 # ct_input.insert(idx, f"OVERVIEW: {general_inclusion_crit}\n{inclusion_crit}\n{exclusion_crit}")
@@ -119,6 +121,7 @@ def create_JSON(
                     else:
                         category = "A: eligible"
                     id_string = f"{index}_{topic_nr}_{ct}"
+                    version = version.split("_")[0]
                     item = {
                         "id": id_string,
                         "topic_year": topic_year,
@@ -228,16 +231,16 @@ def extract_required_data_from_clinical_trials(clinical_trial: list | dict) -> l
         elif key == "brief_summary" and isinstance(value, dict):
             key = "Summary"
             # info = extract_data_info(key, value)
-            continue
+            # continue
             # elements.append(f"{key}: {info}")
         elif key == "brief_title":
             key = "Title"
-            continue
-            # elements.append(f"{key}: {value}")
+            # continue
+            elements.append(f"{key}: {value}")
         elif key == "intervention_type":
             key = "Intervention Type"
-            continue
-            # elements.append(f"{key}: {value}")
+            # continue
+            elements.append(f"{key}: {value}")
         elif isinstance(value, (list, dict)):
             elements.extend(extract_required_data_from_clinical_trials(value))
 
@@ -309,6 +312,21 @@ def xml_to_dict(element):
         else:
             data[child.tag] = child.text
     return data
+
+
+def create_numbered_list(text: str) -> str:
+    splitted = text.split(" - ")
+    if len(splitted) == 1:
+        return None
+    pattern = r"(INCLUSION CRITERIA:|EXCLUSION CRITERIA:)"
+    result = ""
+    for idx, item in enumerate(splitted):
+        if idx != 0:
+            result += f"{idx}. {item}\n"
+        else:
+            text = re.match(pattern, item)
+            result += f"{text[0]}\n"
+    return result
 
 
 if __name__ == "__main__":
