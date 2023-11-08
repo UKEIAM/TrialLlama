@@ -46,11 +46,8 @@ for param_set in param_combinations:
             f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-v2"
         )
 
-    if "one" in dataset_test_version:
+    if task == "reasoning":
         one_shot = True
-        dataset_test_version = dataset_test_version.split("-")[
-            0
-        ]  # TODO: test if this works
     else:
         one_shot = False
 

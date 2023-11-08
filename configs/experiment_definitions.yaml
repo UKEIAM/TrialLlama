@@ -12,8 +12,8 @@ dataset_version:
 #  - "v5_1"
 #  - "v5_2"
 #  - "v6"
-#  - "v7"
-  - "v7_3"
+  - "v7"
+#  - "v7_3"
 #  - "v8"
 dataset_test_version:
 #  - "v1"
@@ -22,16 +22,12 @@ dataset_test_version:
 #  - "v4"
 #  - "v5"
 #  - "v6"
-#  - "v6-one"
-#  - "v7"
-  - "v7_3"
-#  - "v7-one"
-#  - "v8"
-  - "v8_3"
-#  - "v8-one"
-#  - "v9"
-  - "v9_3"
-#  - "v9-one"
+  - "v7"
+#  - "v7_3"
+  - "v8"
+#  - "v8_3"
+  - "v9"
+#  - "v9_3"
 dataset_size:
 #  - 1
 #  - 2
@@ -92,8 +88,8 @@ top_p:
 #  - 0.98
   - 1.0 # Default
 evaluate_base_model:
-#  - true
   - false
+  - true
 task:
   - classification
-#  - reasoning
+  - reasoning
