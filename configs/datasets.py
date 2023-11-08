@@ -223,7 +223,14 @@ class ct_test_sample_v6_2:
 class ct_test_sample_v7:
     dataset: str = "ct_test_sample_v7"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
-    data_path: str = "data/ct_test_sample_v6.json"
+    data_path: str = "data/ct_test_sample_v7.json"
+
+
+@dataclass
+class ct_test_sample_v7_3:
+    dataset: str = "ct_test_sample_v7_3"
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    data_path: str = "data/ct_test_sample_v7_3.json"
 
 
 @dataclass
@@ -234,10 +241,24 @@ class ct_test_sample_v8:
 
 
 @dataclass
+class ct_test_sample_v8_3:
+    dataset: str = "ct_test_sample_v8_3"
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    data_path: str = "data/ct_test_sample_v8_3json"
+
+
+@dataclass
 class ct_test_sample_v9:
     dataset: str = "ct_test_sample_v9"
     train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
     data_path: str = "data/ct_test_sample_v9.json"
+
+
+@dataclass
+class ct_test_sample_v9_3:
+    dataset: str = "ct_test_sample_v9_3"
+    train_split: str = "train"  # Do not be confused. To utilise the existing code, just passing 'train' as argument returns the whole dataset to the dataloader!
+    data_path: str = "data/ct_test_sample_v9_3.json"
 
 
 @dataclass

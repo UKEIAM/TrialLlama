@@ -44,8 +44,11 @@ DATASET_PREPROC = {
     "ct_test_sample_v6_1": partial(InstructionDataset),
     "ct_test_sample_v6_2": partial(InstructionDataset),
     "ct_test_sample_v7": partial(TestingDataset),
+    "ct_test_sample_v7_3": partial(TestingDataset),
     "ct_test_sample_v8": partial(TestingDataset),
+    "ct_test_sample_v8_3": partial(TestingDataset),
     "ct_test_sample_v9": partial(TestingDataset),
+    "ct_test_sample_v9_3": partial(TestingDataset),
     "ct_test_sample_v10": partial(TestingDataset),
     "medqa": partial(QAInstructionDataset),
 }
