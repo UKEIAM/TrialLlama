@@ -325,6 +325,11 @@ def create_numbered_list(text: str) -> str:
             result += f"{idx}. {item}\n"
         else:
             text = re.match(pattern, item)
+            try:
+                assert text != None
+            except AssertionError as e:
+                print(e)
+                return None
             result += f"{text[0]}\n"
     return result
 
