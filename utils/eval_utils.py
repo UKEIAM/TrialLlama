@@ -26,7 +26,7 @@ def prepare_files(
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+\-\d+)_(\w+)$"
-    pattern = r"[A-C][:. ]?\s?\(?\w+\)?|[A-C]\s"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
+    pattern = r"[A-C1-3][:. ]?\s?\(?\w+\)?|[A-C]\s|eligible|excluded|irrelevant"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
 

@@ -30,8 +30,8 @@ dataset_test_version:
 #  - "v9_3"
   - "v12"
 dataset_size:
-#  - 1
-  - 2
+  - 1
+#  - 2
 #  - 3
 #  - 12
 #  - 100 # POC
