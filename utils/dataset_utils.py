@@ -129,7 +129,7 @@ def create_dataset_sample(
         sample from it based on the average number of items in the two other classes.
         That creates a more balanced, but not perfectly balanced dataset. Only applied on train data.
         WARNING: Don"t change random state value!
- """
+    """
 
     # CURATED DATASET: Reduce amount of data in returning only x examples per patient topic
     df["topic_id"] = df["id"].str.split("_").str[1]
@@ -157,34 +157,44 @@ def create_dataset_sample(
 
         # Balance each label group to have the desired_label_count
         if binary_eval:
-            total_samples = desired_label_count * 3
-            # Sample the required number of data points from Label A
-            num_eligible = (
-                int(total_samples / 2)
-                if int(total_samples / 2) <= len(label_groups[1])
-                else len(label_groups[1])
+            aspired_total_sampels = desired_label_count * 3
+            len_eligible = len(id_subset[id_subset["output"] == "A: eligible"])
+            eligible_samples = (
+                len_eligible
+                if len_eligible < int(aspired_total_sampels / 2)
+                else int(aspired_total_sampels / 2)
             )
-            sampled_A = label_groups[1].sample(n=int(num_eligible), random_state=42)
-
-            # Sample the same number of data points from Label B and Label C
-            sampled_B = label_groups[0].sample(
-                n=int(total_samples / 4), random_state=42
-            )
-            sampled_C = label_groups[2].sample(
-                n=int(total_samples / 4), random_state=42
+            eligible = id_subset[id_subset["output"] == "A: eligible"].sample(
+                eligible_samples
             )
 
-            # Concatenate the sampled dataframes to create the balanced dataset
-            balanced_dataset = pd.concat(
-                [sampled_A, sampled_B, sampled_C], ignore_index=True
+            len_excluded = len(id_subset[id_subset["output"] == "B: excluded"])
+            excluded_samples = (
+                len_excluded
+                if len_eligible < int(aspired_total_sampels / 4)
+                else int(aspired_total_sampels / 4)
+            )
+            excluded = id_subset[id_subset["output"] == "B: excluded"].sample(
+                excluded_samples
             )
 
-            # Shuffle the dataset to randomize the order
-            balanced_df = balanced_dataset.sample(frac=1, random_state=42)
+            len_irrelevant = len(id_subset[id_subset["output"] == "C: irrelevant"])
+            irrelevant_sample = (
+                len_irrelevant
+                if len_irrelevant < int(aspired_total_sampels / 4)
+                else int(aspired_total_sampels / 4)
+            )
+            irrelevant = id_subset[id_subset["output"] == "C: irrelevant"].sample(
+                irrelevant_sample
+            )
+
+            balanced_df = pd.concat(
+                [balanced_df, eligible, excluded, irrelevant], ignore_index=True
+            )
 
         else:
             balanced_label_groups = [
-                group.sample(n=desired_label_count, random_state=42, replace=True)
+                group.sample(n=len(group), random_state=42)
                 if len(group) < desired_label_count
                 else group.sample(n=desired_label_count, random_state=42)
                 for group in label_groups

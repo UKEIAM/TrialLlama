@@ -8,6 +8,7 @@ base_dir = os.path.dirname(os.path.dirname(__file__))
 type = "test"
 one_shot = True
 max_allowed_words = 1500
+binary_eval = True
 path = base_dir
 out_path = base_dir
 path = os.path.join(base_dir, "data", f"ct_{type}_v7.json")
@@ -63,17 +64,51 @@ for unique_id in df_reduced["topic_id"].unique():
         for label in id_subset["output"].unique()
     ]
 
-    # Balance each label group to have the desired_label_count
-    balanced_label_groups = [
-        group.sample(n=desired_label_count, random_state=42, replace=True)
-        if len(group) < desired_label_count
-        else group.sample(n=desired_label_count, random_state=42)
-        for group in label_groups
-    ]
+    if binary_eval:
+        aspired_total_sampels = desired_label_count * 3
+        len_eligible = len(id_subset[id_subset["output"] == "A: eligible"])
+        eligible_samples = (
+            len_eligible
+            if len_eligible < int(aspired_total_sampels / 2)
+            else int(aspired_total_sampels / 2)
+        )
+        eligible = id_subset[id_subset["output"] == "A: eligible"].sample(
+            eligible_samples
+        )
 
-    # Concatenate the balanced label groups and add them to the balanced_df
-    for df_item in balanced_label_groups:
-        balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
+        len_excluded = len(id_subset[id_subset["output"] == "B: excluded"])
+        excluded_samples = (
+            len_excluded
+            if len_eligible < int(aspired_total_sampels / 4)
+            else int(aspired_total_sampels / 4)
+        )
+        excluded = id_subset[id_subset["output"] == "B: excluded"].sample(
+            excluded_samples
+        )
+
+        len_irrelevant = len(id_subset[id_subset["output"] == "C: irrelevant"])
+        irrelevant_sample = (
+            len_irrelevant
+            if len_irrelevant < int(aspired_total_sampels / 4)
+            else int(aspired_total_sampels / 4)
+        )
+        irrelevant = id_subset[id_subset["output"] == "C: irrelevant"].sample(
+            irrelevant_sample
+        )
+
+        balanced_df = pd.concat([eligible, excluded, irrelevant], ignore_index=True)
+
+    else:
+        balanced_label_groups = [
+            group.sample(n=len(group), random_state=42)
+            if len(group) < desired_label_count
+            else group.sample(n=desired_label_count, random_state=42)
+            for group in label_groups
+        ]
+
+        # Concatenate the balanced label groups and add them to the balanced_df
+        for df_item in balanced_label_groups:
+            balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
 
 value_counts_grouped = balanced_df["output"].value_counts()
 

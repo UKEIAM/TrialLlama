@@ -2,7 +2,6 @@ base_model:
 #  - "Llama-2-7b-chat-hf"
   - "Llama-2-13b-chat-hf"
 #  - "Llama-2-13b-hf"
-#  - "MedLlama-2-13b-chat-hf"
 dataset_version:
 #  - "v1
 #  - "v2"
@@ -12,10 +11,10 @@ dataset_version:
 #  - "v5_1"
 #  - "v5_2"
 #  - "v6"
-  - "v7"
+#  - "v7"
 #  - "v7_3"
 #  - "v8"
-#  - "v12"
+  - "v12"
 dataset_test_version:
 #  - "v1"
 #  - "v2"
@@ -23,13 +22,13 @@ dataset_test_version:
 #  - "v4"
 #  - "v5"
 #  - "v6"
-  - "v7"
+#  - "v7"
 #  - "v7_3"
-  - "v8"
+#  - "v8"
 #  - "v8_3"
   - "v9"
 #  - "v9_3"
-#  - "v12"
+  - "v12"
 dataset_size:
 #  - 1
 #  - 2
@@ -91,7 +90,7 @@ top_p:
   - 1.0 # Default
 evaluate_base_model:
   - false
-  - true
+#  - true
 task:
   - classification
   - reasoning
