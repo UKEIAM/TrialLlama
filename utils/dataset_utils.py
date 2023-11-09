@@ -225,7 +225,7 @@ def create_dataset_sample(
             samples = dataset_size
         except AssertionError:
             print(
-                "WARNING: Balanced dataset smaller than desired dataset size. Returning balanced dataset."
+                "WARNING: Balanced data set smaller than desired data set size. Returning maximum data set size."
             )
             samples = balanced_df.shape[0]
 

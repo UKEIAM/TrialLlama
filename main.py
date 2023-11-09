@@ -115,6 +115,7 @@ def main(**kwargs):
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
                 max_tokens=experiment_config.max_tokens,
+                binary_eval=experiment_config.binary_eval,
             )
             mlflow.set_tag("ft_conducted", "TRUE")
             mlflow.log_metrics(results)
@@ -140,6 +141,7 @@ def main(**kwargs):
                 logger=logger,
                 evaluate_base_model=experiment_config.evaluate_base_model,
                 add_example=experiment_config.add_example,
+                binary_eval=experiment_config.binary_eval,
             )
             mlflow.set_tag("inference_conducted", "TRUE")
             mlflow.log_metric("number_of_empty_responses", results)

@@ -33,4 +33,4 @@ class test_config:
     debug: bool = False
     evaluate_base_model: bool = False
     add_example: bool = False
-    binary_eval: bool = False
+    binary_eval: bool = True
