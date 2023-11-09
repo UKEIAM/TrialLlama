@@ -180,8 +180,7 @@ def main(**kwargs):
                     logger=logger,
                 )
                 mlflow.set_tag("evaluation_conducted", "TRUE")
-                if not experiment_config.binary_eval:
-                    mlflow.log_metrics(scores)
+                mlflow.log_metrics(scores)
                 mlflow.log_metrics(binary_scores)
                 clear_gpu_cache()
 

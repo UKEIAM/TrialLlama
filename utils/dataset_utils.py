@@ -3,6 +3,7 @@
 import os
 import sys
 import torch
+import math
 
 import pandas as pd
 
@@ -163,8 +164,8 @@ def create_dataset_sample(
                 len_eligible = len(id_subset[id_subset["output"] == "A: eligible"])
                 eligible_samples = (
                     len_eligible
-                    if len_eligible < int(aspired_total_sampels / 2)
-                    else int(aspired_total_sampels / 2)
+                    if len_eligible < math.ceil(aspired_total_sampels / 2)
+                    else math.ceil(aspired_total_sampels / 2)
                 )
                 eligible = id_subset[id_subset["output"] == "A: eligible"].sample(
                     eligible_samples
@@ -173,8 +174,8 @@ def create_dataset_sample(
                 len_excluded = len(id_subset[id_subset["output"] == "B: excluded"])
                 excluded_samples = (
                     len_excluded
-                    if len_eligible < int(aspired_total_sampels / 4)
-                    else int(aspired_total_sampels / 4)
+                    if len_excluded < math.ceil(aspired_total_sampels / 4)
+                    else math.ceil(aspired_total_sampels / 4)
                 )
                 excluded = id_subset[id_subset["output"] == "B: excluded"].sample(
                     excluded_samples
@@ -183,8 +184,8 @@ def create_dataset_sample(
                 len_irrelevant = len(id_subset[id_subset["output"] == "C: irrelevant"])
                 irrelevant_sample = (
                     len_irrelevant
-                    if len_irrelevant < int(aspired_total_sampels / 4)
-                    else int(aspired_total_sampels / 4)
+                    if len_irrelevant < math.ceil(aspired_total_sampels / 4)
+                    else math.ceil(aspired_total_sampels / 4)
                 )
                 irrelevant = id_subset[id_subset["output"] == "C: irrelevant"].sample(
                     irrelevant_sample
