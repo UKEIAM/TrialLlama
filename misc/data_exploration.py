@@ -5,13 +5,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
-type = "test"
-one_shot = True
-max_allowed_words = 1500
+type = "train"
+one_shot = False
+max_allowed_words = 1000
 binary_eval = True
 path = base_dir
 out_path = base_dir
-path = os.path.join(base_dir, "data", f"ct_{type}_v7.json")
+path = os.path.join(base_dir, "data", f"ct_{type}_v12.json")
 
 df = pd.read_json(path)
 
@@ -53,7 +53,7 @@ balanced_df = pd.DataFrame(columns=df_reduced.columns)
 for unique_id in df_reduced["topic_id"].unique():
     id_subset = df_reduced[df_reduced["topic_id"] == unique_id]
     desired_label_count = (
-        id_subset.groupby("topic_id")["output"].value_counts().sort_values()[0]
+        id_subset.groupby("topic_id")["output"].value_counts().sort_values().iloc[0]
     )
     # Get all rows with the current unique ID
     id_subset = df_reduced[df_reduced["topic_id"] == unique_id]
@@ -65,39 +65,44 @@ for unique_id in df_reduced["topic_id"].unique():
     ]
 
     if binary_eval:
-        aspired_total_sampels = desired_label_count * 3
-        len_eligible = len(id_subset[id_subset["output"] == "A: eligible"])
-        eligible_samples = (
-            len_eligible
-            if len_eligible < int(aspired_total_sampels / 2)
-            else int(aspired_total_sampels / 2)
-        )
-        eligible = id_subset[id_subset["output"] == "A: eligible"].sample(
-            eligible_samples
-        )
+        try:
+            aspired_total_sampels = desired_label_count * 3
+            len_eligible = len(id_subset[id_subset["output"] == "A: eligible"])
+            eligible_samples = (
+                len_eligible
+                if len_eligible < int(aspired_total_sampels / 2)
+                else int(aspired_total_sampels / 2)
+            )
+            eligible = id_subset[id_subset["output"] == "A: eligible"].sample(
+                eligible_samples
+            )
 
-        len_excluded = len(id_subset[id_subset["output"] == "B: excluded"])
-        excluded_samples = (
-            len_excluded
-            if len_eligible < int(aspired_total_sampels / 4)
-            else int(aspired_total_sampels / 4)
-        )
-        excluded = id_subset[id_subset["output"] == "B: excluded"].sample(
-            excluded_samples
-        )
+            len_excluded = len(id_subset[id_subset["output"] == "B: excluded"])
+            excluded_samples = (
+                len_excluded
+                if len_eligible < int(aspired_total_sampels / 4)
+                else int(aspired_total_sampels / 4)
+            )
+            excluded = id_subset[id_subset["output"] == "B: excluded"].sample(
+                excluded_samples
+            )
 
-        len_irrelevant = len(id_subset[id_subset["output"] == "C: irrelevant"])
-        irrelevant_sample = (
-            len_irrelevant
-            if len_irrelevant < int(aspired_total_sampels / 4)
-            else int(aspired_total_sampels / 4)
-        )
-        irrelevant = id_subset[id_subset["output"] == "C: irrelevant"].sample(
-            irrelevant_sample
-        )
+            len_irrelevant = len(id_subset[id_subset["output"] == "C: irrelevant"])
+            irrelevant_sample = (
+                len_irrelevant
+                if len_irrelevant < int(aspired_total_sampels / 4)
+                else int(aspired_total_sampels / 4)
+            )
+            irrelevant = id_subset[id_subset["output"] == "C: irrelevant"].sample(
+                irrelevant_sample
+            )
 
-        balanced_df = pd.concat([eligible, excluded, irrelevant], ignore_index=True)
-
+            balanced_df = pd.concat(
+                [balanced_df, eligible, excluded, irrelevant], ignore_index=True
+            )
+        except ValueError as e:
+            print("VALUE COUNTS 0: One of the grouped labels is 0. Continuing.")
+            continue
     else:
         balanced_label_groups = [
             group.sample(n=len(group), random_state=42)

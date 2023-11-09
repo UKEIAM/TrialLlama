@@ -67,6 +67,7 @@ def main(logger: Optional[object] = None, **kwargs):
             dataset_size=train_config.dataset_size,
             version=train_config.dataset_version,
             type="train",
+            binary_eval=train_config.binary_eval,
         )
 
     if train_config.enable_fsdp:

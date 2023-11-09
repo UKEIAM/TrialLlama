@@ -157,41 +157,45 @@ def create_dataset_sample(
 
         # Balance each label group to have the desired_label_count
         if binary_eval:
-            aspired_total_sampels = desired_label_count * 3
-            len_eligible = len(id_subset[id_subset["output"] == "A: eligible"])
-            eligible_samples = (
-                len_eligible
-                if len_eligible < int(aspired_total_sampels / 2)
-                else int(aspired_total_sampels / 2)
-            )
-            eligible = id_subset[id_subset["output"] == "A: eligible"].sample(
-                eligible_samples
-            )
+            try:
+                # Sometimes the aspired split is not possible since not enough "eligible" labels are available. Hence we do the following checks.
+                aspired_total_sampels = desired_label_count * 3
+                len_eligible = len(id_subset[id_subset["output"] == "A: eligible"])
+                eligible_samples = (
+                    len_eligible
+                    if len_eligible < int(aspired_total_sampels / 2)
+                    else int(aspired_total_sampels / 2)
+                )
+                eligible = id_subset[id_subset["output"] == "A: eligible"].sample(
+                    eligible_samples
+                )
 
-            len_excluded = len(id_subset[id_subset["output"] == "B: excluded"])
-            excluded_samples = (
-                len_excluded
-                if len_eligible < int(aspired_total_sampels / 4)
-                else int(aspired_total_sampels / 4)
-            )
-            excluded = id_subset[id_subset["output"] == "B: excluded"].sample(
-                excluded_samples
-            )
+                len_excluded = len(id_subset[id_subset["output"] == "B: excluded"])
+                excluded_samples = (
+                    len_excluded
+                    if len_eligible < int(aspired_total_sampels / 4)
+                    else int(aspired_total_sampels / 4)
+                )
+                excluded = id_subset[id_subset["output"] == "B: excluded"].sample(
+                    excluded_samples
+                )
 
-            len_irrelevant = len(id_subset[id_subset["output"] == "C: irrelevant"])
-            irrelevant_sample = (
-                len_irrelevant
-                if len_irrelevant < int(aspired_total_sampels / 4)
-                else int(aspired_total_sampels / 4)
-            )
-            irrelevant = id_subset[id_subset["output"] == "C: irrelevant"].sample(
-                irrelevant_sample
-            )
+                len_irrelevant = len(id_subset[id_subset["output"] == "C: irrelevant"])
+                irrelevant_sample = (
+                    len_irrelevant
+                    if len_irrelevant < int(aspired_total_sampels / 4)
+                    else int(aspired_total_sampels / 4)
+                )
+                irrelevant = id_subset[id_subset["output"] == "C: irrelevant"].sample(
+                    irrelevant_sample
+                )
 
-            balanced_df = pd.concat(
-                [balanced_df, eligible, excluded, irrelevant], ignore_index=True
-            )
-
+                balanced_df = pd.concat(
+                    [balanced_df, eligible, excluded, irrelevant], ignore_index=True
+                )
+            except ValueError as e:
+                print("VALUE COUNTS 0: One of the grouped labels is 0. Continuing.")
+                continue
         else:
             balanced_label_groups = [
                 group.sample(n=len(group), random_state=42)
