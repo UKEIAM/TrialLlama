@@ -34,17 +34,20 @@ for param_set in param_combinations:
         top_p,
         evaluate_base_model,
         task,
+        binary_balancing,
     ) = param_set
 
     # decimal_part_lr = str(lr).split(".")[1] if "." in str(lr) else "0"
 
     # TODO: Check if learning rate at the end works, since dot in folder name
+    if binary_balancing:
+        model_version = "v3"
+    else:
+        model_version = "v2"
     if evaluate_base_model:
         ft_model = f"{base_model.lower()}-base"
     else:
-        ft_model = (
-            f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-v2"
-        )
+        ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-{model_version}"
 
     if task == "reasoning":
         one_shot = True
@@ -85,6 +88,8 @@ for param_set in param_combinations:
         str(max_new_tokens),
         "--task",
         str(task),
+        "--binary_balancing",
+        str(binary_balancing),
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
     if os.path.exists(os.path.join("out", ft_model)):

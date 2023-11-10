@@ -93,7 +93,7 @@ def create_dataset_sample(
     add_example: Optional[bool] = False,
     version: str = "v7",
     type: str = "train",
-    binary_eval: Optional[bool] = False,
+    binary_balancing: Optional[bool] = False,
 ) -> None:
     path = base_dir
     out_path = base_dir
@@ -121,7 +121,7 @@ def create_dataset_sample(
     if type == "test":
         word_count = 1500
     else:
-        word_count = 1000
+        word_count = 970  # Fine-tuning failed on input with 998 words
     df = truncate(df, word_count)
     df.drop(["word_count"], axis=1, inplace=True)
 
@@ -157,7 +157,7 @@ def create_dataset_sample(
         ]
 
         # Balance each label group to have the desired_label_count
-        if binary_eval:
+        if binary_balancing:
             try:
                 # Sometimes the aspired split is not possible since not enough "eligible" labels are available. Hence we do the following checks.
                 aspired_total_sampels = desired_label_count * 3

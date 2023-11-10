@@ -8,7 +8,7 @@ base_dir = os.path.dirname(os.path.dirname(__file__))
 type = "train"
 one_shot = False
 max_allowed_words = 1000
-binary_eval = True
+binary_balancing = True
 path = base_dir
 out_path = base_dir
 path = os.path.join(base_dir, "data", f"ct_{type}_v12.json")
@@ -64,7 +64,7 @@ for unique_id in df_reduced["topic_id"].unique():
         for label in id_subset["output"].unique()
     ]
 
-    if binary_eval:
+    if binary_balancing:
         try:
             aspired_total_sampels = desired_label_count * 3
             len_eligible = len(id_subset[id_subset["output"] == "A: eligible"])

@@ -20,6 +20,8 @@ from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DistributedSampler
 from transformers import (
     LlamaForCausalLM,
+    LlamaForSequenceClassification,
+    AutoModel,
     LlamaTokenizer,
     LlamaConfig,
     AutoTokenizer,
@@ -67,7 +69,7 @@ def main(logger: Optional[object] = None, **kwargs):
             dataset_size=train_config.dataset_size,
             version=train_config.dataset_version,
             type="train",
-            binary_eval=train_config.binary_eval,
+            binary_balancing=train_config.binary_balancing,
         )
 
     if train_config.enable_fsdp:
@@ -81,6 +83,11 @@ def main(logger: Optional[object] = None, **kwargs):
         torch.cuda.set_device(local_rank)
         clear_gpu_cache(local_rank)
         setup_environ_flags(rank)
+
+    base_model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_path)
+    # tokenizer.padding_side = 'right'
+    tokenizer.pad_token = tokenizer.eos_token
 
     # Load the pre-trained model and setup its configuration
     use_cache = False if train_config.enable_fsdp else None
@@ -132,10 +139,6 @@ def main(logger: Optional[object] = None, **kwargs):
             print(
                 "Module 'optimum' not found. Please install 'optimum' it before proceeding."
             )
-
-    base_model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
-    tokenizer = AutoTokenizer.from_pretrained(base_model_path)
-    tokenizer.pad_token_id = tokenizer.eos_token_id
 
     print_model_size(model, train_config, rank if train_config.enable_fsdp else 0)
 

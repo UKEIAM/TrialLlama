@@ -45,6 +45,8 @@ class InstructionDataset(Dataset):
         padding = self.max_tokens - example.shape[0]
         if padding > 0:
             example = torch.cat((example, torch.zeros(padding, dtype=torch.int64) - 1))
+        if len(example) == 2061:
+            print("-------------WHOOOOPS WHAT HAPPENED?-------------------")
         labels = copy.deepcopy(example)
         labels[: len(prompt)] = -1
         example_mask = example.ge(0)

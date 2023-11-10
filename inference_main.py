@@ -38,7 +38,7 @@ def main(
         add_example=test_config.add_example,
         version=test_config.dataset_version,
         type="test",
-        binary_eval=test_config.binary_eval,
+        binary_balancing=test_config.binary_balancing,
     )
     dataset_config = generate_dataset_config(test_config, kwargs)
 
@@ -89,6 +89,7 @@ def main(
     # After updating all libraries, LlamaTokenizer throws error when trying to load weights. AutoTokenizer works.
     tokenizer = AutoTokenizer.from_pretrained(base_model_path)
     tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "right"
 
     max_tokens = 3072
 

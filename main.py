@@ -40,12 +40,16 @@ def main(**kwargs):
     train_plt_path = plt_save_path = os.path.join(
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch.png"
     )
+    if experiment_config.binary_balancing:
+        model_version = "v3"
+    else:
+        model_version = "v2"
     if experiment_config.evaluate_base_model:
         experiment_name = (
             f"{experiment_config.base_model.lower()}-base-{experiment_config.task}-v2"
         )
     else:
-        experiment_name = f"{experiment_config.base_model.lower()}-{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-v2"
+        experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
@@ -63,7 +67,7 @@ def main(**kwargs):
     random_number = "".join(random.choice(string.digits) for _ in range(number_length))
     # Combine the random prefix and random number to create the run_name
     rand_name = f"{prefix}-{random_number}"
-    run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.dataset_size_testing}_{experiment_config.batch_size}_{experiment_config.lr}_{experiment_config.temperature}"
+    run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.dataset_size_testing}_{experiment_config.batch_size}_{experiment_config.lr}_{experiment_config.temperature}_{model_version}"
     with mlflow.start_run(description=description, run_name=run_name) as run:
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         eval_output_path = os.path.join(
@@ -95,6 +99,7 @@ def main(**kwargs):
                 "run_training": experiment_config.run_training,
                 "run_inference": experiment_config.run_inference,
                 "run_eval": experiment_config.run_eval,
+                "binary_balancing": experiment_config.binary_balancing,
             }
         )
         try:
@@ -115,7 +120,7 @@ def main(**kwargs):
                 model_name=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
                 max_tokens=experiment_config.max_tokens,
-                binary_eval=experiment_config.binary_eval,
+                binary_balancing=experiment_config.binary_balancing,
             )
             mlflow.set_tag("ft_conducted", "TRUE")
             mlflow.log_metrics(results)
@@ -141,7 +146,7 @@ def main(**kwargs):
                 logger=logger,
                 evaluate_base_model=experiment_config.evaluate_base_model,
                 add_example=experiment_config.add_example,
-                binary_eval=experiment_config.binary_eval,
+                binary_balancing=experiment_config.binary_balancing,
             )
             mlflow.set_tag("inference_conducted", "TRUE")
             mlflow.log_metric("number_of_empty_responses", results)
