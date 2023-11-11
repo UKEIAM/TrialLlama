@@ -14,7 +14,7 @@ class train_config:
     num_epochs: int = 4
     num_workers_dataloader: int = 1
     lr: float = 1e-4
-    weight_decay: float = 0.01
+    weight_decay: float = 0.1
     gamma: float = 0.85
     seed: int = 42
     use_fp16: bool = True
@@ -41,5 +41,5 @@ class train_config:
     use_fast_kernels: bool = False  # Enable using SDPA from PyTroch Accelerated Transformers, make use Flash Attention and Xformer memory-efficient kernels
     # max_words: int = 1900 # Since the input is so long, the output of the model while in eval mode is even longer. Hence, we need to restrict the preds output.
     max_tokens: int = 2048  # Fixed: Training does not require that much tokens. Value is set high, since one-/few-shot learning requires prompt + example, which can exceed the token number
-    debug: bool = False
+    debug: bool = True
     binary_balancing: bool = True

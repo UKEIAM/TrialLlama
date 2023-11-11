@@ -9,7 +9,7 @@ class experiment_config:
     dataset_name: str = "ct_train_sample_v7"
     create_sample: bool = True
     dataset_size_testing: int = 50
-    dataset_test_version: str = "v8"
+    dataset_test_version: str = "v9"
     max_tokens: int = 2048
     max_new_tokens: int = 1024
     lr: float = 1e-4
@@ -22,7 +22,7 @@ class experiment_config:
     run_inference: bool = True
     run_eval: bool = True
     top_p: float = 1.0
-    temperature: float = 0.1
+    temperature: float = 0.0
     top_k: int = 50
     repetition_penalty: float = 1.0
     length_penalty: int = 1

@@ -125,7 +125,8 @@ def train(
                     else:
                         batch[key] = batch[key].to("cuda:0")
                 with autocast():
-                    loss = model(**batch).loss
+                    outputs = model(**batch)
+                    loss = outputs.loss
                 loss = loss / gradient_accumulation_steps
                 total_loss += loss.detach().float()
                 train_step_loss.append(total_loss)

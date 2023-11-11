@@ -45,13 +45,12 @@ def main(**kwargs):
     else:
         model_version = "v2"
     if experiment_config.evaluate_base_model:
-        experiment_name = (
-            f"{experiment_config.base_model.lower()}-base-{experiment_config.task}-v2"
-        )
+        experiment_name = f"{experiment_config.base_model.lower()}-base-{experiment_config.task}-{model_version}"
     else:
         experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
+    print(f"OUTPUT MODEL NAME: {experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
     description = (
         f"Fine-tuned model {experiment_config.ft_model} | Dataset balancing v3"
@@ -115,6 +114,7 @@ def main(**kwargs):
                 dataset=experiment_config.dataset_name,
                 dataset_size=experiment_config.dataset_size,
                 create_sample=experiment_config.create_sample,
+                batch_size_training=experiment_config.batch_size,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
                 model_name=experiment_config.base_model,

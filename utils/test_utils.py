@@ -59,12 +59,6 @@ def test(
                         output_scores=True,
                     )
 
-                    input_length = (
-                        1
-                        if model.config.is_encoder_decoder
-                        else batch["input_ids"].shape[1]
-                    )
-
                 except RuntimeError as e:
                     logger.error(
                         f"Model eval Output Error: {e} | Sample Identifier {test_data_json[step]['id']}"
