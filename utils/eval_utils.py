@@ -74,7 +74,6 @@ def prepare_files(
         new_row_eval_df = pd.DataFrame([new_row_eval])
         new_row_trec_df = pd.DataFrame([new_row_trec])
 
-        # TODO: Figure out if trec_eval script can differentiateFor trec_eval split df_raw by year and create two seperate files for the years!
         # Concatenate the new row DataFrame with the original eval_df
         eval_df = pd.concat([eval_df, new_row_eval_df], ignore_index=True)
         trec_eval = pd.concat([trec_eval, new_row_trec_df], ignore_index=True)
@@ -103,7 +102,7 @@ def prepare_files(
     for year, sub_df in sub_dataframes.items():
         trec_eval_path = eval_output_path.replace("eval/", "eval/trec_eval/")
         os.makedirs(os.path.dirname(trec_eval_path), exist_ok=True)
-        trec_eval_path = trec_eval_path.replace(".json", f"_trec_{int(year)}.json")
+        trec_eval_path = trec_eval_path.replace(".json", f"_trec_{int(year)}.txt")
         sub_df.to_csv(f"{trec_eval_path}", sep="\t", header=False, index=False)
 
     """
@@ -226,7 +225,6 @@ def precision_at_k(true_items, predicted_items, k):
 def prepare_binary(
     eval_output_path, run_name, logger: Optional[object] = None
 ) -> pd.DataFrame:
-    # TODO Prepare the trec_eval output file and save it as well as the output file required to run metrics
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+\-\d+)_(\w+)$"
@@ -268,7 +266,6 @@ def prepare_binary(
         # Convert the new row into a DataFrame
         new_row_eval_df = pd.DataFrame([new_row_eval])
 
-        # TODO: Figure out if trec_eval script can differentiateFor trec_eval split df_raw by year and create two seperate files for the years!
         # Concatenate the new row DataFrame with the original eval_df
         eval_df = pd.concat([eval_df, new_row_eval_df], ignore_index=True)
 
