@@ -166,7 +166,7 @@ def calculate_metrics(
 
     try:
         y_true = label_binarize(merged_df["LABEL_gold"], classes=[0, 1, 2])
-        y_pred = merged_df[["LABEL_pred"]]
+        y_pred = label_binarize(merged_df["LABEL_pred"], classes=[0, 1, 2])
         auc = roc_auc_score(
             y_true,
             y_pred,
@@ -311,25 +311,19 @@ def evaluate_binary(
             logger.error(e)
     # Calculate Accuracy, F1 score, and AUC
     accuracy = accuracy_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
-    precision = precision_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
-    )
-    recall = recall_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
-    )
-    f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro")
+    precision = precision_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
+    recall = recall_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
+    f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     p_at_5 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 5)
     p_at_10 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 10)
     p_at_50 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 50)
 
     try:
         y_true = merged_df["LABEL_gold"]
-        y_pred = merged_df[["LABEL_pred"]]
+        y_pred = merged_df["LABEL_pred"]
         auc = roc_auc_score(
             y_true,
             y_pred,
-            average="macro",
-            multi_class="ovr",
         )
     except Exception as e:
         # TODO: Delete, for debug reasons only!
