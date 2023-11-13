@@ -161,16 +161,14 @@ def calculate_metrics(
         merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
     )
     f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro")
-    p_at_5 = precision_score(
-        merged_df["LABEL_gold"][:5], merged_df["LABEL_pred"][:5], average="macro"
+    p_at_5 = precision_at_k_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=5)
+    p_at_10 = precision_at_k_score(
+        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=10
     )
-    p_at_10 = precision_score(
-        merged_df["LABEL_gold"][:10], merged_df["LABEL_pred"][:10], average="macro"
+    p_at_50 = precision_at_k_score(
+        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=50
     )
-    p_at_50 = precision_score(
-        merged_df["LABEL_gold"][:50], merged_df["LABEL_pred"][:50], average="macro"
-    )
-    ncdg_at_10 = ndcg_score([merged_df["LABEL_gold"]], [merged_df["LABEL_pred"]], k=10)
+    ndcg_at_10 = ndcg_score([merged_df["LABEL_gold"]], [merged_df["LABEL_pred"]], k=10)
 
     y_true = label_binarize(merged_df["LABEL_gold"], classes=[0, 1, 2])
     y_pred = label_binarize(merged_df["LABEL_pred"], classes=[0, 1, 2])
@@ -203,7 +201,7 @@ def calculate_metrics(
         "accuracy": accuracy,
         "precision": precision,
         "recall": recall,
-        "nCDG_at_10": ncdg_at_10,
+        "nDCG_at_10": ndcg_at_10,
         "f1": f1,
         "auc": auc,
         "p_at_5": p_at_5,
@@ -301,14 +299,14 @@ def evaluate_binary(
     precision = precision_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     recall = recall_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
-    p_at_5 = precision_score(merged_df["LABEL_gold"][:5], merged_df["LABEL_pred"][:5])
-    p_at_10 = precision_score(
-        merged_df["LABEL_gold"][:10], merged_df["LABEL_pred"][:10]
+    p_at_5 = precision_at_k_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=5)
+    p_at_10 = precision_at_k_score(
+        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=10
     )
-    p_at_50 = precision_score(
-        merged_df["LABEL_gold"][:50], merged_df["LABEL_pred"][:50]
+    p_at_50 = precision_at_k_score(
+        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=50
     )
-    ncdg_at_10 = ndcg_score([merged_df["LABEL_gold"]], [merged_df["LABEL_pred"]], k=10)
+    ndcg_at_10 = ndcg_score([merged_df["LABEL_gold"]], [merged_df["LABEL_pred"]], k=10)
 
     y_true = merged_df["LABEL_gold"]
     y_pred = merged_df["LABEL_pred"]
@@ -340,10 +338,20 @@ def evaluate_binary(
         "binary_accuracy": accuracy,
         "binary_precision": precision,
         "binary_recall": recall,
-        "nCDG_at_10": ncdg_at_10,
+        "nDCG_at_10": ndcg_at_10,
         "binary_f1": f1,
         "binary_auc": auc,
         "binary_p_at_5": p_at_5,
         "binary_p_at_10": p_at_10,
         "binary_p_at_50": p_at_50,
     }
+
+
+def precision_at_k_score(y_true, y_pred, k):
+
+    matches = 0
+    for pos in range(k):
+        if y_true[pos] == y_pred[pos]:
+            matches += 1
+
+    return matches / k
