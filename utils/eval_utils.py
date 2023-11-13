@@ -172,20 +172,14 @@ def calculate_metrics(
     )
     ncdg_at_10 = ndcg_score([merged_df["LABEL_gold"]], [merged_df["LABEL_pred"]], k=10)
 
-    try:
-        y_true = label_binarize(merged_df["LABEL_gold"], classes=[0, 1, 2])
-        y_pred = label_binarize(merged_df["LABEL_pred"], classes=[0, 1, 2])
-        auc = roc_auc_score(
-            y_true,
-            y_pred,
-            average="macro",
-            multi_class="ovr",
-        )
-    except Exception as e:
-        # TODO: Delete, for debug reasons only!
-        logger.error(f"AUC error occured: {e}")
-        auc = 0
-
+    y_true = label_binarize(merged_df["LABEL_gold"], classes=[0, 1, 2])
+    y_pred = label_binarize(merged_df["LABEL_pred"], classes=[0, 1, 2])
+    auc = roc_auc_score(
+        y_true,
+        y_pred,
+        average="macro",
+        multi_class="ovr",
+    )
     # Create a confusion matrix
     conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     plt.figure(figsize=(8, 6))
@@ -316,17 +310,12 @@ def evaluate_binary(
     )
     ncdg_at_10 = ndcg_score([merged_df["LABEL_gold"]], [merged_df["LABEL_pred"]], k=10)
 
-    try:
-        y_true = merged_df["LABEL_gold"]
-        y_pred = merged_df["LABEL_pred"]
-        auc = roc_auc_score(
-            y_true,
-            y_pred,
-        )
-    except Exception as e:
-        # TODO: Delete, for debug reasons only!
-        logger.error(f"AUC error occured: {e}")
-        auc = 0
+    y_true = merged_df["LABEL_gold"]
+    y_pred = merged_df["LABEL_pred"]
+    auc = roc_auc_score(
+        y_true,
+        y_pred,
+    )
 
     # Create a confusion matrix
     conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
