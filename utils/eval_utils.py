@@ -297,13 +297,7 @@ def evaluate_binary(
         gold_df["TOPIC_YEAR"] = year
         gold_dfs = pd.concat([gold_dfs, gold_df], ignore_index=True)
 
-    # Merge the two dataframes on NCT_ID to filter for matching values
-    """
-         Very funny bug: all dtypes of eval_df are object. Such are gold_dfs. Nevertheless, merging on TOPIC_NO,
-         merged_df becomes empty. If removing TOPIC_NO, merge works fine.
-         If df is saved to json and the imported with pd.read_json(), dtypes of most columns is int64. Merge works with
-         TOPIC_NO included. So transforming the dtype object to int64 in the eval_df, fixes the problem as well.
-    """
+    # Give "irrelevant" class label 1 like for "excluded"
     condition = gold_dfs["LABEL"] == 0
     gold_dfs.loc[condition, "LABEL"] = 1
     eval_df["LABEL"] = eval_df["LABEL"].astype(int)

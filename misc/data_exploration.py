@@ -5,13 +5,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
-type = "train"
-one_shot = False
-max_allowed_words = 1000
+type = "test"
+one_shot = True
+max_allowed_words = 1500
 binary_balancing = True
 path = base_dir
 out_path = base_dir
-path = os.path.join(base_dir, "data", f"ct_{type}_v12.json")
+path = os.path.join(base_dir, "data", f"ct_{type}_v7.json")
 
 df = pd.read_json(path)
 
