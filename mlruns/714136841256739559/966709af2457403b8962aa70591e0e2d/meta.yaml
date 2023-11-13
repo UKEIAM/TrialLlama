@@ -1,0 +1,15 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/714136841256739559/966709af2457403b8962aa70591e0e2d/artifacts
+end_time: 1699496622420
+entry_point_name: ''
+experiment_id: '714136841256739559'
+lifecycle_stage: active
+run_id: 966709af2457403b8962aa70591e0e2d
+run_name: x1cudimo-591_v12_50_4_0.0001_0.1
+run_uuid: 966709af2457403b8962aa70591e0e2d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1699495175647
+status: 4
+tags: []
+user_id: 1kkraus

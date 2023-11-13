@@ -1,0 +1,16 @@
+artifact_location: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/797033388486590421
+creation_time: 1697898147148
+experiment_id: '797033388486590421'
+last_update_time: 1698396398745
+lifecycle_stage: deleted
+name: medllama-2-13b-chat-hf-v5
+tags:
+  mlflow.note.content: 'Main model selected trough trial and error. Model fine-tuned
+    on v5 dataset, since best performance after multiple iterations of prompt engineering.
+
+    Under this experiment all runs can be found, which are related to testing different
+    hyperparameters regarding fine-tuning and inference.
+
+    Naming convention of runs: <Random_Name>_<test_dataset_version>_<batch_size>_<learning_rate>_<temperature><OPTIONAL_VALUES>
+
+    '

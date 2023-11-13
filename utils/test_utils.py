@@ -58,6 +58,7 @@ def test(
                         return_dict_in_generate=True,
                         output_scores=True,
                     )
+
                 except RuntimeError as e:
                     logger.error(
                         f"Model eval Output Error: {e} | Sample Identifier {test_data_json[step]['id']}"
@@ -80,6 +81,7 @@ def test(
 
                 if test_config.debug:
                     print(f"{response}")
+                    print(f"GROUND TRUTH: {test_data_json[step]['output']}")
 
                 topic_year = test_data_json[step]["topic_year"]
                 probas = []

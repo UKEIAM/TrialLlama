@@ -8,7 +8,7 @@ base_dir = os.path.dirname(os.path.dirname(__file__))
 def download_from_hub(
     repo_id: Optional[str] = None, token: Optional[str] = os.getenv("HF_TOKEN")
 ) -> None:
-    repo_dir = os.path.join(base_dir, repo_id)
+    repo_dir = os.path.join(base_dir, "checkpoints", repo_id)
     os.makedirs(repo_dir, exist_ok=True)
     print(repo_dir)
 

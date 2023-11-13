@@ -7,12 +7,16 @@ import yaml
 import time
 import math
 
-import fire
 import torch
 import transformers
+import numpy as np
+import matplotlib.pyplot as plt
 
+from contextlib import nullcontext
 from tqdm import tqdm
 from typing import List, Optional
+from torch.nn.utils import clip_grad_norm_
+
 
 """
 Unused imports:
@@ -90,14 +94,18 @@ def train(
         scaler = torch.cuda.amp.GradScaler()
     if train_config.enable_fsdp:
         world_size = int(os.environ["WORLD_SIZE"])
+    autocast = torch.cuda.amp.autocast if train_config.use_fp16 else nullcontext
+
     train_prep = []
     train_loss = []
+    train_step_loss = []
     val_prep = []
     val_loss = []
     epoch_times = []
     checkpoint_times = []
     results = {}
     best_val_loss = float("inf")
+    max_grad_norm = 1.0
     for epoch in range(train_config.num_epochs):
         epoch_start_time = time.perf_counter()
         with MemoryTrace() as memtrace:  # track the memory usage
@@ -105,7 +113,10 @@ def train(
             total_loss = 0.0
             total_length = len(train_dataloader) // gradient_accumulation_steps
             pbar = tqdm(
-                colour="blue", desc=f"Training Epoch: {epoch}", total=total_length
+                colour="blue",
+                desc=f"Training Epoch: {epoch+1}",
+                total=total_length,
+                dynamic_ncols=True,
             )
             for step, batch in enumerate(train_dataloader):
                 for key in batch.keys():
@@ -113,9 +124,12 @@ def train(
                         batch[key] = batch[key].to(local_rank)
                     else:
                         batch[key] = batch[key].to("cuda:0")
-                loss = model(**batch).loss
+                with autocast():
+                    outputs = model(**batch)
+                    loss = outputs.loss
                 loss = loss / gradient_accumulation_steps
                 total_loss += loss.detach().float()
+                train_step_loss.append(total_loss)
                 if train_config.use_fp16:
                     # if fp16 is enabled, use gradient scaler to handle gradient update
                     scaler.scale(loss).backward()
@@ -123,21 +137,23 @@ def train(
                         train_dataloader
                     ) - 1:
                         scaler.step(optimizer)
+                        clip_grad_norm_(model.parameters(), max_grad_norm)
                         scaler.update()
                         optimizer.zero_grad()
-                        pbar.update(step // gradient_accumulation_steps)
+                        pbar.update(1)
                 else:
                     # regular backpropagation when fp16 is not used
                     loss.backward()
                     if (step + 1) % gradient_accumulation_steps == 0 or step == len(
                         train_dataloader
                     ) - 1:
+                        clip_grad_norm_(model.parameters(), max_grad_norm)
                         optimizer.step()
                         optimizer.zero_grad()
-                        pbar.update(step // gradient_accumulation_steps)
+                        pbar.update(1)
 
                 pbar.set_description(
-                    f"Training Epoch: {epoch}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})"
+                    f"Training Epoch: {epoch+1}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})"
                 )
 
         epoch_end_time = time.perf_counter() - epoch_start_time
@@ -283,6 +299,24 @@ def train(
         results["avg_eval_loss"] = avg_eval_loss
     results["avg_epoch_time"] = avg_epoch_time
     results["avg_checkpoint_time"] = avg_checkpoint_time
+
+    # Convert the tensors to NumPy arrays
+    train_losses = [loss.item() for loss in train_loss]
+    # Create x-axis values (epochs)
+    epochs = np.arange(1, len(train_loss) + 1)
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(epochs, train_losses, label="Training Loss", marker="o")
+    # plt.plot(epochs, val_losses, label='Validation Loss', marker='o')
+    plt.xlabel(f"Epochs")
+    plt.ylabel("Loss")
+    plt.title("Training and Validation Loss Over Epochs")
+    plt.legend()
+    plt.grid(True)
+    plt_save_path = os.path.join(
+        "out", "eval", "img", f"{train_config.ft_model}_loss_vs_epoch.png"
+    )
+    plt.savefig(plt_save_path)
 
     # saving the training params including fsdp setting for reference.
     if train_config.enable_fsdp and not train_config.use_peft:

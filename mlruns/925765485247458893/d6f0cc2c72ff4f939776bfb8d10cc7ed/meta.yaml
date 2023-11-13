@@ -1,0 +1,16 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/925765485247458893/d6f0cc2c72ff4f939776bfb8d10cc7ed/artifacts
+deleted_time: 1699179404727
+end_time: 1699178919618
+entry_point_name: ''
+experiment_id: '925765485247458893'
+lifecycle_stage: deleted
+run_id: d6f0cc2c72ff4f939776bfb8d10cc7ed
+run_name: ondx680p-382_v8_3000_4_0.0001_1.0
+run_uuid: d6f0cc2c72ff4f939776bfb8d10cc7ed
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1699178914290
+status: 4
+tags: []
+user_id: 1kkraus

@@ -4,12 +4,15 @@ import os
 import fire
 import torch
 import mlflow
+import random
 
 import policies
 import torch.distributed as dist
 import torch.optim as optim
+
 from peft import PeftModel, get_peft_model, prepare_model_for_kbit_training
 from pkg_resources import packaging
+from torch.distributed.fsdp.fully_sharded_data_parallel import CPUOffload
 from torch.distributed.fsdp import (
     FullyShardedDataParallel as FSDP,
 )
@@ -17,15 +20,18 @@ from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DistributedSampler
 from transformers import (
     LlamaForCausalLM,
+    LlamaForSequenceClassification,
+    AutoModel,
     LlamaTokenizer,
     LlamaConfig,
+    AutoTokenizer,
     default_data_collator,
 )
 from transformers.models.llama.modeling_llama import LlamaDecoderLayer
 from configs.training import train_config
 from configs.fsdp import fsdp_config
 from policies.anyprecision_optimizer import AnyPrecisionAdamW
-
+from policies.activation_checkpointing_functions import apply_fsdp_checkpointing
 from utils.fsdp_utils import fsdp_auto_wrap_policy
 from utils.config_utils import (
     update_config,
@@ -42,7 +48,6 @@ from utils.train_utils import (
     clear_gpu_cache,
     print_model_size,
     get_policies,
-    get_max_length,
 )
 from utils.merge_lora_weights import merge_weights
 from typing import Optional
@@ -56,13 +61,16 @@ def main(logger: Optional[object] = None, **kwargs):
     # Set the seeds for reproducibility
     torch.cuda.manual_seed(train_config.seed)
     torch.manual_seed(train_config.seed)
+    random.seed(train_config.seed)
 
     model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
-    create_dataset_sample(
-        dataset_size=train_config.dataset_size,
-        version=train_config.dataset_version,
-        type="train",
-    )
+    if train_config.create_sample:
+        create_dataset_sample(
+            dataset_size=train_config.dataset_size,
+            version=train_config.dataset_version,
+            type="train",
+            binary_balancing=train_config.binary_balancing,
+        )
 
     if train_config.enable_fsdp:
         setup()
@@ -76,7 +84,13 @@ def main(logger: Optional[object] = None, **kwargs):
         clear_gpu_cache(local_rank)
         setup_environ_flags(rank)
 
+    base_model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
+    tokenizer = AutoTokenizer.from_pretrained(base_model_path)
+    # tokenizer.padding_side = 'right'
+    tokenizer.pad_token = tokenizer.eos_token
+
     # Load the pre-trained model and setup its configuration
+    use_cache = False if train_config.enable_fsdp else None
     if train_config.enable_fsdp and train_config.low_cpu_fsdp:
         """
         for FSDP, we can save cpu memory by loading pretrained model on rank0 only.
@@ -99,6 +113,7 @@ def main(logger: Optional[object] = None, **kwargs):
             )
         else:
             llama_config = LlamaConfig.from_pretrained(model_path)
+            llama_config.use_cache = use_cache
             with torch.device("meta"):
                 model = LlamaForCausalLM(llama_config)
 
@@ -107,6 +122,7 @@ def main(logger: Optional[object] = None, **kwargs):
             model_path,
             load_in_8bit=True if train_config.quantization else None,
             device_map="auto" if train_config.quantization else None,
+            use_cache=use_cache,
         )
 
     if train_config.enable_fsdp and train_config.use_fast_kernels:
@@ -123,6 +139,7 @@ def main(logger: Optional[object] = None, **kwargs):
             print(
                 "Module 'optimum' not found. Please install 'optimum' it before proceeding."
             )
+
     print_model_size(model, train_config, rank if train_config.enable_fsdp else 0)
 
     # Prepare the model for int8 training if quantization is enabled
@@ -133,12 +150,6 @@ def main(logger: Optional[object] = None, **kwargs):
     if train_config.enable_fsdp and fsdp_config.pure_bf16:
         model.to(torch.bfloat16)
 
-    # Load the tokenizer and add special tokens
-    tokenizer = LlamaTokenizer.from_pretrained(model_path)
-    tokenizer.pad_token = tokenizer.eos_token
-    # TODO: Evaluate if this approach suits better for my use-case. Originated from News Classification with LLM by Kshitiz Sahay
-    # tokenizer.pad_token = tokenizer.eos_token
-
     if train_config.use_peft:
         peft_config = generate_peft_config(train_config, kwargs)
         model = get_peft_model(model, peft_config)
@@ -147,6 +158,7 @@ def main(logger: Optional[object] = None, **kwargs):
     # setting up FSDP if enable_fsdp is enabled
     if train_config.enable_fsdp:
         if not train_config.use_peft and train_config.freeze_layers:
+
             freeze_transformer_layers(train_config.num_freeze_layers)
 
         mixed_precision_policy, wrapping_policy = get_policies(fsdp_config, rank)
@@ -157,6 +169,9 @@ def main(logger: Optional[object] = None, **kwargs):
             auto_wrap_policy=my_auto_wrapping_policy
             if train_config.use_peft
             else wrapping_policy,
+            cpu_offload=CPUOffload(offload_params=True)
+            if fsdp_config.fsdp_cpu_offload
+            else None,
             mixed_precision=mixed_precision_policy
             if not fsdp_config.pure_bf16
             else None,
@@ -171,15 +186,13 @@ def main(logger: Optional[object] = None, **kwargs):
             else None,
         )
         if fsdp_config.fsdp_activation_checkpointing:
-            policies.apply_fsdp_checkpointing(model)
+            apply_fsdp_checkpointing(model)
     elif not train_config.quantization and not train_config.enable_fsdp:
         model.to("cuda")
 
     dataset_config = generate_dataset_config(train_config, kwargs)
 
-    max_tokens = get_max_length(model)
-    if max_tokens > train_config.max_tokens:
-        max_tokens = train_config.max_tokens
+    max_tokens = train_config.max_tokens
 
     # Load and preprocess the dataset for training and validation
     dataset_train = get_preprocessed_dataset(
@@ -247,13 +260,15 @@ def main(logger: Optional[object] = None, **kwargs):
             momentum_dtype=torch.bfloat16,
             variance_dtype=torch.bfloat16,
             use_kahan_summation=False,
+            weight_decay=train_config.weight_decay,
         )
     else:
         optimizer = optim.AdamW(
             model.parameters(),
             lr=train_config.lr,
-            weight_decay=0.0,
+            weight_decay=train_config.weight_decay,
         )
+        # Here's where warmup steps could be defined
     scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
 
     # Start the training process

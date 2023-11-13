@@ -1,0 +1,16 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/285325586157316208/b834483b0011405994b280eee55a753e/artifacts
+deleted_time: 1699429560768
+end_time: 1699178857758
+entry_point_name: ''
+experiment_id: '285325586157316208'
+lifecycle_stage: deleted
+run_id: b834483b0011405994b280eee55a753e
+run_name: bzst4cbd-380_v8_4_4_0.0001_1.0
+run_uuid: b834483b0011405994b280eee55a753e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1699178852094
+status: 4
+tags: []
+user_id: 1kkraus
