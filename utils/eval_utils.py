@@ -26,7 +26,7 @@ def prepare_files(
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+\-\d+)_(\w+)$"
-    pattern = r"[A-C][1-3]?[:. ]?\s?\(?\w+\)?|[A-C]"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
+    pattern = r"[A-C][1-3]?[:]\s?\(?\w+\)?|[A-C][:]"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
 
@@ -39,11 +39,11 @@ def prepare_files(
             continue
         resp = match_label[0].lower()
 
-        if "excluded" in resp or "b" in resp:
+        if "excluded" in resp or "b:" in resp:
             pred_class = 1
-        elif "eligible" in resp or "a" in resp:
+        elif "eligible" in resp or "a:" in resp:
             pred_class = 2
-        elif "irrelevant" in resp or "c" in resp:
+        elif "irrelevant" in resp or "c:" in resp:
             pred_class = 0
         else:
             continue
@@ -180,7 +180,6 @@ def calculate_metrics(
 
     # Create a confusion matrix
     conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
-
     plt.figure(figsize=(8, 6))
     sns.heatmap(
         conf_matrix,
