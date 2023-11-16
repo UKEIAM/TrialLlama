@@ -3,7 +3,7 @@ base_model:
   - "Llama-2-13b-chat-hf"
 #  - "Llama-2-13b-hf"
 dataset_version:
-#  - "v1
+#  - "v1"
 #  - "v2"
 #  - "v3"
 #  - "v4"
@@ -14,7 +14,7 @@ dataset_version:
 #  - "v7"
 #  - "v7_3"
 #  - "v8"
-  - "v12"
+#  - "v12"
 dataset_test_version:
 #  - "v1"
 #  - "v2"
@@ -26,19 +26,19 @@ dataset_test_version:
 #  - "v7_3"
 #  - "v8"
 #  - "v8_3"
-  - "v9"
+#  - "v9"
 #  - "v9_3"
-  - "v12"
+#  - "v12"
 dataset_size:
 #  - 1
 #  - 2
-  - 3
+#  - 3
 #  - 12
 #  - 100 # POC
 #  - 300
 #  - 900
 #  - 1800
-#  - 3000
+  - 3000
 #  - 5000
 #  - 10000
 #  - 15000
@@ -94,7 +94,7 @@ evaluate_base_model:
 #  - true
 task:
   - classification
-  - reasoning
+#  - reasoningw
 binary_balancing:
   - true
 #  - false

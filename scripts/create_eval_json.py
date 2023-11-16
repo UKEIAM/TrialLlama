@@ -9,7 +9,7 @@ import pandas as pd
 base_dir = os.path.dirname(os.path.dirname((__file__)))
 
 model_file_path = os.path.join(
-    base_dir, "out", "eval", "eval_ffr6fuah-894_v9_3000_4_0.0001_0.1.json"
+    base_dir, "out", "eval", "eval_lbn5d6tp-748_v9_50_4_v3.json"
 )
 sample_file_path = os.path.join(base_dir, "data", "ct_test_v9.json")
 # Load the main data JSON
@@ -65,6 +65,7 @@ with open(txt_path, "w") as text_file:
         for key, value in item.items():
             # Write the capitalized key in bold
             if key in ["ID", "Ground Truth", "Model Certainty"]:
+                print(value)
                 text_file.write(f"<strong>{key}</strong> ")
             elif key in ["Model Response"]:
                 text_file.write(f"<br><strong>{key}</strong> ")
@@ -77,9 +78,6 @@ with open(txt_path, "w") as text_file:
                 text_file.write(f"{value}<br><br><br>")
             else:
                 text_file.write(f"{value}<br>")
-
-            if key == "Clinical Trial":
-                print(value)
 
 
 print("FINISHED")

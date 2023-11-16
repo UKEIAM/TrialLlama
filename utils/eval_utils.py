@@ -5,6 +5,7 @@ import re
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 from sklearn.metrics import (
     accuracy_score,
@@ -13,6 +14,7 @@ from sklearn.metrics import (
     f1_score,
     roc_auc_score,
     confusion_matrix,
+    ndcg_score,
 )
 from sklearn.preprocessing import label_binarize
 
@@ -26,7 +28,7 @@ def prepare_files(
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+\-\d+)_(\w+)$"
-    pattern = r"[A-C][:. ]?\s?\(?\w+\)?|[A-C]\s"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
+    pattern = r"[A-C][1-3]?[:]\s?\(?\w+\)?|[A-C][:]"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
 
@@ -39,11 +41,11 @@ def prepare_files(
             continue
         resp = match_label[0].lower()
 
-        if "excluded" in resp or "b" in resp:
+        if "excluded" in resp or "b:" in resp:
             pred_class = 1
-        elif "eligible" in resp or "a" in resp:
+        elif "eligible" in resp or "a:" in resp:
             pred_class = 2
-        elif "irrelevant" in resp or "c" in resp:
+        elif "irrelevant" in resp or "c:" in resp:
             pred_class = 0
         else:
             continue
@@ -74,7 +76,6 @@ def prepare_files(
         new_row_eval_df = pd.DataFrame([new_row_eval])
         new_row_trec_df = pd.DataFrame([new_row_trec])
 
-        # TODO: Figure out if trec_eval script can differentiateFor trec_eval split df_raw by year and create two seperate files for the years!
         # Concatenate the new row DataFrame with the original eval_df
         eval_df = pd.concat([eval_df, new_row_eval_df], ignore_index=True)
         trec_eval = pd.concat([trec_eval, new_row_trec_df], ignore_index=True)
@@ -103,7 +104,7 @@ def prepare_files(
     for year, sub_df in sub_dataframes.items():
         trec_eval_path = eval_output_path.replace("eval/", "eval/trec_eval/")
         os.makedirs(os.path.dirname(trec_eval_path), exist_ok=True)
-        trec_eval_path = trec_eval_path.replace(".json", f"_trec_{int(year)}.json")
+        trec_eval_path = trec_eval_path.replace(".json", f"_trec_{int(year)}.txt")
         sub_df.to_csv(f"{trec_eval_path}", sep="\t", header=False, index=False)
 
     """
@@ -160,27 +161,25 @@ def calculate_metrics(
         merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
     )
     f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro")
-    p_at_5 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 5)
-    p_at_10 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 10)
-    p_at_50 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 50)
+    p_at_5 = precision_at_k_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=5)
+    p_at_10 = precision_at_k_score(
+        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=10
+    )
+    p_at_50 = precision_at_k_score(
+        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=50
+    )
+    ndcg_at_10 = ndcg_score([merged_df["LABEL_gold"]], [merged_df["LABEL_pred"]], k=10)
 
-    try:
-        y_true = label_binarize(merged_df["LABEL_gold"], classes=[0, 1, 2])
-        y_pred = merged_df[["LABEL_pred"]]
-        auc = roc_auc_score(
-            y_true,
-            y_pred,
-            average="macro",
-            multi_class="ovr",
-        )
-    except Exception as e:
-        # TODO: Delete, for debug reasons only!
-        logger.error(f"AUC error occured: {e}")
-        auc = 0
-
+    y_true = label_binarize(merged_df["LABEL_gold"], classes=[0, 1, 2])
+    y_pred = label_binarize(merged_df["LABEL_pred"], classes=[0, 1, 2])
+    auc = roc_auc_score(
+        y_true,
+        y_pred,
+        average="macro",
+        multi_class="ovr",
+    )
     # Create a confusion matrix
     conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
-
     plt.figure(figsize=(8, 6))
     sns.heatmap(
         conf_matrix,
@@ -202,6 +201,7 @@ def calculate_metrics(
         "accuracy": accuracy,
         "precision": precision,
         "recall": recall,
+        "nDCG_at_10": ndcg_at_10,
         "f1": f1,
         "auc": auc,
         "p_at_5": p_at_5,
@@ -210,24 +210,9 @@ def calculate_metrics(
     }
 
 
-def precision_at_k(true_items, predicted_items, k):
-    # Ensure both lists have a length of at least k
-    true_items = true_items[:k]
-    predicted_items = predicted_items[:k]
-
-    # Calculate the intersection of true_items and predicted_items
-    intersection = set(true_items) & set(predicted_items)
-
-    # Calculate precision at K
-    precision = len(intersection) / k if k > 0 else 0.0
-
-    return precision
-
-
 def prepare_binary(
     eval_output_path, run_name, logger: Optional[object] = None
 ) -> pd.DataFrame:
-    # TODO Prepare the trec_eval output file and save it as well as the output file required to run metrics
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+\-\d+)_(\w+)$"
@@ -269,7 +254,6 @@ def prepare_binary(
         # Convert the new row into a DataFrame
         new_row_eval_df = pd.DataFrame([new_row_eval])
 
-        # TODO: Figure out if trec_eval script can differentiateFor trec_eval split df_raw by year and create two seperate files for the years!
         # Concatenate the new row DataFrame with the original eval_df
         eval_df = pd.concat([eval_df, new_row_eval_df], ignore_index=True)
 
@@ -297,13 +281,7 @@ def evaluate_binary(
         gold_df["TOPIC_YEAR"] = year
         gold_dfs = pd.concat([gold_dfs, gold_df], ignore_index=True)
 
-    # Merge the two dataframes on NCT_ID to filter for matching values
-    """
-         Very funny bug: all dtypes of eval_df are object. Such are gold_dfs. Nevertheless, merging on TOPIC_NO,
-         merged_df becomes empty. If removing TOPIC_NO, merge works fine.
-         If df is saved to json and the imported with pd.read_json(), dtypes of most columns is int64. Merge works with
-         TOPIC_NO included. So transforming the dtype object to int64 in the eval_df, fixes the problem as well.
-    """
+    # Give "irrelevant" class label 1 like for "excluded"
     condition = gold_dfs["LABEL"] == 0
     gold_dfs.loc[condition, "LABEL"] = 1
     eval_df["LABEL"] = eval_df["LABEL"].astype(int)
@@ -318,30 +296,24 @@ def evaluate_binary(
             logger.error(e)
     # Calculate Accuracy, F1 score, and AUC
     accuracy = accuracy_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
-    precision = precision_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
+    precision = precision_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
+    recall = recall_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
+    f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
+    p_at_5 = precision_at_k_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=5)
+    p_at_10 = precision_at_k_score(
+        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=10
     )
-    recall = recall_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
+    p_at_50 = precision_at_k_score(
+        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=50
     )
-    f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro")
-    p_at_5 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 5)
-    p_at_10 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 10)
-    p_at_50 = precision_at_k(merged_df["LABEL_gold"], merged_df["LABEL_pred"], 50)
+    ndcg_at_10 = ndcg_score([merged_df["LABEL_gold"]], [merged_df["LABEL_pred"]], k=10)
 
-    try:
-        y_true = merged_df["LABEL_gold"]
-        y_pred = merged_df[["LABEL_pred"]]
-        auc = roc_auc_score(
-            y_true,
-            y_pred,
-            average="macro",
-            multi_class="ovr",
-        )
-    except Exception as e:
-        # TODO: Delete, for debug reasons only!
-        logger.error(f"AUC error occured: {e}")
-        auc = 0
+    y_true = merged_df["LABEL_gold"]
+    y_pred = merged_df["LABEL_pred"]
+    auc = roc_auc_score(
+        y_true,
+        y_pred,
+    )
 
     # Create a confusion matrix
     conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
@@ -366,9 +338,20 @@ def evaluate_binary(
         "binary_accuracy": accuracy,
         "binary_precision": precision,
         "binary_recall": recall,
+        "nDCG_at_10": ndcg_at_10,
         "binary_f1": f1,
         "binary_auc": auc,
         "binary_p_at_5": p_at_5,
         "binary_p_at_10": p_at_10,
         "binary_p_at_50": p_at_50,
     }
+
+
+def precision_at_k_score(y_true, y_pred, k):
+
+    matches = 0
+    for pos in range(k):
+        if y_true[pos] == y_pred[pos]:
+            matches += 1
+
+    return matches / k

@@ -45,13 +45,12 @@ def main(**kwargs):
     else:
         model_version = "v2"
     if experiment_config.evaluate_base_model:
-        experiment_name = (
-            f"{experiment_config.base_model.lower()}-base-{experiment_config.task}-v2"
-        )
+        experiment_name = f"{experiment_config.base_model.lower()}-base-{experiment_config.task}-{model_version}"
     else:
         experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
+    print(f"OUTPUT MODEL NAME: {experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
     description = (
         f"Fine-tuned model {experiment_config.ft_model} | Dataset balancing v3"
@@ -67,7 +66,7 @@ def main(**kwargs):
     random_number = "".join(random.choice(string.digits) for _ in range(number_length))
     # Combine the random prefix and random number to create the run_name
     rand_name = f"{prefix}-{random_number}"
-    run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.dataset_size_testing}_{experiment_config.batch_size}_{experiment_config.lr}_{experiment_config.temperature}_{model_version}"
+    run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.dataset_size_testing}_{experiment_config.batch_size}_{model_version}"
     with mlflow.start_run(description=description, run_name=run_name) as run:
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         eval_output_path = os.path.join(

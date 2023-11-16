@@ -46,6 +46,7 @@ def create_JSON(
             required_data_directory = os.path.join(
                 raw_ct_data_directory, "required_cts"
             )
+            os.makedirs(required_data_directory, exist_ok=True)
 
             topics_df = parse_XML_to_df(
                 os.path.join(source_data_directory, f"topics{topic_year}.xml"),

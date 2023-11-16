@@ -14,7 +14,7 @@ class train_config:
     num_epochs: int = 4
     num_workers_dataloader: int = 1
     lr: float = 1e-4
-    weight_decay: float = 0.01
+    weight_decay: float = 0.1
     gamma: float = 0.85
     seed: int = 42
     use_fp16: bool = True
