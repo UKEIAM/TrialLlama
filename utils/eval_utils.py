@@ -142,6 +142,8 @@ def calculate_metrics(
          If df is saved to json and the imported with pd.read_json(), dtypes of most columns is int64. Merge works with
          TOPIC_NO included. So transforming the dtype object to int64 in the eval_df, fixes the problem as well.
     """
+    if len(eval_df > 1000):
+        eval_df = eval_df.iloc[:1000]
     eval_df["LABEL"] = eval_df["LABEL"].astype(int)
     gold_dfs["LABEL"] = gold_dfs["LABEL"].astype(int)
     merged_df = eval_df.merge(

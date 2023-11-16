@@ -11,7 +11,7 @@ dataset_version:
 #  - "v5_1"
 #  - "v5_2"
 #  - "v6"
-#  - "v7"
+  - "v7"
 #  - "v7_3"
 #  - "v8"
 #  - "v12"
@@ -94,7 +94,7 @@ evaluate_base_model:
 #  - true
 task:
   - classification
-#  - reasoningw
+#  - reasoning
 binary_balancing:
   - true
 #  - false

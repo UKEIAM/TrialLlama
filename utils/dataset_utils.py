@@ -216,6 +216,7 @@ def create_dataset_sample(
             df_example = pd.read_json(example_path)
             input_value = df_example["input"]
             balanced_df["instruction"] = balanced_df["instruction"] + input_value[0]
+        balanced_df = balanced_df[balanced_df["topic_year"] == 2021]
         balanced_df = truncate(balanced_df, word_count)
         balanced_df.drop(["word_count"], axis=1, inplace=True)
 
