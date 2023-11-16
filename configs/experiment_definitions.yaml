@@ -11,7 +11,7 @@ dataset_version:
 #  - "v5_1"
 #  - "v5_2"
 #  - "v6"
-  - "v7"
+#  - "v7"
 #  - "v7_3"
 #  - "v8"
   - "v12"
@@ -22,7 +22,7 @@ dataset_test_version:
 #  - "v4"
 #  - "v5"
 #  - "v6"
-#  - "v7"
+  - "v7"
 #  - "v7_3"
 #  - "v8"
 #  - "v8_3"
@@ -97,4 +97,4 @@ task:
   - reasoning
 binary_balancing:
   - true
-  - false
+#  - false

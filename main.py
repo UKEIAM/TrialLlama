@@ -115,6 +115,7 @@ def main(**kwargs):
                 dataset=experiment_config.dataset_name,
                 dataset_size=experiment_config.dataset_size,
                 create_sample=experiment_config.create_sample,
+                batch_size_training=experiment_config.batch_size,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
                 model_name=experiment_config.base_model,

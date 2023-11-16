@@ -22,7 +22,7 @@ class experiment_config:
     run_inference: bool = True
     run_eval: bool = True
     top_p: float = 1.0
-    temperature: float = 0.1
+    temperature: float = 0.0
     top_k: int = 50
     repetition_penalty: float = 1.0
     length_penalty: int = 1
