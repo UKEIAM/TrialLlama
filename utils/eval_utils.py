@@ -157,7 +157,10 @@ def calculate_metrics(
         if logger != None:
             logger.error(e)
     # Calculate Accuracy, F1 score, and AUC
-    accuracy = accuracy_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
+    accuracy = accuracy_score(
+        merged_df["LABEL_gold"],
+        merged_df["LABEL_pred"],
+    )
     precision = precision_score(
         merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
     )

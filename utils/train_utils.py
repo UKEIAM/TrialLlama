@@ -128,6 +128,13 @@ def train(
                     outputs = model(**batch)
                     loss = outputs.loss
                 loss = loss / gradient_accumulation_steps
+                if math.isnan(loss):
+                    print("---------WHOOOOPS---------")
+                    # if math.isnan(loss.detach().float().item()):
+                    #     x = tokenizer.decode(
+                    #         batch["input_ids"][0], skip_special_tokens=True
+                    #     )
+                    print(loss.detach().float())
                 total_loss += loss.detach().float()
                 train_step_loss.append(total_loss)
                 if train_config.use_fp16:
@@ -356,11 +363,6 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
                 # Forward pass and compute loss
                 outputs = model(**batch)
                 loss = outputs.loss
-                if math.isnan(loss.detach().float().item()):
-                    x = tokenizer.decode(
-                        batch["input_ids"][0], skip_special_tokens=True
-                    )
-                    print(loss.detach().float())
                 eval_loss += loss.detach().float()
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
