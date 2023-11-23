@@ -223,7 +223,7 @@ def prepare_binary(
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+\-\d+)_(\w+)$"
-    pattern = r"[A-C][:. ]?\s?\(?\w+\)?|[A-C]\s"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
+    pattern = r"[A-C][:]?\s?\(?\w+\)?|[A-C]\s"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
 
@@ -234,11 +234,11 @@ def prepare_binary(
             continue
         resp = match_label[0].lower()
 
-        if "excluded" in resp or "B" in resp:
+        if "excluded" in resp or "b:" in resp:
             pred_class = 1
-        elif "eligible" in resp or "A" in resp:
+        elif "eligible" in resp or "a:" in resp:
             pred_class = 2
-        elif "irrelevant" in resp or "C" in resp:
+        elif "irrelevant" in resp or "c:" in resp:
             pred_class = 1
         else:
             continue

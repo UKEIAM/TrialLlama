@@ -144,7 +144,7 @@ def train(
                         train_dataloader
                     ) - 1:
                         scaler.step(optimizer)
-                        clip_grad_norm_(model.parameters(), max_grad_norm)
+                        # clip_grad_norm_(model.parameters(), max_grad_norm)
                         scaler.update()
                         optimizer.zero_grad()
                         pbar.update(1)
@@ -154,7 +154,7 @@ def train(
                     if (step + 1) % gradient_accumulation_steps == 0 or step == len(
                         train_dataloader
                     ) - 1:
-                        clip_grad_norm_(model.parameters(), max_grad_norm)
+                        # clip_grad_norm_(model.parameters(), max_grad_norm)
                         optimizer.step()
                         optimizer.zero_grad()
                         pbar.update(1)
@@ -306,6 +306,7 @@ def train(
         results["avg_eval_loss"] = avg_eval_loss
     results["avg_epoch_time"] = avg_epoch_time
     results["avg_checkpoint_time"] = avg_checkpoint_time
+    results["train_loss"] = min(train_loss)
 
     # Convert the tensors to NumPy arrays
     train_losses = [loss.item() for loss in train_loss]
