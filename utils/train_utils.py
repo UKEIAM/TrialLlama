@@ -98,7 +98,9 @@ def train(
 
     train_prep = []
     train_loss = []
-    train_step_loss = []
+    step_loss = []
+    best_epoch_step_losses = []
+    eval_loss = []
     val_prep = []
     val_loss = []
     epoch_times = []
@@ -108,6 +110,7 @@ def train(
     max_grad_norm = 1.0
     for epoch in range(train_config.num_epochs):
         epoch_start_time = time.perf_counter()
+        step_loss = []
         with MemoryTrace() as memtrace:  # track the memory usage
             model.train()
             total_loss = 0.0
@@ -128,6 +131,7 @@ def train(
                     outputs = model(**batch)
                     loss = outputs.loss
                 loss = loss / gradient_accumulation_steps
+                step_loss.append(loss)
                 if math.isnan(loss):
                     print("---------WHOOOOPS---------")
                     # if math.isnan(loss.detach().float().item()):
@@ -136,7 +140,6 @@ def train(
                     #     )
                     print(loss.detach().float())
                 total_loss += loss.detach().float()
-                train_step_loss.append(total_loss)
                 if train_config.use_fp16:
                     # if fp16 is enabled, use gradient scaler to handle gradient update
                     scaler.scale(loss).backward()
@@ -201,8 +204,10 @@ def train(
             eval_ppl, eval_epoch_loss = evaluation(
                 model, train_config, eval_dataloader, local_rank, tokenizer
             )
+            eval_loss.append(eval_epoch_loss)
             checkpoint_start_time = time.perf_counter()
             if train_config.save_model and eval_epoch_loss < best_val_loss:
+                best_epoch_step_losses = step_loss
                 if train_config.enable_fsdp:
                     dist.barrier()
                 if train_config.use_peft:
@@ -307,22 +312,40 @@ def train(
     results["avg_epoch_time"] = avg_epoch_time
     results["avg_checkpoint_time"] = avg_checkpoint_time
     results["train_loss"] = min(train_loss)
+    results["eval_loss"] = best_val_loss
 
     # Convert the tensors to NumPy arrays
     train_losses = [loss.item() for loss in train_loss]
+    eval_losses = [loss.item() for loss in eval_loss]
     # Create x-axis values (epochs)
     epochs = np.arange(1, len(train_loss) + 1)
 
     plt.figure(figsize=(8, 6))
-    plt.plot(epochs, train_losses, label="Training Loss", marker="o")
-    # plt.plot(epochs, val_losses, label='Validation Loss', marker='o')
+    plt.plot(epochs, train_losses, label="Training loss", marker="o")
+    plt.plot(epochs, eval_losses, label="Evaluation loss", marker="o")
     plt.xlabel(f"Epochs")
     plt.ylabel("Loss")
-    plt.title("Training and Validation Loss Over Epochs")
+    plt.title("Training and Eval loss over epochs")
     plt.legend()
     plt.grid(True)
     plt_save_path = os.path.join(
         "out", "eval", "img", f"{train_config.ft_model}_loss_vs_epoch.png"
+    )
+    plt.savefig(plt_save_path)
+
+    step_losses = [loss.item() for loss in best_epoch_step_losses]
+
+    steps = np.arange(1, len(best_epoch_step_losses) + 1)
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(steps, step_losses, label="Training loss", marker="o")
+    plt.xlabel(f"Steps")
+    plt.ylabel("Loss")
+    plt.title("Step losses of best epoch")
+    plt.legend()
+    plt.grid(True)
+    plt_save_path = os.path.join(
+        "out", "eval", "img", f"{train_config.ft_model}_loss_vs_epoch_steps.png"
     )
     plt.savefig(plt_save_path)
 
@@ -379,6 +402,7 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
 
     # Compute average loss and perplexity
     eval_epoch_loss = eval_loss / len(eval_dataloader)
+
     if train_config.enable_fsdp:
         eval_epoch_loss = eval_epoch_loss / world_size
 

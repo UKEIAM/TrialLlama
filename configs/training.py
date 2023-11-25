@@ -10,11 +10,11 @@ class train_config:
     low_cpu_fsdp: bool = False
     run_validation: bool = True
     batch_size_training: int = 4
-    gradient_accumulation_steps: int = 1
+    gradient_accumulation_steps: int = 3
     num_epochs: int = 4
     num_workers_dataloader: int = 1
     lr: float = 1e-4
-    weight_decay: float = 0.1
+    weight_decay: float = 0.01
     gamma: float = 0.85
     seed: int = 42
     use_fp16: bool = True

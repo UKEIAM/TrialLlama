@@ -1,0 +1,15 @@
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/225056005112742895/0e44bdbbbe37401b877ef005164a58ed/artifacts
+end_time: 1700786051935
+entry_point_name: ''
+experiment_id: '225056005112742895'
+lifecycle_stage: active
+run_id: 0e44bdbbbe37401b877ef005164a58ed
+run_name: 0cn9huqb-235_v12_100_4_v3
+run_uuid: 0e44bdbbbe37401b877ef005164a58ed
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1700745219758
+status: 3
+tags: []
+user_id: 1kkraus

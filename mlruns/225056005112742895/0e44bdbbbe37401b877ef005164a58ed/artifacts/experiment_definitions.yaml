@@ -1,7 +1,7 @@
 base_model:
 #  - "Llama-2-7b-chat-hf"
-  - "Llama-2-13b-chat-hf"
-#  - "Llama-2-13b-hf"
+#  - "Llama-2-13b-chat-hf"
+  - "Llama-2-13b-hf"
 dataset_version:
 #  - "v1"
 #  - "v2"
@@ -11,10 +11,10 @@ dataset_version:
 #  - "v5_1"
 #  - "v5_2"
 #  - "v6"
-  - "v7"
+#  - "v7"
 #  - "v7_3"
 #  - "v8"
-#  - "v12"
+  - "v12"
 dataset_test_version:
 #  - "v1"
 #  - "v2"
@@ -22,22 +22,22 @@ dataset_test_version:
 #  - "v4"
 #  - "v5"
 #  - "v6"
-  - "v7"
+#  - "v7"
 #  - "v7_3"
 #  - "v8"
 #  - "v8_3"
 #  - "v9"
 #  - "v9_3"
-#  - "v12"
+  - "v12"
 dataset_size:
-  - 1
+#  - 1
 #  - 2
 #  - 3
 #  - 12
 #  - 100 # POC
 #  - 300
 #  - 900
-#  - 1800
+  - 1800
 #  - 3000
 #  - 5000
 #  - 10000
@@ -46,14 +46,13 @@ dataset_size:
 num_epochs:
 #  -  2
 #  - 3
-#  - 4 # Default
+  - 4 # Default
 #  - 5
 #  - 6
-  - 8
 lr:
 #  - 0.001
-  - 0.0001 # Default
-#  - 0.0002
+#  - 0.0001 # Default
+  - 0.0002
 #  - 0.00001
 temperature:
   - 0.0

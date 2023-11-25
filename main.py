@@ -47,7 +47,7 @@ def main(**kwargs):
     if experiment_config.evaluate_base_model:
         experiment_name = f"{experiment_config.base_model.lower()}-base-{experiment_config.task}-{model_version}"
     else:
-        experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}"
+        experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}-gradient_accumulation"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
     print(f"OUTPUT MODEL NAME: {experiment_config.ft_model}")
@@ -80,6 +80,7 @@ def main(**kwargs):
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,
                 "weight_decay": experiment_config.weight_decay,
+                "gradient_accumulation_steps": experiment_config.gradient_accumulation_steps,
                 "dataset_name": experiment_config.dataset_name,
                 "dataset_version": experiment_config.dataset_version,
                 "dataset_size_testing": experiment_config.dataset_size_testing,
@@ -110,6 +111,7 @@ def main(**kwargs):
                 logger=logger,
                 dataset_version=experiment_config.dataset_version,
                 dataset=experiment_config.dataset_name,
+                gradient_accumulation_steps=experiment_config.gradient_accumulation_steps,
                 dataset_size=experiment_config.dataset_size,
                 create_sample=experiment_config.create_sample,
                 batch_size_training=experiment_config.batch_size,
