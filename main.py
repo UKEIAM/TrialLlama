@@ -45,7 +45,7 @@ def main(**kwargs):
     else:
         model_version = "v2"
     if experiment_config.evaluate_base_model:
-        experiment_name = f"{experiment_config.base_model.lower()}-base-{experiment_config.task}-{model_version}"
+        experiment_name = f"base-{experiment_config.dataset_version}-{experiment_config.task}-{model_version}"
     else:
         experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}"
     mlflow.set_experiment(experiment_name)
@@ -65,6 +65,10 @@ def main(**kwargs):
     # Combine the random prefix and random number to create the run_name
     rand_name = f"{prefix}-{random_number}"
     run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.dataset_size_testing}_{experiment_config.batch_size}_{model_version}"
+    if experiment_config.evaluate_base_model:
+        load_peft_model = False
+    else:
+        load_peft_model = experiment_config.load_peft_model
     with mlflow.start_run(description=description, run_name=run_name) as run:
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         eval_output_path = os.path.join(
@@ -105,7 +109,7 @@ def main(**kwargs):
         except Exception as e:
             logger.error(f"Error while logging artifact: {e}")
 
-        if experiment_config.run_training:
+        if experiment_config.run_training and not experiment_config.evaluate_base_model:
             print("Running training...")
             results = ft_main(
                 logger=logger,
@@ -134,7 +138,7 @@ def main(**kwargs):
                 dataset=f"ct_test_sample_{experiment_config.dataset_test_version}",
                 base_model=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
-                load_peft_model=experiment_config.load_peft_model,
+                load_peft_model=load_peft_model,
                 max_new_tokens=experiment_config.max_new_tokens,
                 temperature=experiment_config.temperature,
                 top_k=experiment_config.top_k,

@@ -16,11 +16,6 @@ from typing import Optional
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 
-def set_tokenizer_params(tokenizer: LlamaTokenizer):
-    tokenizer.pad_token_id = 0
-    tokenizer.padding_side = "left"
-
-
 def test(
     model,
     test_data_json,

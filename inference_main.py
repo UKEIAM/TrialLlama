@@ -49,6 +49,7 @@ def main(
     ft_model_path = os.path.join("out", test_config.ft_model, "adapter_weights")
     model = load_model(base_model_path, test_config.quantization)
     if test_config.load_peft_model:
+        print("LOADING PEFT MODEL")
         model = load_peft_model(model, ft_model_path)
 
     model.eval()

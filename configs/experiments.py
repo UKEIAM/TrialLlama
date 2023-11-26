@@ -32,4 +32,4 @@ class experiment_config:
     add_example: bool = False
     weight_decay: float = 0.1
     task: str = "classification"
-    binary_balancing: bool = False
+    binary_balancing: bool = True
