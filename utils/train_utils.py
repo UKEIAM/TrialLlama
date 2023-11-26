@@ -46,11 +46,6 @@ from policies.mixed_precision import bfSixteen, fpSixteen, bfSixteen_mixed
 from policies.wrapping import get_llama_wrapper
 
 
-def set_tokenizer_params(tokenizer: LlamaTokenizer):
-    tokenizer.pad_token_id = 0
-    tokenizer.padding_side = "left"
-
-
 # Converting Bytes to Megabytes
 def byte2mb(x):
     return int(x / 2**20)
@@ -98,7 +93,6 @@ def train(
 
     train_prep = []
     train_loss = []
-    step_loss = []
     best_epoch_step_losses = []
     eval_loss = []
     val_prep = []
@@ -107,10 +101,9 @@ def train(
     checkpoint_times = []
     results = {}
     best_val_loss = float("inf")
-    max_grad_norm = 1.0
     for epoch in range(train_config.num_epochs):
         epoch_start_time = time.perf_counter()
-        step_loss = []
+        step_losses = []
         with MemoryTrace() as memtrace:  # track the memory usage
             model.train()
             total_loss = 0.0
@@ -131,14 +124,9 @@ def train(
                     outputs = model(**batch)
                     loss = outputs.loss
                 loss = loss / gradient_accumulation_steps
-                step_loss.append(loss)
+                step_losses.append(loss.item())
                 if math.isnan(loss):
                     print("---------WHOOOOPS---------")
-                    # if math.isnan(loss.detach().float().item()):
-                    #     x = tokenizer.decode(
-                    #         batch["input_ids"][0], skip_special_tokens=True
-                    #     )
-                    print(loss.detach().float())
                 total_loss += loss.detach().float()
                 if train_config.use_fp16:
                     # if fp16 is enabled, use gradient scaler to handle gradient update
@@ -207,7 +195,7 @@ def train(
             eval_loss.append(eval_epoch_loss)
             checkpoint_start_time = time.perf_counter()
             if train_config.save_model and eval_epoch_loss < best_val_loss:
-                best_epoch_step_losses = step_loss
+                best_epoch_step_losses = step_losses
                 if train_config.enable_fsdp:
                     dist.barrier()
                 if train_config.use_peft:
@@ -333,12 +321,10 @@ def train(
     )
     plt.savefig(plt_save_path)
 
-    step_losses = [loss.item() for loss in best_epoch_step_losses]
-
     steps = np.arange(1, len(best_epoch_step_losses) + 1)
 
     plt.figure(figsize=(8, 6))
-    plt.plot(steps, step_losses, label="Training loss", marker="o")
+    plt.plot(steps, best_epoch_step_losses, label="Training loss", marker="o")
     plt.xlabel(f"Steps")
     plt.ylabel("Loss")
     plt.title("Step losses of best epoch")

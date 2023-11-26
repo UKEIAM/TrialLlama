@@ -41,13 +41,13 @@ def main(**kwargs):
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch.png"
     )
     if experiment_config.binary_balancing:
-        model_version = "v3"
+        model_version = "v4"
     else:
         model_version = "v2"
     if experiment_config.evaluate_base_model:
         experiment_name = f"{experiment_config.base_model.lower()}-base-{experiment_config.task}-{model_version}"
     else:
-        experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}-gradient_accumulation"
+        experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
     print(f"OUTPUT MODEL NAME: {experiment_config.ft_model}")

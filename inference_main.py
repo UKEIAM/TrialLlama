@@ -42,39 +42,6 @@ def main(
     )
     dataset_config = generate_dataset_config(test_config, kwargs)
 
-    # Load fine-tuned model ATTENTION: Fine-tuned adapter weights, need to be merged with base-model before loading is possible!
-    # if test_config.load_peft_model:
-    #     model_path = os.path.join("checkpoints", "meta-llama", test_config.base_model)
-    #     base_model = LlamaForCausalLM.from_pretrained(
-    #         model_path,
-    #         return_dict=True,
-    #         load_in_8bit=test_config.quantization,
-    #         device_map="auto",
-    #         low_cpu_mem_usage=True,
-    #     )
-    #     ft_model_path = os.path.join("out", test_config.ft_model, "adapter_weights")
-    #     model = PeftModel.from_pretrained(
-    #         base_model,
-    #         ft_model_path,
-    #     )
-    # elif test_config.evaluate_base_model:
-    #     model_path = os.path.join("checkpoints", "meta-llama", test_config.base_model)
-    #     model = LlamaForCausalLM.from_pretrained(
-    #         model_path,
-    #         return_dict=True,
-    #         load_in_8bit=test_config.quantization,
-    #         device_map="auto",
-    #         low_cpu_mem_usage=True,
-    #     )
-    # else:
-    #     model = LlamaForCausalLM.from_pretrained(
-    #         os.path.join("out", test_config.ft_model),
-    #         return_dict=True,
-    #         load_in_8bit=test_config.quantization,
-    #         device_map="auto",
-    #         low_cpu_mem_usage=True,
-    #     )
-
     # Set the seeds for reproducibility
     torch.cuda.manual_seed(test_config.seed)
     torch.manual_seed(test_config.seed)
@@ -88,8 +55,7 @@ def main(
 
     # After updating all libraries, LlamaTokenizer throws error when trying to load weights. AutoTokenizer works.
     tokenizer = AutoTokenizer.from_pretrained(base_model_path)
-    tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.padding_side = "right"
+    tokenizer.pad_token_id = tokenizer.eos_token_id
 
     max_tokens = 3072
 

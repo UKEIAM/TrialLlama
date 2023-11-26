@@ -10,7 +10,7 @@ import policies
 import torch.distributed as dist
 import torch.optim as optim
 
-from peft import PeftModel, get_peft_model, prepare_model_for_kbit_training
+from peft import get_peft_model, prepare_model_for_int8_training
 from pkg_resources import packaging
 from torch.distributed.fsdp.fully_sharded_data_parallel import CPUOffload
 from torch.distributed.fsdp import (
@@ -85,9 +85,6 @@ def main(logger: Optional[object] = None, **kwargs):
         setup_environ_flags(rank)
 
     base_model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
-    tokenizer = AutoTokenizer.from_pretrained(base_model_path)
-    # tokenizer.padding_side = 'right'
-    tokenizer.pad_token = tokenizer.eos_token
 
     # Load the pre-trained model and setup its configuration
     use_cache = False if train_config.enable_fsdp else None
@@ -140,11 +137,14 @@ def main(logger: Optional[object] = None, **kwargs):
                 "Module 'optimum' not found. Please install 'optimum' it before proceeding."
             )
 
+    tokenizer = AutoTokenizer.from_pretrained(base_model_path)
+    tokenizer.pad_token_id = tokenizer.eos_token_id
+
     print_model_size(model, train_config, rank if train_config.enable_fsdp else 0)
 
     # Prepare the model for int8 training if quantization is enabled
     if train_config.quantization:
-        model = prepare_model_for_kbit_training(model)
+        model = prepare_model_for_int8_training(model)
 
     # Convert the model to bfloat16 if fsdp and pure_bf16 is enabled
     if train_config.enable_fsdp and fsdp_config.pure_bf16:
@@ -295,7 +295,7 @@ def main(logger: Optional[object] = None, **kwargs):
     if not train_config.enable_fsdp or rank == 0:
         [print(f"Key: {k}, Value: {v}") for k, v in results.items()]
 
-    if train_config.merge_weights:
+    if train_config.merge_adapter_weights:
         print("Merging adapter weights with base-model...")
         ft_model_path = os.path.join("out", train_config.ft_model)
         peft_model = os.path.join(ft_model_path, "adapter_weights")

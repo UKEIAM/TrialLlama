@@ -44,7 +44,7 @@ dataset_size:
 #  - 15000
 #  - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 15426
 num_epochs:
-#  -  2
+#  - 2
 #  - 3
 #  - 4 # Default
 #  - 5

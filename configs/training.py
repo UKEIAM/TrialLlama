@@ -10,7 +10,7 @@ class train_config:
     low_cpu_fsdp: bool = False
     run_validation: bool = True
     batch_size_training: int = 4
-    gradient_accumulation_steps: int = 3
+    gradient_accumulation_steps: int = 1
     num_epochs: int = 4
     num_workers_dataloader: int = 1
     lr: float = 1e-4
@@ -34,7 +34,7 @@ class train_config:
     quantization: bool = True
     one_gpu: bool = False
     save_model: bool = True
-    merge_weights: bool = False
+    merge_adapter_weights: bool = False
     dist_checkpoint_root_folder: str = "out"  # will be used if using FSDP
     dist_checkpoint_folder: str = "ft-model"  # will be used if using FSDP
     save_optimizer: bool = False  # will be used if using FSDP

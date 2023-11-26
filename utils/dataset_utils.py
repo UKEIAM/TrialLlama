@@ -13,7 +13,6 @@ from typing import Optional
 from ft_datasets.instruct_dataset import (
     InstructionDataset,
     TestingDataset,
-    QAInstructionDataset,
 )
 
 DATASET_PREPROC = {
@@ -51,7 +50,6 @@ DATASET_PREPROC = {
     "ct_test_sample_v9": partial(TestingDataset),
     "ct_test_sample_v9_3": partial(TestingDataset),
     "ct_test_sample_v12": partial(TestingDataset),
-    "medqa": partial(QAInstructionDataset),
 }
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
