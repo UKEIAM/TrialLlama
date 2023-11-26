@@ -41,7 +41,7 @@ def main(**kwargs):
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch.png"
     )
     if experiment_config.binary_balancing:
-        model_version = "v4"
+        model_version = "v3"
     else:
         model_version = "v2"
     if experiment_config.evaluate_base_model:

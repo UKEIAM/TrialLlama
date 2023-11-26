@@ -301,6 +301,7 @@ def train(
     results["avg_checkpoint_time"] = avg_checkpoint_time
     results["train_loss"] = min(train_loss)
     results["eval_loss"] = best_val_loss
+    results["train_perplexity"] = min(train_prep)
 
     # Convert the tensors to NumPy arrays
     train_losses = [loss.item() for loss in train_loss]
