@@ -37,22 +37,28 @@ def main(**kwargs):
     experiment_config_dir = os.path.join(
         base_dir, "configs", "experiment_definitions.yaml"
     )
-    train_plt_path = plt_save_path = os.path.join(
+    train_plt_path = os.path.join(
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch.png"
     )
+    train_step_plt_path = os.path.join(
+        "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch_steps.png"
+    )
+
     if experiment_config.binary_balancing:
-        model_version = "v3"
+        model_version = "v4"
     else:
         model_version = "v2"
     if experiment_config.evaluate_base_model:
-        experiment_name = f"base-{experiment_config.dataset_version}-{experiment_config.task}-{model_version}"
+        experiment_name = (
+            f"base-{experiment_config.dataset_test_version}-{experiment_config.task}"
+        )
     else:
         experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
     print(f"OUTPUT MODEL NAME: {experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
-    description = f"Fine-tuned model {experiment_config.ft_model} | Dataset balancing v3 | Only 2021 topics to enable trec comparision"
+    description = f"Fine-tuned model {experiment_config.ft_model} | {model_version}"
     # Define the characters to choose from for the prefix
     prefix_characters = string.ascii_lowercase + string.digits
     prefix_length = 8  # Adjust the length as needed
@@ -154,12 +160,10 @@ def main(**kwargs):
             )
             mlflow.set_tag("inference_conducted", "TRUE")
             mlflow.log_metric("number_of_empty_responses", results)
-            # artifact_uri = os.path.join(
-            #     base_dir, "mlruns", run.info.experiment_id, run.info.run_id, "artifacts"
-            # )
             try:
-                # TODO: Suddenly some issues with logging artifacts happened because of PermissionError on remote interpreter"
                 mlflow.log_artifact(local_path=eval_output_path)
+                mlflow.log_artifact(local_path=train_plt_path)
+                mlflow.log_artifact(local_path=train_step_plt_path)
             except Exception as e:
                 logger.error(f"Error while logging artifact: {e}")
             clear_gpu_cache()

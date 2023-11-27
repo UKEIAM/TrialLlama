@@ -273,7 +273,7 @@ def main(logger: Optional[object] = None, **kwargs):
 
     # Start the training process
 
-    results = train(
+    results = trLain(
         model,
         train_dataloader,
         eval_dataloader,

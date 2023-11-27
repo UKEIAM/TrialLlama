@@ -8,6 +8,7 @@ import json
 import torch
 
 from torch.utils.data import Dataset
+from sklearn.model_selection import train_test_split
 
 
 PROMPT_DICT = {
@@ -19,9 +20,9 @@ class InstructionDataset(Dataset):
     def __init__(self, dataset_config, tokenizer, partition="train", max_tokens=1024):
         self.ann = json.load(open(dataset_config.data_path))
         if partition == "train":
-            self.ann = self.ann
+            self.ann, _ = train_test_split(self.ann, test_size=0.1, random_state=42)
         else:
-            self.ann = self.ann[:200]
+            _, self.ann = train_test_split(self.ann, test_size=0.1, random_state=42)
 
         self.max_tokens = max_tokens
         self.tokenizer = tokenizer

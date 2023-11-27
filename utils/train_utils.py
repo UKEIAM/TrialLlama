@@ -23,15 +23,6 @@ Unused imports:
 import torch.nn as nn
 import bitsandbytes as bnb
 """
-from torch.nn import functional as F
-from peft import (
-    LoraConfig,
-    get_peft_model,
-    get_peft_model_state_dict,
-    prepare_model_for_kbit_training,
-    set_peft_model_state_dict,
-)
-from transformers import LlamaForCausalLM, LlamaTokenizer
 from torch.distributed.fsdp import StateDictType
 import torch.distributed as dist
 from pkg_resources import packaging
