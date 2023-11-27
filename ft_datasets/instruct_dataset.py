@@ -32,7 +32,6 @@ class InstructionDataset(Dataset):
 
     def __getitem__(self, index):
         IGNORE_INDEX = -100  # The default setting in CrossEntropyLoss
-        # TODO: Find nicer solution than just removing words from the input to assert tokens is not > max_tokens
         ann = self.ann[index]
         prompt = PROMPT_DICT["prompt_input"].format_map(ann)
         example = prompt + ann["output"]
@@ -70,7 +69,7 @@ class TestingDataset(Dataset):
         return len(self.ann)
 
     def __getitem__(self, index):
-        # TODO: Funny, the approach used for tokenization in the training phase, is not working if you call model.generate(**batch). CUDA fails somehow
+        # NOTE: Funny, the approach used for tokenization in the training phase, is not working if you call model.generate(**batch). CUDA fails somehow
         ann = self.ann[index]
         prompt = PROMPT_DICT["prompt_input"].format_map(ann)
         batch = self.tokenizer(
