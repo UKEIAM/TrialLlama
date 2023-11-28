@@ -260,9 +260,9 @@ def train(
                 best_val_loss = eval_epoch_loss
                 if train_config.enable_fsdp:
                     if rank == 0:
-                        print(f"best eval loss on epoch {epoch} is {best_val_loss}")
+                        print(f"best eval loss on epoch {epoch+1} is {best_val_loss}")
                 else:
-                    print(f"best eval loss on epoch {epoch} is {best_val_loss}")
+                    print(f"best eval loss on epoch {epoch+1} is {best_val_loss}")
             val_loss.append(best_val_loss)
             val_prep.append(eval_ppl)
 

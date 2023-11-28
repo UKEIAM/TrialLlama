@@ -98,12 +98,6 @@ def create_dataset_sample(
     path = base_dir
     out_path = base_dir
 
-    # TODO: Refactor: Create a sample from ct_all_years and save it as "ct_all_years_testing"
-    # Derive train_dataset from "ct_all_years" but leave out ~1000 samples for testssh
-    instruction_path = os.path.join(base_dir, "configs", f"ct_data.yaml")
-    with open(instruction_path, "r") as file:
-        instruction_config = yaml.safe_load(file)
-    instruction = instruction_config[version]["instruction"]
     if type == "train":
         path = os.path.join(base_dir, "data", f"ct_train_{version}.json")
         out_path = os.path.join(base_dir, "data", f"ct_train_sample_{version}.json")
@@ -116,7 +110,13 @@ def create_dataset_sample(
         out_path = os.path.join(base_dir, "data", f"ct_test_sample_{version}.json")
 
     df = pd.read_json(path)
+
+    # Possibility to change the instruction for training/testing and not having to recreate whole dataset!
     if replace_instruction:
+        instruction_path = os.path.join(base_dir, "configs", f"ct_data.yaml")
+        with open(instruction_path, "r") as file:
+            instruction_config = yaml.safe_load(file)
+        instruction = instruction_config[version]["instruction"]
         # Possibility to change the instruction for training/testing and not having to recreate whole dataset!
         df.loc[:, "instruction"] = instruction
 

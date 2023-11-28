@@ -1,0 +1,15 @@
+artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/678315871922730516/7bf48315fcc54a988003c07aaa2eaca3/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '678315871922730516'
+lifecycle_stage: active
+run_id: 7bf48315fcc54a988003c07aaa2eaca3
+run_name: feuqg8d7-792_v7_1200_4_v4
+run_uuid: 7bf48315fcc54a988003c07aaa2eaca3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1701129843127
+status: 1
+tags: []
+user_id: 1kkraus
