@@ -1,8 +1,9 @@
-artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/678315871922730516/38c1c57e209449b5b106fdc9f0e146c3/artifacts
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/678315871922730516/38c1c57e209449b5b106fdc9f0e146c3/artifacts
+deleted_time: 1701133242178
 end_time: 1701095436422
 entry_point_name: ''
 experiment_id: '678315871922730516'
-lifecycle_stage: active
+lifecycle_stage: deleted
 run_id: 38c1c57e209449b5b106fdc9f0e146c3
 run_name: rmjavzgz-207_v7_1200_4_v4
 run_uuid: 38c1c57e209449b5b106fdc9f0e146c3

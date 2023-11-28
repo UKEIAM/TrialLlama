@@ -41,7 +41,7 @@ for param_set in param_combinations:
 
     # TODO: Check if learning rate at the end works, since dot in folder name
     if binary_balancing:
-        model_version = "v4"
+        model_version = "v7"
     else:
         model_version = "v2"
     if evaluate_base_model:
