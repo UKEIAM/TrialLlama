@@ -10,7 +10,7 @@ class experiment_config:
     create_sample: bool = True
     dataset_size_testing: int = 1200
     dataset_test_version: str = "v7"
-    gradient_accumulation_steps: int = 2
+    gradient_accumulation_steps: int = 1
     max_tokens: int = 2048
     max_new_tokens: int = 1024
     lr: float = 1e-4
