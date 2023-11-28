@@ -112,8 +112,7 @@ def create_dataset_sample(
     df = pd.read_json(path)
     exclusion_criteria_check = df["clinical_trial"].str.count("EXCLUSION CRITERIA") == 1
     inclusion_criteria_check = df["clinical_trial"].str.count("INCLUSION CRITERIA") == 1
-    df = df[exclusion_criteria_check]
-    df = df[inclusion_criteria_check]
+    df = df[exclusion_criteria_check & inclusion_criteria_check]
 
     # Possibility to change the instruction for training/testing and not having to recreate whole dataset!
     if replace_instruction:
