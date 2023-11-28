@@ -5,14 +5,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class medqa:
-    dataset: str = "medqa"
-    train_split: str = "train"
-    test_split: str = "val"
-    data_path: str = "data/medical_meadow_medqa.json"
-
-
-@dataclass
 class ct_train_sample_v1:
     dataset: str = "ct_train_sample_v1"
     train_split: str = "train"

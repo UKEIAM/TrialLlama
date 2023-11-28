@@ -32,7 +32,7 @@ def get_free_cuda_device():
 
         least_busy_gpu_index = rel_used_memory.index(min(rel_used_memory))
         least_busy_memory = rel_used_memory[least_busy_gpu_index]
-        if least_busy_memory > 0.05:
+        if least_busy_memory > 0.15:
             # If the least busy GPU is more than 5% busy, return None
             return False
 

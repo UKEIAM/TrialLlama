@@ -37,24 +37,28 @@ def main(**kwargs):
     experiment_config_dir = os.path.join(
         base_dir, "configs", "experiment_definitions.yaml"
     )
-    train_plt_path = plt_save_path = os.path.join(
+    train_plt_path = os.path.join(
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch.png"
     )
+    train_step_plt_path = os.path.join(
+        "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch_steps.png"
+    )
+
     if experiment_config.binary_balancing:
-        model_version = "v3"
+        model_version = "v4"
     else:
         model_version = "v2"
     if experiment_config.evaluate_base_model:
-        experiment_name = f"{experiment_config.base_model.lower()}-base-{experiment_config.task}-{model_version}"
+        experiment_name = (
+            f"base-{experiment_config.dataset_test_version}-{experiment_config.task}"
+        )
     else:
         experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
     print(f"OUTPUT MODEL NAME: {experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
-    description = (
-        f"Fine-tuned model {experiment_config.ft_model} | Dataset balancing v3"
-    )
+    description = f"Fine-tuned model {experiment_config.ft_model} | {model_version}"
     # Define the characters to choose from for the prefix
     prefix_characters = string.ascii_lowercase + string.digits
     prefix_length = 8  # Adjust the length as needed
@@ -67,6 +71,10 @@ def main(**kwargs):
     # Combine the random prefix and random number to create the run_name
     rand_name = f"{prefix}-{random_number}"
     run_name = f"{rand_name}_{experiment_config.dataset_test_version}_{experiment_config.dataset_size_testing}_{experiment_config.batch_size}_{model_version}"
+    if experiment_config.evaluate_base_model:
+        load_peft_model = False
+    else:
+        load_peft_model = experiment_config.load_peft_model
     with mlflow.start_run(description=description, run_name=run_name) as run:
         logger = setup_logger(run_id=run.info.run_id, run_name=run_name)
         eval_output_path = os.path.join(
@@ -82,6 +90,7 @@ def main(**kwargs):
                 "num_epochs": experiment_config.num_epochs,
                 "learning_rate": experiment_config.lr,
                 "weight_decay": experiment_config.weight_decay,
+                "gradient_accumulation_steps": experiment_config.gradient_accumulation_steps,
                 "dataset_name": experiment_config.dataset_name,
                 "dataset_version": experiment_config.dataset_version,
                 "dataset_size_testing": experiment_config.dataset_size_testing,
@@ -106,18 +115,19 @@ def main(**kwargs):
         except Exception as e:
             logger.error(f"Error while logging artifact: {e}")
 
-        if experiment_config.run_training:
+        if experiment_config.run_training and not experiment_config.evaluate_base_model:
             print("Running training...")
             results = ft_main(
                 logger=logger,
                 dataset_version=experiment_config.dataset_version,
                 dataset=experiment_config.dataset_name,
+                gradient_accumulation_steps=experiment_config.gradient_accumulation_steps,
                 dataset_size=experiment_config.dataset_size,
                 create_sample=experiment_config.create_sample,
                 batch_size_training=experiment_config.batch_size,
                 lr=experiment_config.lr,
                 num_epochs=experiment_config.num_epochs,
-                model_name=experiment_config.base_model,
+                base_model=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
                 max_tokens=experiment_config.max_tokens,
                 binary_balancing=experiment_config.binary_balancing,
@@ -132,9 +142,9 @@ def main(**kwargs):
                 dataset_size=experiment_config.dataset_size_testing,
                 dataset_version=experiment_config.dataset_test_version,
                 dataset=f"ct_test_sample_{experiment_config.dataset_test_version}",
-                model_name=experiment_config.base_model,
+                base_model=experiment_config.base_model,
                 ft_model=experiment_config.ft_model,
-                load_peft_model=experiment_config.load_peft_model,
+                load_peft_model=load_peft_model,
                 max_new_tokens=experiment_config.max_new_tokens,
                 temperature=experiment_config.temperature,
                 top_k=experiment_config.top_k,
@@ -150,12 +160,10 @@ def main(**kwargs):
             )
             mlflow.set_tag("inference_conducted", "TRUE")
             mlflow.log_metric("number_of_empty_responses", results)
-            # artifact_uri = os.path.join(
-            #     base_dir, "mlruns", run.info.experiment_id, run.info.run_id, "artifacts"
-            # )
             try:
-                # TODO: Suddenly some issues with logging artifacts happened because of PermissionError on remote interpreter"
                 mlflow.log_artifact(local_path=eval_output_path)
+                mlflow.log_artifact(local_path=train_plt_path)
+                mlflow.log_artifact(local_path=train_step_plt_path)
             except Exception as e:
                 logger.error(f"Error while logging artifact: {e}")
             clear_gpu_cache()

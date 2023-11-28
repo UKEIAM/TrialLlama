@@ -1,7 +1,0 @@
-artifact_location: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/701388192037389001
-creation_time: 1698931769644
-experiment_id: '701388192037389001'
-last_update_time: 1699072276439
-lifecycle_stage: active
-name: DEPRECATED-llama-2-13b-chat-hf-v8-3000-classification
-tags: {}

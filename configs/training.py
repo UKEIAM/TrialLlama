@@ -14,7 +14,7 @@ class train_config:
     num_epochs: int = 4
     num_workers_dataloader: int = 1
     lr: float = 1e-4
-    weight_decay: float = 0.1
+    weight_decay: float = 0.01
     gamma: float = 0.85
     seed: int = 42
     use_fp16: bool = True
@@ -34,7 +34,7 @@ class train_config:
     quantization: bool = True
     one_gpu: bool = False
     save_model: bool = True
-    merge_weights: bool = False
+    merge_adapter_weights: bool = False
     dist_checkpoint_root_folder: str = "out"  # will be used if using FSDP
     dist_checkpoint_folder: str = "ft-model"  # will be used if using FSDP
     save_optimizer: bool = False  # will be used if using FSDP

@@ -41,7 +41,7 @@ for param_set in param_combinations:
 
     # TODO: Check if learning rate at the end works, since dot in folder name
     if binary_balancing:
-        model_version = "v3"
+        model_version = "v7"
     else:
         model_version = "v2"
     if evaluate_base_model:
@@ -57,7 +57,7 @@ for param_set in param_combinations:
     if task == "classification":
         max_new_tokens = 10
     else:
-        max_new_tokens = 1024
+        max_new_tokens = 500
 
     command = [
         "python",

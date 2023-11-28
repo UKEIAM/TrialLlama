@@ -105,6 +105,8 @@ def prepare_files(
         trec_eval_path = eval_output_path.replace("eval/", "eval/trec_eval/")
         os.makedirs(os.path.dirname(trec_eval_path), exist_ok=True)
         trec_eval_path = trec_eval_path.replace(".json", f"_trec_{int(year)}.txt")
+        if len(sub_df) > 1000:
+            sub_df = sub_df[:1000]
         sub_df.to_csv(f"{trec_eval_path}", sep="\t", header=False, index=False)
 
     """
@@ -142,6 +144,8 @@ def calculate_metrics(
          If df is saved to json and the imported with pd.read_json(), dtypes of most columns is int64. Merge works with
          TOPIC_NO included. So transforming the dtype object to int64 in the eval_df, fixes the problem as well.
     """
+    if len(eval_df) > 1000:
+        eval_df = eval_df.iloc[:1000]
     eval_df["LABEL"] = eval_df["LABEL"].astype(int)
     gold_dfs["LABEL"] = gold_dfs["LABEL"].astype(int)
     merged_df = eval_df.merge(
@@ -153,7 +157,10 @@ def calculate_metrics(
         if logger != None:
             logger.error(e)
     # Calculate Accuracy, F1 score, and AUC
-    accuracy = accuracy_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
+    accuracy = accuracy_score(
+        merged_df["LABEL_gold"],
+        merged_df["LABEL_pred"],
+    )
     precision = precision_score(
         merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
     )
@@ -216,7 +223,7 @@ def prepare_binary(
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+\-\d+)_(\w+)$"
-    pattern = r"[A-C][:. ]?\s?\(?\w+\)?|[A-C]\s"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
+    pattern = r"[A-C][:]?\s?\(?\w+\)?|[A-C]\s"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
 
@@ -227,11 +234,11 @@ def prepare_binary(
             continue
         resp = match_label[0].lower()
 
-        if "excluded" in resp or "B" in resp:
+        if "excluded" in resp or "b:" in resp:
             pred_class = 1
-        elif "eligible" in resp or "A" in resp:
+        elif "eligible" in resp or "a:" in resp:
             pred_class = 2
-        elif "irrelevant" in resp or "C" in resp:
+        elif "irrelevant" in resp or "c:" in resp:
             pred_class = 1
         else:
             continue
@@ -338,9 +345,9 @@ def evaluate_binary(
         "binary_accuracy": accuracy,
         "binary_precision": precision,
         "binary_recall": recall,
-        "nDCG_at_10": ndcg_at_10,
         "binary_f1": f1,
         "binary_auc": auc,
+        "binary_nDCG_at_10": ndcg_at_10,
         "binary_p_at_5": p_at_5,
         "binary_p_at_10": p_at_10,
         "binary_p_at_50": p_at_50,

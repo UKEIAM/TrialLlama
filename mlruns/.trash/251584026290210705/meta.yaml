@@ -1,7 +1,0 @@
-artifact_location: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/251584026290210705
-creation_time: 1699166829558
-experiment_id: '251584026290210705'
-last_update_time: 1699172462143
-lifecycle_stage: deleted
-name: llama-2-13b-chat-hf-base-classification
-tags: {}

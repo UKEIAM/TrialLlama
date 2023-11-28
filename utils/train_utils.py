@@ -23,15 +23,6 @@ Unused imports:
 import torch.nn as nn
 import bitsandbytes as bnb
 """
-from torch.nn import functional as F
-from peft import (
-    LoraConfig,
-    get_peft_model,
-    get_peft_model_state_dict,
-    prepare_model_for_kbit_training,
-    set_peft_model_state_dict,
-)
-from transformers import LlamaForCausalLM, LlamaTokenizer
 from torch.distributed.fsdp import StateDictType
 import torch.distributed as dist
 from pkg_resources import packaging
@@ -44,11 +35,6 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from policies.mixed_precision import bfSixteen, fpSixteen, bfSixteen_mixed
 from policies.wrapping import get_llama_wrapper
-
-
-def set_tokenizer_params(tokenizer: LlamaTokenizer):
-    tokenizer.pad_token_id = 0
-    tokenizer.padding_side = "left"
 
 
 # Converting Bytes to Megabytes
@@ -98,16 +84,17 @@ def train(
 
     train_prep = []
     train_loss = []
-    train_step_loss = []
+    best_epoch_step_losses = []
+    eval_loss = []
     val_prep = []
     val_loss = []
     epoch_times = []
     checkpoint_times = []
     results = {}
     best_val_loss = float("inf")
-    max_grad_norm = 1.0
     for epoch in range(train_config.num_epochs):
         epoch_start_time = time.perf_counter()
+        step_losses = []
         with MemoryTrace() as memtrace:  # track the memory usage
             model.train()
             total_loss = 0.0
@@ -128,8 +115,10 @@ def train(
                     outputs = model(**batch)
                     loss = outputs.loss
                 loss = loss / gradient_accumulation_steps
+                step_losses.append(loss.item())
+                if math.isnan(loss):
+                    print("---------WHOOOOPS---------")
                 total_loss += loss.detach().float()
-                train_step_loss.append(total_loss)
                 if train_config.use_fp16:
                     # if fp16 is enabled, use gradient scaler to handle gradient update
                     scaler.scale(loss).backward()
@@ -137,7 +126,7 @@ def train(
                         train_dataloader
                     ) - 1:
                         scaler.step(optimizer)
-                        clip_grad_norm_(model.parameters(), max_grad_norm)
+                        # clip_grad_norm_(model.parameters(), max_grad_norm)
                         scaler.update()
                         optimizer.zero_grad()
                         pbar.update(1)
@@ -147,7 +136,7 @@ def train(
                     if (step + 1) % gradient_accumulation_steps == 0 or step == len(
                         train_dataloader
                     ) - 1:
-                        clip_grad_norm_(model.parameters(), max_grad_norm)
+                        # clip_grad_norm_(model.parameters(), max_grad_norm)
                         optimizer.step()
                         optimizer.zero_grad()
                         pbar.update(1)
@@ -194,8 +183,10 @@ def train(
             eval_ppl, eval_epoch_loss = evaluation(
                 model, train_config, eval_dataloader, local_rank, tokenizer
             )
+            eval_loss.append(eval_epoch_loss)
             checkpoint_start_time = time.perf_counter()
             if train_config.save_model and eval_epoch_loss < best_val_loss:
+                best_epoch_step_losses = step_losses
                 if train_config.enable_fsdp:
                     dist.barrier()
                 if train_config.use_peft:
@@ -269,9 +260,9 @@ def train(
                 best_val_loss = eval_epoch_loss
                 if train_config.enable_fsdp:
                     if rank == 0:
-                        print(f"best eval loss on epoch {epoch} is {best_val_loss}")
+                        print(f"best eval loss on epoch {epoch+1} is {best_val_loss}")
                 else:
-                    print(f"best eval loss on epoch {epoch} is {best_val_loss}")
+                    print(f"best eval loss on epoch {epoch+1} is {best_val_loss}")
             val_loss.append(best_val_loss)
             val_prep.append(eval_ppl)
 
@@ -299,22 +290,40 @@ def train(
         results["avg_eval_loss"] = avg_eval_loss
     results["avg_epoch_time"] = avg_epoch_time
     results["avg_checkpoint_time"] = avg_checkpoint_time
+    results["train_loss"] = min(train_loss)
+    results["eval_loss"] = best_val_loss
+    results["train_perplexity"] = min(train_prep)
 
     # Convert the tensors to NumPy arrays
     train_losses = [loss.item() for loss in train_loss]
+    eval_losses = [loss.item() for loss in eval_loss]
     # Create x-axis values (epochs)
     epochs = np.arange(1, len(train_loss) + 1)
 
     plt.figure(figsize=(8, 6))
-    plt.plot(epochs, train_losses, label="Training Loss", marker="o")
-    # plt.plot(epochs, val_losses, label='Validation Loss', marker='o')
+    plt.plot(epochs, train_losses, label="Training loss", marker="o")
+    plt.plot(epochs, eval_losses, label="Evaluation loss", marker="o")
     plt.xlabel(f"Epochs")
     plt.ylabel("Loss")
-    plt.title("Training and Validation Loss Over Epochs")
+    plt.title("Training and Eval loss over epochs")
     plt.legend()
     plt.grid(True)
     plt_save_path = os.path.join(
         "out", "eval", "img", f"{train_config.ft_model}_loss_vs_epoch.png"
+    )
+    plt.savefig(plt_save_path)
+
+    steps = np.arange(1, len(best_epoch_step_losses) + 1)
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(steps, best_epoch_step_losses, label="Training loss", marker="o")
+    plt.xlabel(f"Steps")
+    plt.ylabel("Loss")
+    plt.title("Step losses of best epoch")
+    plt.legend()
+    plt.grid(True)
+    plt_save_path = os.path.join(
+        "out", "eval", "img", f"{train_config.ft_model}_loss_vs_epoch_steps.png"
     )
     plt.savefig(plt_save_path)
 
@@ -356,11 +365,6 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
                 # Forward pass and compute loss
                 outputs = model(**batch)
                 loss = outputs.loss
-                if math.isnan(loss.detach().float().item()):
-                    x = tokenizer.decode(
-                        batch["input_ids"][0], skip_special_tokens=True
-                    )
-                    print(loss.detach().float())
                 eval_loss += loss.detach().float()
             # Decode predictions and add to evaluation predictions list
             preds = torch.argmax(outputs.logits, -1)
@@ -376,6 +380,7 @@ def evaluation(model, train_config, eval_dataloader, local_rank, tokenizer):
 
     # Compute average loss and perplexity
     eval_epoch_loss = eval_loss / len(eval_dataloader)
+
     if train_config.enable_fsdp:
         eval_epoch_loss = eval_epoch_loss / world_size
 

@@ -8,14 +8,15 @@ class experiment_config:
     dataset_version: str = "v7"
     dataset_name: str = "ct_train_sample_v7"
     create_sample: bool = True
-    dataset_size_testing: int = 1000
+    dataset_size_testing: int = 1200
     dataset_test_version: str = "v7"
+    gradient_accumulation_steps: int = 2
     max_tokens: int = 2048
     max_new_tokens: int = 1024
     lr: float = 1e-4
     batch_size: int = 4
-    num_epochs: int = 4
-    ft_model: str = "llama-2-13b-chat-hf-3000-v7-4-v3"
+    num_epochs: int = 6  # Found optimum
+    ft_model: str = "llama-2-13b-chat-hf-3000-v7-4-v4"
     load_peft_model: bool = True
     gamma: float = 0.85
     run_training: bool = True
@@ -31,4 +32,4 @@ class experiment_config:
     add_example: bool = False
     weight_decay: float = 0.01
     task: str = "classification"
-    binary_balancing: bool = False
+    binary_balancing: bool = True

@@ -4,6 +4,7 @@ import os
 import sys
 import torch
 import math
+import yaml
 
 import pandas as pd
 
@@ -13,7 +14,6 @@ from typing import Optional
 from ft_datasets.instruct_dataset import (
     InstructionDataset,
     TestingDataset,
-    QAInstructionDataset,
 )
 
 DATASET_PREPROC = {
@@ -51,7 +51,6 @@ DATASET_PREPROC = {
     "ct_test_sample_v9": partial(TestingDataset),
     "ct_test_sample_v9_3": partial(TestingDataset),
     "ct_test_sample_v12": partial(TestingDataset),
-    "medqa": partial(QAInstructionDataset),
 }
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
@@ -94,12 +93,11 @@ def create_dataset_sample(
     version: str = "v7",
     type: str = "train",
     binary_balancing: Optional[bool] = False,
+    replace_instruction: Optional[bool] = False,
 ) -> None:
     path = base_dir
     out_path = base_dir
 
-    # TODO: Refactor: Create a sample from ct_all_years and save it as "ct_all_years_testing"
-    # Derive train_dataset from "ct_all_years" but leave out ~1000 samples for testssh
     if type == "train":
         path = os.path.join(base_dir, "data", f"ct_train_{version}.json")
         out_path = os.path.join(base_dir, "data", f"ct_train_sample_{version}.json")
@@ -112,6 +110,15 @@ def create_dataset_sample(
         out_path = os.path.join(base_dir, "data", f"ct_test_sample_{version}.json")
 
     df = pd.read_json(path)
+
+    # Possibility to change the instruction for training/testing and not having to recreate whole dataset!
+    if replace_instruction:
+        instruction_path = os.path.join(base_dir, "configs", f"ct_data.yaml")
+        with open(instruction_path, "r") as file:
+            instruction_config = yaml.safe_load(file)
+        instruction = instruction_config[version]["instruction"]
+        # Possibility to change the instruction for training/testing and not having to recreate whole dataset!
+        df.loc[:, "instruction"] = instruction
 
     """
         Some examples are very long. Checking some random samples showed that those are often faulty or just unnecessary
@@ -216,6 +223,7 @@ def create_dataset_sample(
             df_example = pd.read_json(example_path)
             input_value = df_example["input"]
             balanced_df["instruction"] = balanced_df["instruction"] + input_value[0]
+        balanced_df = balanced_df[balanced_df["topic_year"] == 2021]
         balanced_df = truncate(balanced_df, word_count)
         balanced_df.drop(["word_count"], axis=1, inplace=True)
 
