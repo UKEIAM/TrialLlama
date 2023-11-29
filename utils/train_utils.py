@@ -300,10 +300,10 @@ def train(
 
     plt.figure(figsize=(8, 6))
     plt.plot(epochs, train_losses, label="Training loss", marker="o")
-    plt.plot(epochs, eval_losses, label="Evaluation loss", marker="o")
+    plt.plot(epochs, eval_losses, label="Validation loss", marker="o")
     plt.xlabel(f"Epochs")
     plt.ylabel("Loss")
-    plt.title("Training and Eval loss over epochs")
+    plt.title("Training and validation loss over epochs")
     plt.legend()
     plt.grid(True)
     plt_save_path = os.path.join(
