@@ -1,0 +1,29 @@
+base_model:
+  - "Llama-2-13b-chat-hf"
+dataset_version:
+  - "v7"
+dataset_test_version:
+  - "v7"
+#  - "v9"
+dataset_size:
+  - 3000
+  - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 11361
+num_epochs:
+  - 4 # All runs reach optimium at 4
+gradient_accumulation_steps:
+  - 1
+lr:
+#  - 0.0001 # Default
+  - 0.00002 # MedTron Release
+weight_decay:
+  - 0.1
+temperature:
+  - 0.0
+evaluate_base_model:
+  - false
+#  - true
+task:
+  - classification
+#  - reasoning
+binary_balancing:
+  - true

@@ -14,6 +14,10 @@ class train_config:
     num_epochs: int = 4
     num_workers_dataloader: int = 1
     lr: float = 1e-4
+    eps: float = 1e-5
+    b1: float = 0.9
+    b2: float = 0.95
+    min_lr: float = 2e-6
     weight_decay: float = 0.01
     gamma: float = 0.85
     seed: int = 42
@@ -25,7 +29,6 @@ class train_config:
     dataset_size: int = (
         None  # If number is given, all available data after balancing is used
     )
-    create_sample: bool = True
     peft_method: str = "lora"  # None , llama_adapter, prefix
     use_peft: bool = True
     ft_model: str = "llama-2-13b-chat-hf-default"  # Name for the output ft-model

@@ -7,8 +7,7 @@ class experiment_config:
     dataset_size: int = 1
     dataset_version: str = "v7"
     dataset_name: str = "ct_train_sample_v7"
-    create_sample: bool = True
-    dataset_size_testing: int = 20
+    dataset_size_testing: int = 1100
     dataset_test_version: str = "v7"
     gradient_accumulation_steps: int = 1
     max_tokens: int = 2048
@@ -30,6 +29,6 @@ class experiment_config:
     debug: bool = True
     evaluate_base_model: bool = False
     add_example: bool = False
-    weight_decay: float = 0.01
+    weight_decay: float = 0.1
     task: str = "classification"
     binary_balancing: bool = True

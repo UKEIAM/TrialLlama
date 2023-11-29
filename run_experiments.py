@@ -30,6 +30,7 @@ for param_set in param_combinations:
         num_epochs,
         grad_acc,
         lr,
+        weight_decay,
         temperature,
         evaluate_base_model,
         task,
@@ -40,13 +41,13 @@ for param_set in param_combinations:
 
     # TODO: Check if learning rate at the end works, since dot in folder name
     if grad_acc == 1:
-        model_version = "v4"
+        model_version = "v7"
     else:
         model_version = "v5"
     if evaluate_base_model:
         ft_model = f"{base_model.lower()}-base"
     else:
-        ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-{model_version}-{lr}"
+        ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-{model_version}-{lr}-{grad_acc}"
 
     if task == "reasoning":
         one_shot = True
@@ -75,6 +76,8 @@ for param_set in param_combinations:
         str(ft_model),
         "--lr",
         str(lr),
+        "weight_decay",
+        str(weight_decay),
         "--temperature",
         str(temperature),
         "--evaluate_base_model",

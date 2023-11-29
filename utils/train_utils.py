@@ -92,6 +92,7 @@ def train(
     checkpoint_times = []
     results = {}
     best_val_loss = float("inf")
+    max_grad_norm = 1.0
     for epoch in range(train_config.num_epochs):
         epoch_start_time = time.perf_counter()
         with MemoryTrace() as memtrace:  # track the memory usage
@@ -125,7 +126,7 @@ def train(
                         train_dataloader
                     ) - 1:
                         scaler.step(optimizer)
-                        # clip_grad_norm_(model.parameters(), max_grad_norm)
+                        clip_grad_norm_(model.parameters(), max_grad_norm)
                         scaler.update()
                         optimizer.zero_grad()
                         pbar.update(1)
@@ -135,7 +136,7 @@ def train(
                     if (step + 1) % gradient_accumulation_steps == 0 or step == len(
                         train_dataloader
                     ) - 1:
-                        # clip_grad_norm_(model.parameters(), max_grad_norm)
+                        clip_grad_norm_(model.parameters(), max_grad_norm)
                         optimizer.step()
                         optimizer.zero_grad()
                         pbar.update(1)

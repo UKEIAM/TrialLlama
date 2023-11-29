@@ -42,23 +42,27 @@ dataset_size:
 #  - 3000
 #  - 5000
 #  - 10000
-#  - 15000
-#  - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 15426
+#  - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 11361
 num_epochs:
 #  - 2
 #  - 3
-#  - 4 # Default
-  - 5
-#  - 6
+#  - 4 # All runs reach optimium at 4
+#  - 5
+  - 6
 #  - 8
 #  - 12
 gradient_accumulation_steps:
-#  - 1
+  - 1
   - 2
+#  - 3
+#  - 4
 lr:
 #  - 0.001
-#  - 0.0001 # Default
-  - 0.0002
+  - 0.0001 # Default
+#  - 0.00002 # MedTron release
+weight_decay:
+  - 0.1
+  - 0.01
 temperature:
   - 0.0
 #  - 0.1
