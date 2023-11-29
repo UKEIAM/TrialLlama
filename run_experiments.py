@@ -28,10 +28,9 @@ for param_set in param_combinations:
         dataset_test_version,
         dataset_size,
         num_epochs,
+        grad_acc,
         lr,
         temperature,
-        top_k,
-        top_p,
         evaluate_base_model,
         task,
         binary_balancing,
@@ -40,14 +39,14 @@ for param_set in param_combinations:
     # decimal_part_lr = str(lr).split(".")[1] if "." in str(lr) else "0"
 
     # TODO: Check if learning rate at the end works, since dot in folder name
-    if binary_balancing:
-        model_version = "v8"
+    if grad_acc == 1:
+        model_version = "v4"
     else:
-        model_version = "v2"
+        model_version = "v5"
     if evaluate_base_model:
         ft_model = f"{base_model.lower()}-base"
     else:
-        ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-{model_version}"
+        ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-{model_version}-{lr}"
 
     if task == "reasoning":
         one_shot = True
@@ -78,10 +77,6 @@ for param_set in param_combinations:
         str(lr),
         "--temperature",
         str(temperature),
-        "--top_k",
-        str(top_k),
-        "--top_p",
-        str(top_p),
         "--evaluate_base_model",
         str(evaluate_base_model),
         "--max_new_tokens",
@@ -90,6 +85,8 @@ for param_set in param_combinations:
         str(task),
         "--binary_balancing",
         str(binary_balancing),
+        "--gradient_accumulation_steps",
+        str(grad_acc),
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
     if os.path.exists(os.path.join("out", ft_model)):

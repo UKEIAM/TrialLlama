@@ -84,8 +84,8 @@ def train(
 
     train_prep = []
     train_loss = []
-    best_epoch_step_losses = []
     eval_loss = []
+    step_loss = []
     val_prep = []
     val_loss = []
     epoch_times = []
@@ -94,7 +94,6 @@ def train(
     best_val_loss = float("inf")
     for epoch in range(train_config.num_epochs):
         epoch_start_time = time.perf_counter()
-        step_losses = []
         with MemoryTrace() as memtrace:  # track the memory usage
             model.train()
             total_loss = 0.0
@@ -115,7 +114,7 @@ def train(
                     outputs = model(**batch)
                     loss = outputs.loss
                 loss = loss / gradient_accumulation_steps
-                step_losses.append(loss.item())
+                step_loss.append(loss.item())
                 if math.isnan(loss):
                     print("---------WHOOOOPS---------")
                 total_loss += loss.detach().float()
@@ -186,7 +185,6 @@ def train(
             eval_loss.append(eval_epoch_loss)
             checkpoint_start_time = time.perf_counter()
             if train_config.save_model and eval_epoch_loss < best_val_loss:
-                best_epoch_step_losses = step_losses
                 if train_config.enable_fsdp:
                     dist.barrier()
                 if train_config.use_peft:
@@ -313,10 +311,10 @@ def train(
     )
     plt.savefig(plt_save_path)
 
-    steps = np.arange(1, len(best_epoch_step_losses) + 1)
+    steps = np.arange(1, len(step_loss) + 1)
 
     plt.figure(figsize=(8, 6))
-    plt.plot(steps, best_epoch_step_losses, label="Training loss", marker="o")
+    plt.plot(steps, step_loss, label="Training loss", marker="o")
     plt.xlabel(f"Steps")
     plt.ylabel("Loss")
     plt.title("Step losses of best epoch")

@@ -48,17 +48,15 @@ num_epochs:
 #  - 2
 #  - 3
 #  - 4 # Default
-  - 5
 #  - 6
-#  - 8
+  - 8
 #  - 12
 gradient_accumulation_steps:
-#  - 1
-#  - 2
+  - 1
+  - 2
 lr:
-#  - 0.001
-#  - 0.0001 # Default
-#  - 0.0002
+  - 0.001
+  - 0.0001 # Default
 temperature:
   - 0.0
 #  - 0.1
