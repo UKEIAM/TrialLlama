@@ -66,7 +66,7 @@ def main(logger: Optional[object] = None, **kwargs):
 
     model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
 
-    sample_path = create_dataset_sample(
+    create_dataset_sample(
         dataset_size=train_config.dataset_size,
         version=train_config.dataset_version,
         type="train",
@@ -141,8 +141,6 @@ def main(logger: Optional[object] = None, **kwargs):
     tokenizer = AutoTokenizer.from_pretrained(base_model_path)
     tokenizer.pad_token_id = tokenizer.eos_token_id
 
-    token_count = count_tokens(sample_path, tokenizer)
-
     print_model_size(model, train_config, rank if train_config.enable_fsdp else 0)
 
     # Prepare the model for int8 training if quantization is enabled
@@ -194,6 +192,9 @@ def main(logger: Optional[object] = None, **kwargs):
         model.to("cuda")
 
     dataset_config = generate_dataset_config(train_config, kwargs)
+
+    sample_path = os.path.join("data", dataset_config.data_path)
+    token_count = count_tokens(sample_path, tokenizer)
 
     max_tokens = train_config.max_tokens
 

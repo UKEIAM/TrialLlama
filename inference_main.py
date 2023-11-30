@@ -33,7 +33,7 @@ def main(
 
     clear_gpu_cache()
 
-    sample_path = create_dataset_sample(
+    create_dataset_sample(
         dataset_size=test_config.dataset_size,
         add_example=test_config.add_example,
         version=test_config.dataset_version,

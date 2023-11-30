@@ -243,8 +243,6 @@ def create_dataset_sample(
     data_sample = balanced_df.sample(n=samples, random_state=42).reset_index(drop=True)
     data_sample.to_json(out_path, orient="records")
 
-    return out_path
-
 
 def truncate(df, word_count):
     cols_to_count = ["instruction", "topic", "clinical_trial", "response"]

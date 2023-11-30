@@ -323,13 +323,13 @@ def evaluate_binary(
     )
 
     # Create a confusion matrix
-    conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
-
-    plt.figure(figsize=(8, 6))
+    cm = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
+    cmn = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
+    plt.figure(figsize=(10, 10))
     sns.heatmap(
-        conf_matrix,
+        cmn,
         annot=True,
-        fmt="d",
+        fmt=".4f",
         # cmap="Blues",
         xticklabels=["excluded", "eligible"],
         yticklabels=["excluded", "eligible"],

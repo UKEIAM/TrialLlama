@@ -40,10 +40,7 @@ for param_set in param_combinations:
     # decimal_part_lr = str(lr).split(".")[1] if "." in str(lr) else "0"
 
     # TODO: Check if learning rate at the end works, since dot in folder name
-    if grad_acc == 1:
-        model_version = "v7"
-    else:
-        model_version = "v5"
+    model_version = "v5"
     if evaluate_base_model:
         ft_model = f"{base_model.lower()}-base"
     else:
