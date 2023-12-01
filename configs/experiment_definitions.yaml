@@ -35,11 +35,11 @@ dataset_size:
 #  - 3
 #  - 12
 #  - 100 # POC
-  - 300
+#  - 300
 #  - 900
 #  - 1800
 #  - 2000
-#  - 3000
+  - 3000
 #  - 5000
 #  - 10000
 #  - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 11361
@@ -47,17 +47,18 @@ num_epochs:
 #  - 2
 #  - 3
 #  - 4 # All runs reach optimium at 4
-#  - 5
-  - 6
+  - 5
+#  - 6
 #  - 8
 #  - 12
 gradient_accumulation_steps:
 #  - 1
 #  - 2
 #  - 3
-#  - 4
-  - 12
-  - 16
+  - 4
+#  - 8
+#  - 12
+#  - 16
 lr:
 #  - 0.001
 #  - 0.0001 # Default

@@ -193,8 +193,7 @@ def main(logger: Optional[object] = None, **kwargs):
 
     dataset_config = generate_dataset_config(train_config, kwargs)
 
-    sample_path = os.path.join("data", dataset_config.data_path)
-    token_count = count_tokens(sample_path, tokenizer)
+    token_count = count_tokens(dataset_config.data_path, tokenizer)
 
     max_tokens = train_config.max_tokens
 

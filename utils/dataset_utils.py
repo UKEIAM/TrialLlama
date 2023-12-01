@@ -230,7 +230,7 @@ def create_dataset_sample(
         balanced_df.drop(["word_count"], axis=1, inplace=True)
 
     samples = balanced_df.shape[0]
-    if dataset_size > 3:
+    if dataset_size > 3 and dataset_size is not None:
         try:
             assert dataset_size <= balanced_df.shape[0]
             samples = dataset_size

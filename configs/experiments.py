@@ -7,7 +7,7 @@ class experiment_config:
     dataset_size: int = 1
     dataset_version: str = "v7"
     dataset_name: str = "ct_train_sample_v7"
-    dataset_size_testing: int = 100
+    dataset_size_testing: int = 1000
     dataset_test_version: str = "v7"
     gradient_accumulation_steps: int = 1
     max_tokens: int = 2048

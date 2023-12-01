@@ -15,10 +15,10 @@ param_combinations = list(itertools.product(*parameters.values()))
 # Kind of something similar to Hydra :D
 # Get currently free cuda device
 # TODO: setting free cuda device is not working in certain cases e.g. when all devices are currently busy (even only partly)
-gpu_available = get_free_cuda_device()
-if not gpu_available:
-    print("No GPU available. Exiting.")
-    exit()
+# gpu_available = get_free_cuda_device()
+# if not gpu_available:
+#     print("No GPU available. Exiting.")
+#     exit()
 
 for param_set in param_combinations:
     # Unpack parameter set and add parameters and values to the command

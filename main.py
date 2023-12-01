@@ -25,6 +25,10 @@ from utils.set_free_cuda_device import get_free_cuda_device
 base_dir = os.path.dirname((__file__))
 
 
+# Disable forking the process after parallelism has been used
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+
 def main(**kwargs):
     update_config((experiment_config), **kwargs)
     if "dataset_name" in kwargs:
