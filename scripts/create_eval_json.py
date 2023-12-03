@@ -7,7 +7,7 @@ import re
 import pandas as pd
 
 base_dir = os.path.dirname(os.path.dirname((__file__)))
-run_name = "lbn5d6tp-748_v9_50_4_v3"
+run_name = "22etfjza-931_v9_20_4_v5"
 model_file_path = os.path.join(base_dir, "out", "eval", f"eval_{run_name}.json")
 sample_file_path = os.path.join(base_dir, "data", "ct_test_v9.json")
 # Load the main data JSON
@@ -46,8 +46,8 @@ for entry in merged_df.iterrows():
 df_sum = pd.DataFrame(summary_list)
 df_resp = pd.DataFrame(response_list)
 base_dir = os.path.dirname(os.path.dirname(__file__))
-eval_sum = df_sum.sample(n=20, random_state=42, ignore_index=True)
-eval_resp = df_resp.sample(n=20, random_state=42, ignore_index=True)
+eval_sum = df_sum.sample(n=15, random_state=42, ignore_index=True)
+eval_resp = df_resp.sample(n=15, random_state=42, ignore_index=True)
 eval_sum.to_json(
     os.path.join(base_dir, "out", "eval", f"summary_eval_file_{run_name}_sum.json"),
     orient="records",
@@ -77,10 +77,11 @@ txt_path = os.path.join(base_dir, dir_path, f"eval_{run_name}_sum.html")
 os.makedirs(dir_path, exist_ok=True)
 # Open a text file for writing
 with open(txt_path, "w") as text_file:
-    for item in data:
+    for idx, item in enumerate(data):
         for key, value in item.items():
             # Write the capitalized key in bold
             if key in ["ID", "Ground Truth", "Model Certainty"]:
+                text_file.write(f"<br><strong>{idx + 1}</strong><br>")
                 text_file.write(f"<strong>{key}</strong> ")
             else:
                 text_file.write(f"<strong>{key}</strong><br> ")
@@ -96,14 +97,16 @@ txt_path_resp = os.path.join(base_dir, dir_path, f"eval_{run_name}_resp.html")
 os.makedirs(dir_path, exist_ok=True)
 # Open a text file for writing
 with open(txt_path_resp, "w") as text_file:
-    for item in data:
+    for idx, item in enumerate(data):
         for key, value in item.items():
             # Write the capitalized key in bold
             if key in ["Model Response"]:
-                text_file.write(f"<br><strong>{key}</strong> ")
+                text_file.write(f"<br><strong>{idx+1}</strong><br>")
+                text_file.write(f"<br><strong>{key}</strong>")
 
             if key == "Model Response":
                 value = re.sub(r"#\d+", r"<br>\g<0>", value)
-                text_file.write(f"{value}<br><br><br>")
+                text_file.write(f"{value}")
+                text_file.write(" ")
 
 print("FINISHED")

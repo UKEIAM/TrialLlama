@@ -53,8 +53,10 @@ for param_set in param_combinations:
 
     if task == "classification":
         max_new_tokens = 10
+        dataset_size_testing = 1200
     else:
         max_new_tokens = 1000
+        dataset_size_testing = 20
 
     command = [
         "python",
@@ -87,6 +89,8 @@ for param_set in param_combinations:
         str(binary_balancing),
         "--gradient_accumulation_steps",
         str(grad_acc),
+        "--dataset_size_testing",
+        str(dataset_size_testing),
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
     if os.path.exists(os.path.join("out", ft_model)):
