@@ -1,4 +1,4 @@
-artifact_uri: file:///ltstorage/home/1kkraus/master_thesis/mlruns/363605899102810411/f67d1fd8a2244285b787fd097edaf099/artifacts
+artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/363605899102810411/f67d1fd8a2244285b787fd097edaf099/artifacts
 end_time: null
 entry_point_name: ''
 experiment_id: '363605899102810411'
@@ -10,6 +10,6 @@ source_name: ''
 source_type: 4
 source_version: ''
 start_time: 1701569357020
-status: 1
+status: 3
 tags: []
 user_id: 1kkraus

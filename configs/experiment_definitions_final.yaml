@@ -6,10 +6,10 @@ dataset_test_version:
   - "v7"
 #  - "v9"
 dataset_size:
-  - 3000
+#  - 3000
   - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 11361
 num_epochs:
-  - 5 #
+  - 4 #
 gradient_accumulation_steps:
   - 4 # For 3000 sample size -> Effective batch_size = 16
 #  - 12 # For ALL available samples -> Effective batch_size = 48

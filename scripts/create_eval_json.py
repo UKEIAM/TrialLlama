@@ -27,7 +27,8 @@ merged_df = testing_set.merge(output, on=["id"], suffixes=("_model", "_truth"))
 summary_list = []
 response_list = []
 for entry in merged_df.iterrows():
-    new_entry_sum = {
+    new_entry = {
+        "Model Response": entry[1]["RESPONSE"],
         "ID": entry[1]["id"],
         "Ground Truth": entry[1]["output"],
         "Topic": entry[1]["topic"],
@@ -35,78 +36,43 @@ for entry in merged_df.iterrows():
         "Model Certainty": entry[1]["PROBA"],
         "Helper": "Likert-Scale Helper: (1) Very poor, (2) Poor, (3) Fair, (4) Good, (5) Excellent",
     }
-    summary_list.append(new_entry_sum)
+    response_list.append(new_entry)
 
-    new_entry_resp = {
-        "ID": entry[1]["id"],
-        "Model Response": entry[1]["RESPONSE"],
-    }
-    response_list.append(new_entry_resp)
-
-df_sum = pd.DataFrame(summary_list)
-df_resp = pd.DataFrame(response_list)
+df = pd.DataFrame(response_list)
 base_dir = os.path.dirname(os.path.dirname(__file__))
-eval_sum = df_sum.sample(n=15, random_state=42, ignore_index=True)
-eval_resp = df_resp.sample(n=15, random_state=42, ignore_index=True)
-eval_sum.to_json(
-    os.path.join(base_dir, "out", "eval", f"summary_eval_file_{run_name}_sum.json"),
+eval = df.sample(n=15, random_state=42, ignore_index=True)
+eval.to_json(
+    os.path.join(base_dir, "out", "eval", f"summary_eval_file_{run_name}.json"),
     orient="records",
 )
-eval_resp.to_json(
-    os.path.join(base_dir, "out", "eval", f"summary_eval_file_{run_name}_resp.json"),
-    orient="records",
-)
-
 
 # Second part ---------------------------------------------------------------------------------------------------------
 
-eval_sum_json = (
-    os.path.join(base_dir, "out", "eval", f"summary_eval_file_{run_name}_sum.json"),
+eval_json = (
+    os.path.join(base_dir, "out", "eval", f"summary_eval_file_{run_name}.json"),
 )
 
-eval_resp_json = (
-    os.path.join(base_dir, "out", "eval", f"summary_eval_file_{run_name}_resp.json"),
-)
 
 # Load the JSON data from your JSON file
-with open(eval_sum_json[0], "r") as json_file:
+with open(eval_json[0], "r") as json_file:
     data = json.load(json_file)
 
 dir_path = os.path.join(base_dir, "out", "eval", "qual_eval")
-txt_path = os.path.join(base_dir, dir_path, f"eval_{run_name}_sum.html")
+txt_path = os.path.join(base_dir, dir_path, f"eval_{run_name}.html")
 os.makedirs(dir_path, exist_ok=True)
 # Open a text file for writing
 with open(txt_path, "w") as text_file:
     for idx, item in enumerate(data):
+        text_file.write(f"<br><strong>{idx + 1}</strong><br>")
         for key, value in item.items():
             # Write the capitalized key in bold
-            if key in ["ID", "Ground Truth", "Model Certainty"]:
-                text_file.write(f"<br><strong>{idx + 1}</strong><br>")
-                text_file.write(f"<strong>{key}</strong> ")
-            else:
-                text_file.write(f"<strong>{key}</strong><br> ")
-
-            text_file.write(f"{value}<br>")
-
-
-with open(eval_resp_json[0], "r") as json_file:
-    data = json.load(json_file)
-
-dir_path = os.path.join(base_dir, "out", "eval", "qual_eval")
-txt_path_resp = os.path.join(base_dir, dir_path, f"eval_{run_name}_resp.html")
-os.makedirs(dir_path, exist_ok=True)
-# Open a text file for writing
-with open(txt_path_resp, "w") as text_file:
-    for idx, item in enumerate(data):
-        for key, value in item.items():
-            # Write the capitalized key in bold
-            if key in ["Model Response"]:
-                text_file.write(f"<br><strong>{idx+1}</strong><br>")
-                text_file.write(f"<br><strong>{key}</strong>")
-
             if key == "Model Response":
+                text_file.write(f"<br><strong>{key}</strong><br>")
                 value = re.sub(r"#\d+", r"<br>\g<0>", value)
                 text_file.write(f"{value}")
-                text_file.write(" ")
+            else:
+                text_file.write(f"<strong>{key}</strong><br> ")
+                text_file.write(f"{value}<br>")
+
 
 print("FINISHED")
