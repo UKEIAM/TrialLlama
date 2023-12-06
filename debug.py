@@ -8,30 +8,33 @@ from utils.eval_utils import (
     evaluate_binary,
 )
 
+model_name = "llama-2-13b-hf-3000-v7-4-v4-0.0001-3"
+run_name = "ptae93wg-248_v7_1100_4_v5"
+
 eval_output_path = os.path.join(
     "out",
     "eval",
-    f"eval_nd3h2a3n-674_v7_1200_4_v3.json",
+    f"eval_{run_name}.json",
 )
 
-eval_df = prepare_files(eval_output_path, "eval_nd3h2a3n-674_v7_1200_4_v3")
+eval_df = prepare_files(eval_output_path, f"eval_{run_name}")
 
 scores = calculate_metrics(
     eval_df=eval_df,
     gold_labels_dir="data/gold_labels/",
-    ft_model_name="llama-2-13b-chat-hf-3000-v7-4-v3",
-    run_name="eval_nd3h2a3n-674_v7_1200_4_v3",
+    ft_model_name=model_name,
+    run_name=run_name,
 )
 
 print(scores)
 
-eval_df = prepare_binary(eval_output_path, "eval_nd3h2a3n-674_v7_1200_4_v3")
+eval_df = prepare_binary(eval_output_path, f"eval_{run_name}")
 
 scores_binary = evaluate_binary(
     eval_df=eval_df,
     gold_labels_dir="data/gold_labels/",
-    ft_model_name="llama-2-13b-chat-hf-1800-v12-4-v3",
-    run_name="eval_nd3h2a3n-674_v7_1200_4_v3",
+    ft_model_name=model_name,
+    run_name=run_name,
 )
 
 print(scores_binary)
