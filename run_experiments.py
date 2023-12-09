@@ -35,12 +35,13 @@ for param_set in param_combinations:
         evaluate_base_model,
         task,
         binary_balancing,
+        one_shot,
     ) = param_set
 
     # decimal_part_lr = str(lr).split(".")[1] if "." in str(lr) else "0"
 
     # TODO: Check if learning rate at the end works, since dot in folder name
-    model_version = "v4"
+    model_version = "v5"
     if evaluate_base_model:
         ft_model = f"{base_model.lower()}-base"
     else:
@@ -48,15 +49,13 @@ for param_set in param_combinations:
 
     if task == "reasoning":
         one_shot = True
-    else:
-        one_shot = False
 
     if task == "classification":
         max_new_tokens = 10
         dataset_size_testing = 1100
     else:
         max_new_tokens = 1000
-        dataset_size_testing = 20
+        dataset_size_testing = 150
 
     command = [
         "python",

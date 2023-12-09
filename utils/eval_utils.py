@@ -28,7 +28,7 @@ def prepare_files(
     # Original columns: ["ID", "TOPIC_YEAR", "RESPONSE", "PROBA"]
     raw_df = pd.read_json(eval_output_path, orient="records")
     id_pattern = r"^(\d+)_(\d+\-\d+)_(\w+)$"
-    pattern = r"[A-C][1-3]?[:]\s?\(?\w+\)?|[A-C][:]|eligible|excluded|irrelevant"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
+    pattern = r"[A-C][1-3]?[:]\s?\W?\(?\w+\)?|[A-C][:]|eligible|excluded|irrelevant"  # Pattern includes answers like A: eligible, B excluded and C (not relevant)
 
     eval_df = pd.DataFrame(columns=["TOPIC_NO", "Q0", "NCT_ID", "LABEL", "TOPIC_YEAR"])
 
@@ -38,6 +38,8 @@ def prepare_files(
         match = re.match(id_pattern, item[1]["ID"])
         match_label = re.findall(pattern, item[1]["RESPONSE"])
         if len(match_label) == 0 or len(match_label) > 1:
+            print(item[1]["RESPONSE"])
+            print(match_label)
             continue
         resp = match_label[0].lower()
 
@@ -47,9 +49,6 @@ def prepare_files(
             pred_class = 2
         elif "irrelevant" in resp or "c:" in resp:
             pred_class = 0
-        else:
-            continue
-
         # Create a dictionary representing the new row
         try:
             new_row_eval = {
@@ -186,12 +185,13 @@ def calculate_metrics(
         multi_class="ovr",
     )
     # Create a confusion matrix
-    conf_matrix = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
-    plt.figure(figsize=(8, 6))
+    cm = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
+    cmn = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
+    plt.figure(figsize=(10, 10))
     sns.heatmap(
-        conf_matrix,
+        cmn,
         annot=True,
-        fmt="d",
+        fmt=".4f",
         # cmap="Blues",
         xticklabels=["irrelevant", "excluded", "eligible"],
         yticklabels=["irrelevant", "excluded", "eligible"],

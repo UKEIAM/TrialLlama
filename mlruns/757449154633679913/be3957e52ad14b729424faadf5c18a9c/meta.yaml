@@ -1,8 +1,9 @@
 artifact_uri: /Users/kevinkraus/Code/mtb_ai_kevin_kraus/mlruns/757449154633679913/be3957e52ad14b729424faadf5c18a9c/artifacts
+deleted_time: 1702098859078
 end_time: 1701689888168
 entry_point_name: ''
 experiment_id: '757449154633679913'
-lifecycle_stage: active
+lifecycle_stage: deleted
 run_id: be3957e52ad14b729424faadf5c18a9c
 run_name: 8msvv0er-609_v7_1100_4_v5
 run_uuid: be3957e52ad14b729424faadf5c18a9c
