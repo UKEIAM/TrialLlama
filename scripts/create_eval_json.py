@@ -7,7 +7,7 @@ import re
 import pandas as pd
 
 base_dir = os.path.dirname(os.path.dirname((__file__)))
-run_name = "22etfjza-931_v9_20_4_v5"
+run_name = "llama-2-13b-chat-hf-None-v7-4-v5-2e-05-16_epoch_1_v9"
 model_file_path = os.path.join(base_dir, "out", "eval", f"eval_{run_name}.json")
 sample_file_path = os.path.join(base_dir, "data", "ct_test_v9.json")
 # Load the main data JSON
@@ -40,7 +40,7 @@ for entry in merged_df.iterrows():
 
 df = pd.DataFrame(response_list)
 base_dir = os.path.dirname(os.path.dirname(__file__))
-eval = df.sample(n=15, random_state=42, ignore_index=True)
+eval = df.sample(n=20, random_state=42, ignore_index=True)
 eval.to_json(
     os.path.join(base_dir, "out", "eval", f"summary_eval_file_{run_name}.json"),
     orient="records",
@@ -67,11 +67,11 @@ with open(txt_path, "w") as text_file:
         for key, value in item.items():
             # Write the capitalized key in bold
             if key == "Model Response":
-                text_file.write(f"<br><strong>{key}</strong><br>")
+                text_file.write(f"<br><strong>{key}</strong>")
                 value = re.sub(r"#\d+", r"<br>\g<0>", value)
-                text_file.write(f"{value}")
+                text_file.write(f"{value}<br>")
             else:
-                text_file.write(f"<strong>{key}</strong><br> ")
+                text_file.write(f"<strong>{key}</strong><br>")
                 text_file.write(f"{value}<br>")
 
 

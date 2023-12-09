@@ -156,7 +156,9 @@ def main(**kwargs):
                 eval_output_path=eval_output_path,
                 logger=logger,
                 evaluate_base_model=experiment_config.evaluate_base_model,
-                add_example=experiment_config.add_example,
+                # TODO: REMOVE ME ONCE TRAINING FINSIHED
+                add_example=True,
+                # add_example=experiment_config.add_example,
                 binary_balancing=experiment_config.binary_balancing,
             )
             mlflow.set_tag("inference_conducted", "TRUE")
