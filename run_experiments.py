@@ -56,7 +56,7 @@ for param_set in param_combinations:
         dataset_size_testing = 1200
     else:
         max_new_tokens = 1000
-        dataset_size_testing = 150
+        dataset_size_testing = 20
 
     command = [
         "python",

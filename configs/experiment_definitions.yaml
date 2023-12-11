@@ -83,8 +83,8 @@ evaluate_base_model:
   - false
 #  - true
 task:
-  - classification
-#  - reasoning
+#  - classification
+  - reasoning
 binary_balancing:
   - true
 #  - false

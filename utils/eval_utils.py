@@ -38,8 +38,6 @@ def prepare_files(
         match = re.match(id_pattern, item[1]["ID"])
         match_label = re.findall(pattern, item[1]["RESPONSE"])
         if len(match_label) == 0 or len(match_label) > 1:
-            print(item[1]["RESPONSE"])
-            print(match_label)
             continue
         resp = match_label[0].lower()
 
@@ -143,6 +141,7 @@ def calculate_metrics(
          If df is saved to json and the imported with pd.read_json(), dtypes of most columns is int64. Merge works with
          TOPIC_NO included. So transforming the dtype object to int64 in the eval_df, fixes the problem as well.
     """
+    len_all = len(eval_df)
     if len(eval_df) > 1000:
         eval_df = eval_df.iloc[:1000]
     eval_df["LABEL"] = eval_df["LABEL"].astype(int)
@@ -204,7 +203,7 @@ def calculate_metrics(
     plt.savefig(os.path.join(out_img_path, f"cm_{ft_model_name}_{run_name}.png"))
 
     return {
-        "all_items": len(eval_df),
+        "all_items": len_all,
         "evaluatable_items": len(merged_df),
         "accuracy": accuracy,
         "precision": precision,
@@ -289,6 +288,10 @@ def evaluate_binary(
         gold_df["TOPIC_YEAR"] = year
         gold_dfs = pd.concat([gold_dfs, gold_df], ignore_index=True)
 
+    len_all = len(eval_df)
+    if len(eval_df) > 1000:
+        eval_df = eval_df.iloc[:1000]
+
     # Give "irrelevant" class label 1 like for "excluded"
     condition = gold_dfs["LABEL"] == 0
     gold_dfs.loc[condition, "LABEL"] = 1
@@ -343,7 +346,7 @@ def evaluate_binary(
     plt.savefig(os.path.join(out_img_path, f"cm_{ft_model_name}_{run_name}_binary.png"))
 
     return {
-        "all_items": len(eval_df),
+        "all_items": len_all,
         "binary_accuracy": accuracy,
         "binary_precision": precision,
         "binary_recall": recall,
