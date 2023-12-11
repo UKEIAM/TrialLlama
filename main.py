@@ -48,7 +48,7 @@ def main(**kwargs):
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch_steps.png"
     )
 
-    model_version = "v5 "
+    model_version = "v5"
     if experiment_config.evaluate_base_model:
         experiment_name = (
             f"base-{experiment_config.dataset_test_version}-{experiment_config.task}"
