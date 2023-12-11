@@ -225,7 +225,6 @@ def create_dataset_sample(
             df_example = pd.read_json(example_path)
             input_value = df_example["input"]
             balanced_df["instruction"] = balanced_df["instruction"] + input_value[0]
-        balanced_df = balanced_df[balanced_df["topic_year"] == 2021]
         balanced_df = truncate(balanced_df, word_count)
         balanced_df.drop(["word_count"], axis=1, inplace=True)
 
@@ -241,6 +240,9 @@ def create_dataset_sample(
             samples = balanced_df.shape[0]
 
     data_sample = balanced_df.sample(n=samples, random_state=42).reset_index(drop=True)
+    print(
+        f'CLASS DISTRIBUTION: {data_sample.groupby("output")["output"].value_counts()}'
+    )
     data_sample.to_json(out_path, orient="records")
 
 

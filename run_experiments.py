@@ -49,10 +49,11 @@ for param_set in param_combinations:
 
     if task == "reasoning":
         one_shot = True
+        binary_balancing = False
 
     if task == "classification":
         max_new_tokens = 10
-        dataset_size_testing = 1100
+        dataset_size_testing = 1200
     else:
         max_new_tokens = 1000
         dataset_size_testing = 150
@@ -74,7 +75,7 @@ for param_set in param_combinations:
         str(ft_model),
         "--lr",
         str(lr),
-        "weight_decay",
+        "--weight_decay",
         str(weight_decay),
         "--temperature",
         str(temperature),

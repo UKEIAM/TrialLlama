@@ -204,6 +204,7 @@ def calculate_metrics(
     plt.savefig(os.path.join(out_img_path, f"cm_{ft_model_name}_{run_name}.png"))
 
     return {
+        "all_items": len(eval_df),
         "evaluatable_items": len(merged_df),
         "accuracy": accuracy,
         "precision": precision,
@@ -342,6 +343,7 @@ def evaluate_binary(
     plt.savefig(os.path.join(out_img_path, f"cm_{ft_model_name}_{run_name}_binary.png"))
 
     return {
+        "all_items": len(eval_df),
         "binary_accuracy": accuracy,
         "binary_precision": precision,
         "binary_recall": recall,

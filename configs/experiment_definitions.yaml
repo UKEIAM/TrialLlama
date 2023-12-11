@@ -45,8 +45,8 @@ dataset_size:
   - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 11361
 num_epochs:
 #  - 2
-#  - 3
-  - 4
+  - 3
+#  - 4
 #  - 5 # Tests with new scheduler etc. show optimum at 5 epochs
 #  - 6
 #  - 8
@@ -81,7 +81,7 @@ temperature:
 #  - 10.0
 evaluate_base_model:
   - false
-  - true
+#  - true
 task:
 #  - classification
   - reasoning
