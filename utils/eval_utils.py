@@ -187,7 +187,7 @@ def calculate_metrics(
     # Create a confusion matrix
     cm = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     cmn = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
-    plt.figure(figsize=(8, 10))
+    plt.figure(figsize=(10, 8))
     sns.heatmap(
         cmn,
         annot=True,
@@ -326,7 +326,7 @@ def evaluate_binary(
     # Create a confusion matrix
     cm = confusion_matrix(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     cmn = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
-    plt.figure(figsize=(8, 10))
+    plt.figure(figsize=(10, 8))
     sns.heatmap(
         cmn,
         annot=True,
