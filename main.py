@@ -59,7 +59,7 @@ def main(**kwargs):
     print(f"RUNNING EXPERIMENT: {experiment_name}")
     print(f"OUTPUT MODEL NAME: {experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
-    description = f"Fine-tuned model {experiment_config.ft_model} | {model_version} | cosine scheduling | tested negative one-shot example"
+    description = f"Fine-tuned model {experiment_config.ft_model} | {model_version} | cosine scheduling "
     # Define the characters to choose from for the prefix
     prefix_characters = string.ascii_lowercase + string.digits
     prefix_length = 8  # Adjust the length as needed

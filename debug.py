@@ -8,8 +8,8 @@ from utils.eval_utils import (
     evaluate_binary,
 )
 
-model_name = "llama-2-13b-chat-hf-None-v7-4-v5-2e-05-16"
-run_name = "j7740uk0-521_v7_1100_4_v5"
+model_name = "llama-2-13b-chat-hf-3000-v7-5-v5-0.0001-1"
+run_name = "tmlr8o2r-530_v9_1200_4_v5"
 
 eval_output_path = os.path.join(
     "out",
