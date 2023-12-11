@@ -15,10 +15,10 @@ param_combinations = list(itertools.product(*parameters.values()))
 # Kind of something similar to Hydra :D
 # Get currently free cuda device
 # TODO: setting free cuda device is not working in certain cases e.g. when all devices are currently busy (even only partly)
-gpu_available = get_free_cuda_device()
-if not gpu_available:
-    print("No GPU available. Exiting.")
-    exit()
+# gpu_available = get_free_cuda_device()
+# if not gpu_available:
+#     print("No GPU available. Exiting.")
+#     exit()
 
 for param_set in param_combinations:
     # Unpack parameter set and add parameters and values to the command
@@ -28,36 +28,35 @@ for param_set in param_combinations:
         dataset_test_version,
         dataset_size,
         num_epochs,
+        grad_acc,
         lr,
+        weight_decay,
         temperature,
-        top_k,
-        top_p,
         evaluate_base_model,
         task,
         binary_balancing,
+        one_shot,
     ) = param_set
 
     # decimal_part_lr = str(lr).split(".")[1] if "." in str(lr) else "0"
 
     # TODO: Check if learning rate at the end works, since dot in folder name
-    if binary_balancing:
-        model_version = "v7"
-    else:
-        model_version = "v2"
+    model_version = "v5"
     if evaluate_base_model:
         ft_model = f"{base_model.lower()}-base"
     else:
-        ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-{model_version}"
+        ft_model = f"{base_model.lower()}-{dataset_size}-{dataset_version}-{num_epochs}-{model_version}-{lr}-{grad_acc}"
 
     if task == "reasoning":
         one_shot = True
-    else:
-        one_shot = False
+        binary_balancing = False
 
     if task == "classification":
         max_new_tokens = 10
+        dataset_size_testing = 1200
     else:
-        max_new_tokens = 500
+        max_new_tokens = 1000
+        dataset_size_testing = 150
 
     command = [
         "python",
@@ -76,12 +75,10 @@ for param_set in param_combinations:
         str(ft_model),
         "--lr",
         str(lr),
+        "--weight_decay",
+        str(weight_decay),
         "--temperature",
         str(temperature),
-        "--top_k",
-        str(top_k),
-        "--top_p",
-        str(top_p),
         "--evaluate_base_model",
         str(evaluate_base_model),
         "--max_new_tokens",
@@ -90,6 +87,10 @@ for param_set in param_combinations:
         str(task),
         "--binary_balancing",
         str(binary_balancing),
+        "--gradient_accumulation_steps",
+        str(grad_acc),
+        "--dataset_size_testing",
+        str(dataset_size_testing),
     ]
     # Check if a model was already trained and only experiment needs to be repeated on re_evaluation
     if os.path.exists(os.path.join("out", ft_model)):

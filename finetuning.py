@@ -16,7 +16,7 @@ from torch.distributed.fsdp.fully_sharded_data_parallel import CPUOffload
 from torch.distributed.fsdp import (
     FullyShardedDataParallel as FSDP,
 )
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import StepLR, CosineAnnealingLR
 from torch.utils.data import DistributedSampler
 from transformers import (
     LlamaForCausalLM,
@@ -49,6 +49,7 @@ from utils.train_utils import (
     print_model_size,
     get_policies,
 )
+from utils.count_tokens import count_tokens
 from utils.merge_lora_weights import merge_weights
 from typing import Optional
 
@@ -64,13 +65,13 @@ def main(logger: Optional[object] = None, **kwargs):
     random.seed(train_config.seed)
 
     model_path = os.path.join("checkpoints", "meta-llama", train_config.base_model)
-    if train_config.create_sample:
-        create_dataset_sample(
-            dataset_size=train_config.dataset_size,
-            version=train_config.dataset_version,
-            type="train",
-            binary_balancing=train_config.binary_balancing,
-        )
+
+    create_dataset_sample(
+        dataset_size=train_config.dataset_size,
+        version=train_config.dataset_version,
+        type="train",
+        binary_balancing=train_config.binary_balancing,
+    )
 
     if train_config.enable_fsdp:
         setup()
@@ -192,6 +193,8 @@ def main(logger: Optional[object] = None, **kwargs):
 
     dataset_config = generate_dataset_config(train_config, kwargs)
 
+    token_count = count_tokens(dataset_config.data_path, tokenizer)
+
     max_tokens = train_config.max_tokens
 
     # Load and preprocess the dataset for training and validation
@@ -267,9 +270,14 @@ def main(logger: Optional[object] = None, **kwargs):
             model.parameters(),
             lr=train_config.lr,
             weight_decay=train_config.weight_decay,
+            eps=train_config.eps,
+            betas=(train_config.b1, train_config.b2),
         )
         # Here's where warmup steps could be defined
-    scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
+    # scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
+    scheduler = CosineAnnealingLR(
+        optimizer, T_max=train_config.num_epochs, eta_min=train_config.min_lr
+    )
 
     # Start the training process
 
@@ -301,6 +309,8 @@ def main(logger: Optional[object] = None, **kwargs):
         peft_model = os.path.join(ft_model_path, "adapter_weights")
         merge_weights(model_path, peft_model, ft_model_path)
         print(f"Merged adapter weights with base model and saved to {ft_model_path}")
+
+    results["token_count"] = token_count
 
     return results
 

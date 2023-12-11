@@ -11,7 +11,7 @@ class test_config:
     dataset: str = "ct_test_sample_v7"
     dataset_size: int = 100
     num_workers_dataloader: int = 1
-    max_new_tokens: int = 500
+    max_new_tokens: int = 600
     seed: int = 42  # seed value for reproducibility
     do_sample: bool = (
         False  # Whether or not to use sampling ; use greedy decoding otherwise.

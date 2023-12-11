@@ -58,7 +58,7 @@ class InstructionDataset(Dataset):
 
 
 class TestingDataset(Dataset):
-    def __init__(self, dataset_config, tokenizer, partition="train", max_tokens=30):
+    def __init__(self, dataset_config, tokenizer, partition="test", max_tokens=30):
         self.ann = json.load(open(dataset_config.data_path))
         self.ann = self.ann
 

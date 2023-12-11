@@ -1,7 +1,7 @@
 base_model:
 #  - "Llama-2-7b-chat-hf"
-  - "Llama-2-13b-chat-hf"
 #  - "Llama-2-13b-hf"
+  - "Llama-2-13b-chat-hf"
 dataset_version:
 #  - "v1"
 #  - "v2"
@@ -30,7 +30,7 @@ dataset_test_version:
 #  - "v9_3"
 #  - "v12"
 dataset_size:
-  - 1
+#  - 1
 #  - 2
 #  - 3
 #  - 12
@@ -39,22 +39,34 @@ dataset_size:
 #  - 900
 #  - 1800
 #  - 2000
-#  - 3000
+  - 3000
 #  - 5000
 #  - 10000
-#  - 15000
-#  - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 15426
+#  - None # If no dataset_size parameter is given, all available samples after topic-based balancing are taken -> 11361
 num_epochs:
 #  - 2
 #  - 3
-#  - 4 # Default
-#  - 5
-  - 6
+#  - 4
+  - 5 # Tests with new scheduler etc. show optimum at 5 epochs
+#  - 6
+#  - 8
 #  - 12
+gradient_accumulation_steps:
+  - 1
+#  - 2
+#  - 3
+#  - 4
+#  - 8
+#  - 12
+#  - 16
+#  - 32
 lr:
 #  - 0.001
   - 0.0001 # Default
-#  - 0.0002
+#  - 0.00002 # From original LLama 2 paper -> Fine-tuning Llama 2 to the chat version
+weight_decay:
+  - 0.1
+#  - 0.01
 temperature:
   - 0.0
 #  - 0.1
@@ -67,30 +79,6 @@ temperature:
 #  - 3.0
 #  - 5.0
 #  - 10.0
-top_k:
-#  - None
-#  - 1 # Greedy strategy
-#  - 10
-#  - 20
-#  - 30
-#  - 40
-  - 50 # Default, Experiments "llama-7b-chat-300-3-0001_top-k" show 50 seems to be best
-#  - 60
-#  - 70
-#  - 80
-#  - 90
-top_p:
-#  - None
-#  - 0.15
-#  - 0.25
-#  - 0.5
-#  - 0.75
-#  - 0.9
-#  - 0.95
-#  - 0.96
-#  - 0.97
-#  - 0.98
-  - 1.0 # Default
 evaluate_base_model:
   - false
 #  - true
@@ -98,5 +86,8 @@ task:
   - classification
 #  - reasoning
 binary_balancing:
+  - true
+#  - false
+one_shot:
   - true
 #  - false

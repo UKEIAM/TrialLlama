@@ -81,7 +81,9 @@ def test(
 
                 if test_config.debug:
                     print(f"{response}")
-                    print(f"GROUND TRUTH: {test_data_json[step]['output']}")
+                    print(
+                        f"GROUND TRUTH: {test_data_json[step]['output']}\nID: {test_data_json[step]['id']}"
+                    )
 
                 topic_year = test_data_json[step]["topic_year"]
                 probas = []

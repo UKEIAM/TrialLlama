@@ -5,6 +5,7 @@ import subprocess
 
 
 def get_free_cuda_device():
+    # TODO: Since adding one A100 GPU to the A6000 GPU stack, somehow the script fails to select the correct visible device
     try:
         # Run nvidia-smi to get GPU information
         nvidia_smi_output = subprocess.check_output(
@@ -32,7 +33,7 @@ def get_free_cuda_device():
 
         least_busy_gpu_index = rel_used_memory.index(min(rel_used_memory))
         least_busy_memory = rel_used_memory[least_busy_gpu_index]
-        if least_busy_memory > 0.15:
+        if least_busy_memory > 0.05:
             # If the least busy GPU is more than 5% busy, return None
             return False
 

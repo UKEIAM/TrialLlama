@@ -84,17 +84,17 @@ def train(
 
     train_prep = []
     train_loss = []
-    best_epoch_step_losses = []
     eval_loss = []
+    step_loss = []
     val_prep = []
     val_loss = []
     epoch_times = []
     checkpoint_times = []
     results = {}
     best_val_loss = float("inf")
+    max_grad_norm = 1.0
     for epoch in range(train_config.num_epochs):
         epoch_start_time = time.perf_counter()
-        step_losses = []
         with MemoryTrace() as memtrace:  # track the memory usage
             model.train()
             total_loss = 0.0
@@ -115,7 +115,7 @@ def train(
                     outputs = model(**batch)
                     loss = outputs.loss
                 loss = loss / gradient_accumulation_steps
-                step_losses.append(loss.item())
+                step_loss.append(loss.item())
                 if math.isnan(loss):
                     print("---------WHOOOOPS---------")
                 total_loss += loss.detach().float()
@@ -126,7 +126,7 @@ def train(
                         train_dataloader
                     ) - 1:
                         scaler.step(optimizer)
-                        # clip_grad_norm_(model.parameters(), max_grad_norm)
+                        clip_grad_norm_(model.parameters(), max_grad_norm)
                         scaler.update()
                         optimizer.zero_grad()
                         pbar.update(1)
@@ -136,7 +136,7 @@ def train(
                     if (step + 1) % gradient_accumulation_steps == 0 or step == len(
                         train_dataloader
                     ) - 1:
-                        # clip_grad_norm_(model.parameters(), max_grad_norm)
+                        clip_grad_norm_(model.parameters(), max_grad_norm)
                         optimizer.step()
                         optimizer.zero_grad()
                         pbar.update(1)
@@ -186,7 +186,6 @@ def train(
             eval_loss.append(eval_epoch_loss)
             checkpoint_start_time = time.perf_counter()
             if train_config.save_model and eval_epoch_loss < best_val_loss:
-                best_epoch_step_losses = step_losses
                 if train_config.enable_fsdp:
                     dist.barrier()
                 if train_config.use_peft:
@@ -302,10 +301,10 @@ def train(
 
     plt.figure(figsize=(8, 6))
     plt.plot(epochs, train_losses, label="Training loss", marker="o")
-    plt.plot(epochs, eval_losses, label="Evaluation loss", marker="o")
+    plt.plot(epochs, eval_losses, label="Validation loss", marker="o")
     plt.xlabel(f"Epochs")
     plt.ylabel("Loss")
-    plt.title("Training and Eval loss over epochs")
+    plt.title("Training and validation loss over epochs")
     plt.legend()
     plt.grid(True)
     plt_save_path = os.path.join(
@@ -313,10 +312,10 @@ def train(
     )
     plt.savefig(plt_save_path)
 
-    steps = np.arange(1, len(best_epoch_step_losses) + 1)
+    steps = np.arange(1, len(step_loss) + 1)
 
     plt.figure(figsize=(8, 6))
-    plt.plot(steps, best_epoch_step_losses, label="Training loss", marker="o")
+    plt.plot(steps, step_loss, label="Training loss", marker="o")
     plt.xlabel(f"Steps")
     plt.ylabel("Loss")
     plt.title("Step losses of best epoch")

@@ -55,7 +55,7 @@ def main(
 
     model.eval()
 
-    # After updating all libraries, LlamaTokenizer throws error when trying to load weights. AutoTokenizer works.
+    # After updating all libraries, LlamaxTokenizer throws error when trying to load weights. AutoTokenizer works.
     tokenizer = AutoTokenizer.from_pretrained(base_model_path)
     tokenizer.pad_token_id = tokenizer.eos_token_id
 
@@ -65,7 +65,7 @@ def main(
         tokenizer,
         dataset_config,
         max_tokens=max_tokens,
-        split="train",
+        split="test",
     )
 
     test_dataloader = torch.utils.data.DataLoader(

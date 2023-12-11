@@ -18,9 +18,8 @@ Beside a whole bunch of utils, scripts and data-related files the most important
 ## Data availablity
 For the sake of experimentation and future work, the final version of the used dataset is uploaded to huggingface-hub (https://huggingface.co/datasets/Kevinkrs/mtb_ai_v1_data) , so no one has to figure out how to run my data_extraction and preparation scripts.
 
-
 ## Model availability
-The model is available on huggingface-hub (https://huggingface.co/Kevinkrs/mtb_ai_v1) as well if someone wants to play with it! I only uploaded the adpater weights. Hence the base model has to be loaded first (Llama-2-13b-chat-hf) and than the adapter weights initialised. It is also possible to merge the base-model with the adapter weights, if necessary. Please refer to the `merge_lora_weights.py` script.
+The model is available on huggingface-hub (https://huggingface.co/Kevinkrs/TrialLlama) as well if someone wants to play with it! I only uploaded the adpater weights. Hence the base model has to be loaded first (Llama-2-13b-chat-hf) and than the adapter weights initialised. It is also possible to merge the base-model with the adapter weights, if necessary. Please refer to the `merge_lora_weights.py` script.
 
 ## Setup
 - Run `pip install -r requirements.txt`
@@ -33,7 +32,7 @@ To run a single experiment, run `main.py` and either add required arguments to `
 Important are the flags `--run_training`, `--run_inference`, `--run_eval`. They decided if the whole cycle of fine-tuning, model inference and inference evaluation are run. This comes in handy e.g. when a base-model was fine-tuned and one only wants to tweak on different inference parameters (e.g. temperature).
 
 ## Multiple experiments
-Adjust required parameters in `configs/experiment_definitions.yaml` to automatically run all possible parameter combinations. If there is already a fine-tuned model, the `--run_training` flag is automatically set to `False`
+Adjust required parameters in `configs/experiment_definitions.yaml` to automatically run all possible parameter combinations. If there is already a fine-tuned model with the same parameters, the `--run_training` flag is automatically set to `False`
 
 ## Merging weights
 Since we usually train with a PEFT method (LoRA) the generated output are adapter weights instead of a "full" model. Even tough they can be loaded in combination with the base-model, there is an option to merge the weights with the base-model if required (e.g. for uploading to huggingface-hub).
@@ -41,9 +40,9 @@ Run `python utils/merge_lora_weights.py --base_model BASE_MODEL_NAME --peft_mode
 
 # Notes on data
 - Based on .xml files of fully scraped clinical trials from clinicaltrials.gov
-- Since GPU restrictions and issues in running evaluation of model (nan), max-word size was set on 1000 for now. Further experimentation will show, if more words are required, even tough the restriction only removes out ~10% of data, so still enough to work with
-- First tries to use whole XML ended desastreous. No chance to fine-tune model except with e.g. 10 A100 GPUs of power.
-- Right now, only simple data-cleaning, as well as max-word count are done. Further experementation is required, to see how data can be optimally prepared to achieve best results by acceptable computational costs.
+- Since GPU restrictions and issues in running evaluation of model (nan), max-word size was set on 1000 for now. Further experimentation will show, if more words are required, even tough the restriction only removes ~10% of data, so still enough to work with
+- Data sampling pipeline balances dataset on a topic level: Each topic has gets sampled with roughly 50/50% of positive and negative label, no matter on what sample-size is utilised
+- One-shot examples are attached to the instruction, if this option is set to True in command-line or config file
 
 
 ## Data structure
