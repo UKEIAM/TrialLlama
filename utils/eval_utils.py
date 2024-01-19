@@ -166,13 +166,13 @@ def calculate_metrics(
         merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro"
     )
     f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], average="macro")
-    p_at_5 = precision_at_k_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=5)
-    p_at_10 = precision_at_k_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=10
-    )
-    p_at_50 = precision_at_k_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=50
-    )
+    # p_at_5 = precision_at_k_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=5)
+    # p_at_10 = precision_at_k_score(
+    #     merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=10
+    # )
+    # p_at_50 = precision_at_k_score(
+    #     merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=50
+    # )
     ndcg_at_10 = ndcg_score([merged_df["LABEL_gold"]], [merged_df["LABEL_pred"]], k=10)
 
     y_true = label_binarize(merged_df["LABEL_gold"], classes=[0, 1, 2])
@@ -211,9 +211,9 @@ def calculate_metrics(
         "nDCG_at_10": ndcg_at_10,
         "f1": f1,
         "auc": auc,
-        "p_at_5": p_at_5,
-        "p_at_10": p_at_10,
-        "p_at_50": p_at_50,
+        # "p_at_5": p_at_5,
+        # "p_at_10": p_at_10,
+        # "p_at_50": p_at_50,
     }
 
 
@@ -310,13 +310,13 @@ def evaluate_binary(
     precision = precision_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     recall = recall_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
     f1 = f1_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"])
-    p_at_5 = precision_at_k_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=5)
-    p_at_10 = precision_at_k_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=10
-    )
-    p_at_50 = precision_at_k_score(
-        merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=50
-    )
+    # p_at_5 = precision_at_k_score(merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=5)
+    # p_at_10 = precision_at_k_score(
+    #     merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=10
+    # )
+    # p_at_50 = precision_at_k_score(
+    #     merged_df["LABEL_gold"], merged_df["LABEL_pred"], k=50
+    # )
     ndcg_at_10 = ndcg_score([merged_df["LABEL_gold"]], [merged_df["LABEL_pred"]], k=10)
 
     y_true = merged_df["LABEL_gold"]
@@ -353,17 +353,42 @@ def evaluate_binary(
         "binary_f1": f1,
         "binary_auc": auc,
         "binary_nDCG_at_10": ndcg_at_10,
-        "binary_p_at_5": p_at_5,
-        "binary_p_at_10": p_at_10,
-        "binary_p_at_50": p_at_50,
+        # "binary_p_at_5": p_at_5,
+        # "binary_p_at_10": p_at_10,
+        # "binary_p_at_50": p_at_50,
     }
 
 
-def precision_at_k_score(y_true, y_pred, k):
+# NOT IN USE
+def precision_at_k_score(y_true, y_pred, k, num_classes=3):
+    # Check if k is valid
+    k = min(k, len(y_true))
 
-    matches = 0
-    for pos in range(k):
-        if y_true[pos] == y_pred[pos]:
-            matches += 1
+    # Initialize counters for precision and total instances for each class
+    precision_per_class = [0] * num_classes
+    total_instances_per_class = [0] * num_classes
 
-    return matches / k
+    for i in range(k):
+        if i < len(y_true):
+            true_label = y_true[i]
+            predicted_label = y_pred[i]
+
+            # Update total instances for the true class
+            total_instances_per_class[true_label] += 1
+
+            # Check if the prediction is correct
+            if true_label == predicted_label:
+                precision_per_class[true_label] += 1
+
+    # Calculate precision for each class
+    class_precisions = [
+        precision / total_instances if total_instances > 0 else 0
+        for precision, total_instances in zip(
+            precision_per_class, total_instances_per_class
+        )
+    ]
+
+    # Average precision across all classes
+    average_precision = sum(class_precisions) / num_classes
+
+    return average_precision

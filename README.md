@@ -7,6 +7,9 @@ This repository is an adaptaion of `lama-recepies` by facebook labs. To simply i
 `pip install --extra-index-url https://download.pytorch.org/whl/test/cu118 llama-recipes`
 On top of that run `pip install -r requirements.txt` to add project specific requirements.
 
+## Loading a Base-Model
+Before starting, one needs to load a base model. This can be achieved with the `scripts/download_models.py` script, triggered via terminal. One simply requries a valid huggingface access token and the correct model name.
+
 ## Repo structure
 Beside a whole bunch of utils, scripts and data-related files the most important python files are:
 - `scripts/prepare_dataset.py` for preparing the dataset for fine-tuning based on the data provided by TREC Precision Medicine Track Challenge
@@ -19,7 +22,7 @@ Beside a whole bunch of utils, scripts and data-related files the most important
 For the sake of experimentation and future work, the final version of the used dataset is uploaded to huggingface-hub (https://huggingface.co/datasets/Kevinkrs/mtb_ai_v1_data) , so no one has to figure out how to run my data_extraction and preparation scripts.
 
 ## Model availability
-The model is available on huggingface-hub (https://huggingface.co/Kevinkrs/TrialLlama) as well if someone wants to play with it! I only uploaded the adpater weights. Hence the base model has to be loaded first (Llama-2-13b-chat-hf) and than the adapter weights initialised. It is also possible to merge the base-model with the adapter weights, if necessary. Please refer to the `merge_lora_weights.py` script.
+The model is available on huggingface-hub (https://huggingface.co/Kevinkrs/TrialLlama) as well if someone wants to play with it! I only uploaded the adpater weights. Hence, the base model has to be loaded first (Llama-2-13b-chat-hf) and than the adapter weights initialised. It is also possible to merge the base-model with the adapter weights, if necessary. Please refer to the `merge_lora_weights.py` script.
 
 ## Setup
 - Run `pip install -r requirements.txt`
