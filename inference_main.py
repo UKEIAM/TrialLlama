@@ -39,6 +39,7 @@ def main(
         version=test_config.dataset_version,
         type="test",
         binary_balancing=test_config.binary_balancing,
+        year=test_config.topic_year,
     )
     dataset_config = generate_dataset_config(test_config, kwargs)
 

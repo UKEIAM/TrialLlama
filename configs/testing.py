@@ -34,3 +34,4 @@ class test_config:
     evaluate_base_model: bool = False
     add_example: bool = False
     binary_balancing: bool = True
+    topic_year: int = None

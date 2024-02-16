@@ -94,6 +94,7 @@ def create_dataset_sample(
     type: str = "train",
     binary_balancing: Optional[bool] = False,
     replace_instruction: Optional[bool] = False,
+    year: Optional[int] = None,
 ) -> None:
     path = base_dir
     out_path = base_dir
@@ -134,6 +135,8 @@ def create_dataset_sample(
         word_count = 970  # Fine-tuning failed on input with 998 words
     df = truncate(df, word_count)
     df.drop(["word_count"], axis=1, inplace=True)
+    if year != None:
+        df = df[df["topic_year"] == year]
 
     """
         BALANCING: Since "IRRELEVANT" label is predominant in the dataset, we will truncate it in extracting a random
@@ -149,77 +152,81 @@ def create_dataset_sample(
     if dataset_size is None:
         dataset_size = len(df)
 
-    for unique_id in df["topic_id"].unique():
-        # Get all rows with the current unique ID
-        id_subset = df[df["topic_id"] == unique_id]
-        if dataset_size > 3:
-            desired_label_count = (
-                id_subset.groupby("topic_id")["output"]
-                .value_counts()
-                .sort_values()
-                .iloc[0]
-            )
-        else:
-            desired_label_count = dataset_size
-        # Separate the rows by label
-        label_groups = [
-            id_subset[id_subset["output"] == label]
-            for label in id_subset["output"].unique()
-        ]
-
-        # Balance each label group to have the desired_label_count
-        if binary_balancing:
-            try:
-                # Sometimes the aspired split is not possible since not enough "eligible" labels are available. Hence we do the following checks.
-                aspired_total_sampels = desired_label_count * 3
-                len_eligible = len(id_subset[id_subset["output"] == "A: eligible"])
-                eligible_samples = (
-                    len_eligible
-                    if len_eligible < math.ceil(aspired_total_sampels / 2)
-                    else math.ceil(aspired_total_sampels / 2)
+    if type != "test":
+        for unique_id in df["topic_id"].unique():
+            # Get all rows with the current unique ID
+            id_subset = df[df["topic_id"] == unique_id]
+            if dataset_size > 3:
+                desired_label_count = (
+                    id_subset.groupby("topic_id")["output"]
+                    .value_counts()
+                    .sort_values()
+                    .iloc[0]
                 )
-                eligible = id_subset[id_subset["output"] == "A: eligible"].sample(
-                    eligible_samples, random_state=42
-                )
-
-                len_excluded = len(id_subset[id_subset["output"] == "B: excluded"])
-                excluded_samples = (
-                    len_excluded
-                    if len_excluded < math.ceil(aspired_total_sampels / 4)
-                    else math.ceil(aspired_total_sampels / 4)
-                )
-                excluded = id_subset[id_subset["output"] == "B: excluded"].sample(
-                    excluded_samples, random_state=42
-                )
-
-                len_irrelevant = len(id_subset[id_subset["output"] == "C: irrelevant"])
-                irrelevant_sample = (
-                    len_irrelevant
-                    if len_irrelevant < math.ceil(aspired_total_sampels / 4)
-                    else math.ceil(aspired_total_sampels / 4)
-                )
-                irrelevant = id_subset[id_subset["output"] == "C: irrelevant"].sample(
-                    irrelevant_sample, random_state=42
-                )
-
-                balanced_df = pd.concat(
-                    [balanced_df, eligible, excluded, irrelevant], ignore_index=True
-                )
-            except ValueError as e:
-                print("VALUE COUNTS 0: One of the grouped labels is 0. Continuing.")
-                continue
-        else:
-            balanced_label_groups = [
-                group.sample(n=len(group), random_state=42)
-                if len(group) < desired_label_count
-                else group.sample(n=desired_label_count, random_state=42)
-                for group in label_groups
+            else:
+                desired_label_count = dataset_size
+            # Separate the rows by label
+            label_groups = [
+                id_subset[id_subset["output"] == label]
+                for label in id_subset["output"].unique()
             ]
 
-            # Concatenate the balanced label groups and add them to the balanced_df
-            for df_item in balanced_label_groups:
-                balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
+            # Balance each label group to have the desired_label_count
+            if binary_balancing:
+                try:
+                    # Sometimes the aspired split is not possible since not enough "eligible" labels are available. Hence we do the following checks.
+                    aspired_total_sampels = desired_label_count * 3
+                    len_eligible = len(id_subset[id_subset["output"] == "A: eligible"])
+                    eligible_samples = (
+                        len_eligible
+                        if len_eligible < math.ceil(aspired_total_sampels / 2)
+                        else math.ceil(aspired_total_sampels / 2)
+                    )
+                    eligible = id_subset[id_subset["output"] == "A: eligible"].sample(
+                        eligible_samples, random_state=42
+                    )
 
+                    len_excluded = len(id_subset[id_subset["output"] == "B: excluded"])
+                    excluded_samples = (
+                        len_excluded
+                        if len_excluded < math.ceil(aspired_total_sampels / 4)
+                        else math.ceil(aspired_total_sampels / 4)
+                    )
+                    excluded = id_subset[id_subset["output"] == "B: excluded"].sample(
+                        excluded_samples, random_state=42
+                    )
+
+                    len_irrelevant = len(
+                        id_subset[id_subset["output"] == "C: irrelevant"]
+                    )
+                    irrelevant_sample = (
+                        len_irrelevant
+                        if len_irrelevant < math.ceil(aspired_total_sampels / 4)
+                        else math.ceil(aspired_total_sampels / 4)
+                    )
+                    irrelevant = id_subset[
+                        id_subset["output"] == "C: irrelevant"
+                    ].sample(irrelevant_sample, random_state=42)
+
+                    balanced_df = pd.concat(
+                        [balanced_df, eligible, excluded, irrelevant], ignore_index=True
+                    )
+                except ValueError as e:
+                    print("VALUE COUNTS 0: One of the grouped labels is 0. Continuing.")
+                    continue
+            else:
+                balanced_label_groups = [
+                    group.sample(n=len(group), random_state=42)
+                    if len(group) < desired_label_count
+                    else group.sample(n=desired_label_count, random_state=42)
+                    for group in label_groups
+                ]
+
+                # Concatenate the balanced label groups and add them to the balanced_df
+                for df_item in balanced_label_groups:
+                    balanced_df = pd.concat([balanced_df, df_item], ignore_index=True)
+    else:
+        balanced_df = df
     if type == "test":
         if add_example:
             df_example = pd.read_json(example_path)
