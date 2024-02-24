@@ -22,11 +22,11 @@ dataset_test_version:
 #  - "v4"
 #  - "v5"
 #  - "v6"
-  - "v7"
+#  - "v7"
 #  - "v7_3"
 #  - "v8"
 #  - "v8_3"
-#  - "v9"
+  - "v9"
 #  - "v9_3"
 #  - "v12"
 dataset_size:
@@ -84,11 +84,11 @@ evaluate_base_model:
   - false
 #  - true
 task:
-  - classification
-#  - reasoning
+#  - classification
+  - reasoning
 binary_balancing:
-  - true
-#  - false
+#  - true
+  - false
 one_shot:
   - true
 #  - false

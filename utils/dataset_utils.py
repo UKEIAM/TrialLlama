@@ -109,11 +109,35 @@ def create_dataset_sample(
             )
         path = os.path.join(base_dir, "data", f"ct_test_{version}.json")
         out_path = os.path.join(base_dir, "data", f"ct_test_sample_{version}.json")
+        ids = [
+            "17432_36-2021_NCT04660643",
+            "33801_71-2021_NCT03395067",
+            "33532_71-2021_NCT01215617",
+            "33546_71-2021_NCT01323218",
+            "35441_75-2021_NCT01446939",
+            "14209_30-2021_NCT03807024",
+            "30997_65-2021_NCT04848480",
+            "35330_75-2021_NCT00329056",
+            "35443_75-2021_NCT01485276",
+            "35602_75-2021_NCT02930512",
+            "17023_36-2021_NCT01360957",
+            "35348_75-2021_NCT00517842",
+            "6736_15-2021_NCT01673945",
+            "17145_36-2021_NCT02463435",
+            "35361_75-2021_NCT00654563",
+            "14210_30-2021_NCT03823859",
+            "35387_75-2021_NCT00909389",
+            "17428_36-2021_NCT04640701",
+            "14220_30-2021_NCT03898622",
+            "35430_75-2021_NCT01356056",
+        ]
 
     df = pd.read_json(path)
     exclusion_criteria_check = df["clinical_trial"].str.count("EXCLUSION CRITERIA") == 1
     inclusion_criteria_check = df["clinical_trial"].str.count("INCLUSION CRITERIA") == 1
     df = df[exclusion_criteria_check & inclusion_criteria_check]
+
+    # test_dataset = df[df['id'].isin(ids)]
 
     # Possibility to change the instruction for training/testing and not having to recreate whole dataset!
     if replace_instruction:
@@ -250,6 +274,7 @@ def create_dataset_sample(
     print(
         f'CLASS DISTRIBUTION: {data_sample.groupby("output")["output"].value_counts()}'
     )
+    print(len(data_sample))
     data_sample.to_json(out_path, orient="records")
 
 

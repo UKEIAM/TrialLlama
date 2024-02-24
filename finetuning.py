@@ -153,6 +153,16 @@ def main(logger: Optional[object] = None, **kwargs):
 
     if train_config.use_peft:
         peft_config = generate_peft_config(train_config, kwargs)
+        # Whysoever the getattr function in generate_peft_config does not set the target_modules to the specified values. So here's a dirty fix for now.
+        # peft_config.target_modules = [
+        #     "q_proj",
+        #     "k_proj",
+        #     "v_proj",
+        #     "o_proj",
+        #     "gate_proj",
+        #     "up_proj",
+        #     "down_proj",
+        #     "lm_head"]
         model = get_peft_model(model, peft_config)
         model.print_trainable_parameters()
 
@@ -274,10 +284,10 @@ def main(logger: Optional[object] = None, **kwargs):
             betas=(train_config.b1, train_config.b2),
         )
         # Here's where warmup steps could be defined
-    # scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
-    scheduler = CosineAnnealingLR(
-        optimizer, T_max=train_config.num_epochs, eta_min=train_config.min_lr
-    )
+    scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
+    # scheduler = CosineAnnealingLR(
+    #     optimizer, T_max=train_config.num_epochs, eta_min=train_config.min_lr
+    # )
 
     # Start the training process
 

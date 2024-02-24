@@ -33,14 +33,15 @@ def main(
 
     clear_gpu_cache()
 
-    create_dataset_sample(
-        dataset_size=test_config.dataset_size,
-        add_example=test_config.add_example,
-        version=test_config.dataset_version,
-        type="test",
-        binary_balancing=test_config.binary_balancing,
-        year=test_config.topic_year,
-    )
+    if test_config.create_dataset_sample:
+        create_dataset_sample(
+            dataset_size=test_config.dataset_size,
+            add_example=test_config.add_example,
+            version=test_config.dataset_version,
+            type="test",
+            binary_balancing=test_config.binary_balancing,
+            year=test_config.topic_year,
+        )
     dataset_config = generate_dataset_config(test_config, kwargs)
 
     # Set the seeds for reproducibility

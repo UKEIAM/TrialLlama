@@ -4,6 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class experiment_config:
     base_model: str = "Llama-2-13b-chat-hf"
+    model_version: str = "v5"
     dataset_size: int = 1
     dataset_version: str = "v7"
     dataset_name: str = "ct_train_sample_v7"

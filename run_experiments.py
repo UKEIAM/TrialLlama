@@ -53,10 +53,10 @@ for param_set in param_combinations:
 
     if task == "classification":
         max_new_tokens = 10
-        dataset_size_testing = 1200
+        dataset_size_testing = None
     else:
         max_new_tokens = 1000
-        dataset_size_testing = 150
+        dataset_size_testing = 20
 
     command = [
         "python",

@@ -2,6 +2,8 @@ base_model:
 #  - "Llama-2-7b-chat-hf"
 #  - "Llama-2-13b-hf"
   - "Llama-2-13b-chat-hf"
+model_version:
+  - "v5"
 dataset_version:
 #  - "v1"
 #  - "v2"
@@ -52,18 +54,18 @@ num_epochs:
 #  - 8
 #  - 12
 gradient_accumulation_steps:
-  - 1
+#  - 1
 #  - 2
 #  - 3
 #  - 4
 #  - 8
 #  - 12
-#  - 16
+  - 16
 #  - 32
 lr:
 #  - 0.001
-  - 0.0001 # Default
-#  - 0.00002 # From original LLama 2 paper -> Fine-tuning Llama 2 to the chat version
+#  - 0.0001 # Default
+  - 0.00002 # From original LLama 2 paper -> Fine-tuning Llama 2 to the chat version
 #  - 0.00001
 weight_decay:
   - 0.1

@@ -7,7 +7,7 @@ import re
 import pandas as pd
 
 base_dir = os.path.dirname(os.path.dirname((__file__)))
-run_name = "exbseku2-869_v9_20_4_v5"
+run_name = "19efzkhr-481_v9_20_4_v5"
 model_file_path = os.path.join(base_dir, "out", "eval", f"eval_{run_name}.json")
 sample_file_path = os.path.join(base_dir, "data", "ct_test_v9.json")
 # Load the main data JSON

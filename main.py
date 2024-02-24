@@ -48,18 +48,17 @@ def main(**kwargs):
         "out", "eval", "img", f"{experiment_config.ft_model}_loss_vs_epoch_steps.png"
     )
 
-    model_version = "v5"
     if experiment_config.evaluate_base_model:
         experiment_name = (
             f"base-{experiment_config.dataset_test_version}-{experiment_config.task}"
         )
     else:
-        experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{model_version}"
+        experiment_name = f"{experiment_config.dataset_version}-{experiment_config.dataset_size}-{experiment_config.task}-{experiment_config.model_version}"
     mlflow.set_experiment(experiment_name)
     print(f"RUNNING EXPERIMENT: {experiment_name}")
     print(f"OUTPUT MODEL NAME: {experiment_config.ft_model}")
     mlflow.set_tracking_uri(os.path.join(base_dir, "mlruns"))
-    description = f"Fine-tuned model {experiment_config.ft_model} | {model_version} | cosine scheduling "
+    description = f"Fine-tuned model {experiment_config.ft_model} | {experiment_config.model_version}"
     # Define the characters to choose from for the prefix
     prefix_characters = string.ascii_lowercase + string.digits
     prefix_length = 8  # Adjust the length as needed

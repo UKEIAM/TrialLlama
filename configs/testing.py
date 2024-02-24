@@ -35,3 +35,4 @@ class test_config:
     add_example: bool = False
     binary_balancing: bool = True
     topic_year: int = None
+    create_dataset_sample: bool = True
